@@ -394,7 +394,7 @@
           <h1>🦜 豐鳥球衣登記管理面板</h1>
         </div>
         <div class="action-buttons">
-          <a href="fungbird-index.html" class="btn btn-primary">
+          <a href="fungbird.html" class="btn btn-primary">
             <span>🏠</span>
             <span>返回首頁</span>
           </a>
@@ -502,7 +502,7 @@
       if (confirm('確定要登出嗎？')) {
         try {
           await signOut(auth);
-          window.location.href = 'fungbird-index.html';
+          window.location.href = 'fungbird.html';
         } catch (error) {
           console.error('登出錯誤:', error);
           alert('登出失敗，請重試');
@@ -520,7 +520,7 @@
       } else {
         // User is signed out - redirect to login
         alert('請先登入管理員帳號');
-        window.location.href = 'fungbird-index.html';
+        window.location.href = 'fungbird.html';
       }
     });
 
