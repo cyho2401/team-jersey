@@ -171,94 +171,36 @@
                 return dates;
             };
 
-            // Export to Excel function
+            // Export to Excel function - Modified to only export specific July dates
             const exportToExcel = () => {
                 const wb = XLSX.utils.book_new();
-                const monthNames = ['七月', '八月', '九月', '十月', '十一月', '十二月'];
                 
-                // Summary data
-                const summaryData = [
-                    ['豐鳥團隊出席狀況報表'],
-                    [''],
-                    ['匯出日期', new Date().toLocaleString('zh-TW')],
-                    ['總球員數', players.length],
-                    [''],
-                    ['各月份無法出席統計']
-                ];
-
-                // Add monthly summary
-                [7, 8, 9, 10, 11, 12].forEach((month, idx) => {
-                    const unavailableDates = getAllUnavailableDatesForMonth(month);
-                    summaryData.push([monthNames[idx], `${unavailableDates.length} 個日期有人請假`]);
-                });
-
-                const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-                XLSX.utils.book_append_sheet(wb, summarySheet, "總覽");
-
-                // Detailed data for each month
-                [7, 8, 9, 10, 11, 12].forEach((month, idx) => {
-                    const monthName = monthNames[idx];
-                    const unavailableDates = getAllUnavailableDatesForMonth(month);
+                // Only export specific July dates
+                const julyDatesToExport = [2, 4, 6, 7, 19, 30];
+                const julyData = [];
+                
+                julyDatesToExport.forEach(day => {
+                    const dateStr = `2025-07-${day.toString().padStart(2, '0')}`;
+                    const unavailablePlayers = getUnavailablePlayersForDate(dateStr);
                     
-                    const monthData = [
-                        [`${monthName} 2025 出席狀況`],
-                        [''],
-                        ['日期', '星期', '無法出席人數', '無法出席名單']
-                    ];
-
-                    unavailableDates.forEach(date => {
-                        const unavailablePlayers = getUnavailablePlayersForDate(date.date);
-                        monthData.push([
-                            `${date.day}日`,
-                            date.dayOfWeek,
-                            date.count,
-                            unavailablePlayers.join(', ')
-                        ]);
-                    });
-
-                    if (unavailableDates.length === 0) {
-                        monthData.push(['', '所有日期都全員可出席', '', '']);
-                    }
-
-                    const monthSheet = XLSX.utils.aoa_to_sheet(monthData);
-                    XLSX.utils.book_append_sheet(wb, monthSheet, monthName);
-                });
-
-                // Player details sheet
-                const playerData = [
-                    ['球員個人出席統計'],
-                    [''],
-                    ['球員姓名', '總無法出席天數', '出席率', '無法出席日期']
-                ];
-
-                players.forEach(player => {
-                    const playerUnavailableDates = [];
-                    [7, 8, 9, 10, 11, 12].forEach(month => {
-                        const dates = getPlayerUnavailableDates(player, month);
-                        dates.forEach(date => {
-                            playerUnavailableDates.push(`${month}/${date.day}`);
+                    if (unavailablePlayers.length > 0) {
+                        julyData.push({
+                            '日期': `7月${day}日`,
+                            '星期': generateDates(7).find(d => d.day === day)?.dayOfWeek || '',
+                            '無法出席人數': unavailablePlayers.length,
+                            '無法出席名單': unavailablePlayers.join(', ')
                         });
-                    });
-                    
-                    const totalUnavailable = playerUnavailableDates.length;
-                    const totalDays = 184;
-                    const attendanceRate = Math.round(((totalDays - totalUnavailable) / totalDays) * 100);
-                    
-                    playerData.push([
-                        player,
-                        totalUnavailable,
-                        `${attendanceRate}%`,
-                        playerUnavailableDates.join(', ')
-                    ]);
+                    }
                 });
 
-                const playerSheet = XLSX.utils.aoa_to_sheet(playerData);
-                XLSX.utils.book_append_sheet(wb, playerSheet, "球員統計");
+                // Create worksheet
+                const ws = XLSX.utils.json_to_sheet(julyData);
+                XLSX.utils.book_append_sheet(wb, ws, "七月請假資料");
 
                 // Generate filename with current date
                 const date = new Date();
                 const dateStr = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
-                const filename = `豐鳥團隊出席狀況_${dateStr}.xlsx`;
+                const filename = `豐鳥七月請假資料_${dateStr}.xlsx`;
                 
                 // Save the file
                 XLSX.writeFile(wb, filename);
@@ -369,7 +311,7 @@
             };
 
             // Get all unavailable dates for a month sorted by count
-            const getAllUnavailableDatesForMonth = (month) => {
+            const getAllUnavailableDatesForMonth = (month, sortByCount = true) => {
                 const dates = generateDates(month);
                 const dateCounts = [];
                 
@@ -385,11 +327,15 @@
                     }
                 });
                 
-                // Sort by count (descending) then by date
-                return dateCounts.sort((a, b) => {
-                    if (b.count !== a.count) return b.count - a.count;
-                    return a.date.localeCompare(b.date);
-                });
+                // Sort by count (descending) or by date (ascending)
+                if (sortByCount) {
+                    return dateCounts.sort((a, b) => {
+                        if (b.count !== a.count) return b.count - a.count;
+                        return a.date.localeCompare(b.date);
+                    });
+                } else {
+                    return dateCounts.sort((a, b) => a.day - b.day);
+                }
             };
 
             // Get player's unavailable dates for a month
@@ -473,7 +419,7 @@
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                                     <div>
                                         <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-                                            <img src="https://i.imgur.com/jk3Z99M.png" alt="豐鳥 Logo" className="w-12 h-12 object-contain" />
+                                            <img src="fungbird-logo.jpg" alt="豐鳥 Logo" className="w-12 h-12 object-contain" />
                                             豐鳥 🦜 團隊出席狀況總覽
                                         </h1>
                                         <p className="text-gray-600">追蹤並管理團隊所有月份的出席狀況</p>
@@ -502,7 +448,7 @@
                                 <div className="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-200">
                                     <div className="flex items-center gap-2 text-orange-800">
                                         <AlertIcon />
-                                        <p className="font-medium">顯示所有有人無法出席的日期，按無法出席人數排序（點擊查看詳情）</p>
+                                        <p className="font-medium">顯示所有有人無法出席的日期（點擊查看詳情）</p>
                                     </div>
                                 </div>
 
@@ -513,7 +459,8 @@
                                 ) : (
                                     <div className="space-y-6">
                                         {[7, 8, 9, 10, 11, 12].map((month, idx) => {
-                                            const unavailableDates = getAllUnavailableDatesForMonth(month);
+                                            const unavailableDatesAsc = getAllUnavailableDatesForMonth(month, false); // Sorted by date
+                                            const unavailableDatesDesc = getAllUnavailableDatesForMonth(month, true); // Sorted by count
                                             const monthName = monthNames[idx];
                                             const isExpanded = expandedMonths[month];
                                             
@@ -530,19 +477,16 @@
                                                                     <h2 className="text-xl font-bold text-gray-800">
                                                                         {monthName} 2025
                                                                     </h2>
-                                                                    <span className="text-sm text-gray-600 bg-gray-200 px-3 py-1 rounded-full">
-                                                                        {unavailableDates.length} 個日期有人請假
-                                                                    </span>
                                                                 </div>
                                                                 <div className="flex items-center gap-4">
                                                                     {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
                                                                 </div>
                                                             </div>
                                                             
-                                                            {/* Date preview when collapsed */}
-                                                            {!isExpanded && unavailableDates.length > 0 && (
+                                                            {/* Date preview when collapsed - showing all dates in ascending order */}
+                                                            {!isExpanded && unavailableDatesAsc.length > 0 && (
                                                                 <div className="flex flex-wrap gap-2 text-sm">
-                                                                    {unavailableDates.slice(0, 8).map((date) => (
+                                                                    {unavailableDatesAsc.map((date) => (
                                                                         <span 
                                                                             key={date.date}
                                                                             className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -551,14 +495,9 @@
                                                                                 'bg-yellow-100 text-yellow-700'
                                                                             }`}
                                                                         >
-                                                                            {date.day}日({date.count}人)
+                                                                            {date.day}日
                                                                         </span>
                                                                     ))}
-                                                                    {unavailableDates.length > 8 && (
-                                                                        <span className="text-gray-500">
-                                                                            還有 {unavailableDates.length - 8} 個日期...
-                                                                        </span>
-                                                                    )}
                                                                 </div>
                                                             )}
                                                         </div>
@@ -566,11 +505,11 @@
                                                     
                                                     {isExpanded && (
                                                         <div className="px-6 pb-6 border-t border-gray-200">
-                                                            {unavailableDates.length === 0 ? (
+                                                            {unavailableDatesDesc.length === 0 ? (
                                                                 <p className="text-gray-500 italic text-center py-8">所有日期都全員可出席！ 🎉</p>
                                                             ) : (
                                                                 <div className="mt-4 space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
-                                                                    {unavailableDates.map((slot) => (
+                                                                    {unavailableDatesDesc.map((slot) => (
                                                                         <div 
                                                                             key={slot.date}
                                                                             className="group cursor-pointer hover:bg-gray-100 p-3 rounded-lg transition-all"
