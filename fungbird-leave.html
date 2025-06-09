@@ -90,6 +90,8 @@
             const [selectedDateDetails, setSelectedDateDetails] = useState(null);
             const [players, setPlayers] = useState([]);
             const [expandedMonths, setExpandedMonths] = useState({});
+            const [acceptableAbsences, setAcceptableAbsences] = useState(1); // New state for threshold
+            const [showThresholdSettings, setShowThresholdSettings] = useState(false);
 
             // SVG Icons
             const CalendarIcon = () => (
@@ -152,6 +154,13 @@
                 </svg>
             );
 
+            const SettingsIcon = () => (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            );
+
             // Generate dates for a month
             const generateDates = (month) => {
                 const year = 2025;
@@ -171,82 +180,142 @@
                 return dates;
             };
 
-            // Get available dates for a month (dates where everyone can attend)
-            const getAvailableDatesForMonth = (month) => {
+            // Get categorized dates for a month based on absence count
+            const getCategorizedDatesForMonth = (month) => {
                 const dates = generateDates(month);
-                const availableDates = [];
+                const categorizedDates = {
+                    fullyAvailable: [],      // 0 absences
+                    acceptable: [],          // <= acceptableAbsences
+                    partiallyAvailable: [],  // > acceptableAbsences but < half
+                    mostlyUnavailable: []    // >= half of players
+                };
                 
-                dates.forEach(({ date, day }) => {
-                    let someoneUnavailable = false;
+                dates.forEach(({ date, day, dayOfWeek, dayIndex }) => {
+                    let absentCount = 0;
                     players.forEach(player => {
                         if (availabilityData[player]?.[date]) {
-                            someoneUnavailable = true;
+                            absentCount++;
                         }
                     });
-                    if (!someoneUnavailable) {
-                        availableDates.push(day);
+                    
+                    const dateInfo = { date, day, dayOfWeek, dayIndex, count: absentCount };
+                    
+                    if (absentCount === 0) {
+                        categorizedDates.fullyAvailable.push(dateInfo);
+                    } else if (absentCount <= acceptableAbsences) {
+                        categorizedDates.acceptable.push(dateInfo);
+                    } else if (absentCount < Math.ceil(players.length / 2)) {
+                        categorizedDates.partiallyAvailable.push(dateInfo);
+                    } else {
+                        categorizedDates.mostlyUnavailable.push(dateInfo);
                     }
                 });
                 
-                return availableDates;
+                return categorizedDates;
             };
 
-            // Export to Excel function - Modified format with title and two sheets
+            // Get color class based on category
+            const getCategoryColorClass = (category) => {
+                switch (category) {
+                    case 'fullyAvailable':
+                        return {
+                            bg: 'bg-green-100',
+                            text: 'text-green-700',
+                            label: '全員可出席'
+                        };
+                    case 'acceptable':
+                        return {
+                            bg: 'bg-blue-100',
+                            text: 'text-blue-700',
+                            label: `可接受 (≤${acceptableAbsences}人缺席)`
+                        };
+                    case 'partiallyAvailable':
+                        return {
+                            bg: 'bg-yellow-100',
+                            text: 'text-yellow-700',
+                            label: '部分缺席'
+                        };
+                    case 'mostlyUnavailable':
+                        return {
+                            bg: 'bg-red-100',
+                            text: 'text-red-700',
+                            label: '多數缺席'
+                        };
+                    default:
+                        return {
+                            bg: 'bg-gray-100',
+                            text: 'text-gray-700',
+                            label: ''
+                        };
+                }
+            };
+
+            // Export to Excel function - Modified to include new categories
             const exportToExcel = () => {
                 const wb = XLSX.utils.book_new();
                 const monthNames = ['七月', '八月', '九月', '十月', '十一月', '十二月'];
                 const monthNamesEng = ['July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 
-                // Sheet 1: Unavailable dates
-                const unavailableData = [
-                    ['豐鳥團隊請假日期統計'],
+                // Sheet 1: Categorized dates
+                const categorizedData = [
+                    ['豐鳥團隊出席狀況分類統計'],
                     ['匯出日期：' + new Date().toLocaleDateString('zh-TW')],
+                    [`可接受缺席人數設定：${acceptableAbsences}人`],
                     [''],
-                    ['月份', '請假日期']
+                    ['月份', '全員可出席', `可接受(≤${acceptableAbsences}人)`, '部分缺席', '多數缺席']
                 ];
                 
                 [7, 8, 9, 10, 11, 12].forEach((month, idx) => {
-                    const unavailableDates = getAllUnavailableDatesForMonth(month, false);
-                    const dateNumbers = unavailableDates.map(d => d.day);
+                    const categories = getCategorizedDatesForMonth(month);
                     
-                    unavailableData.push([
+                    categorizedData.push([
                         monthNamesEng[idx],
-                        dateNumbers.length > 0 ? dateNumbers.join(',') : '無'
+                        categories.fullyAvailable.map(d => d.day).join(',') || '無',
+                        categories.acceptable.map(d => d.day).join(',') || '無',
+                        categories.partiallyAvailable.map(d => d.day).join(',') || '無',
+                        categories.mostlyUnavailable.map(d => d.day).join(',') || '無'
                     ]);
                 });
 
-                const ws1 = XLSX.utils.aoa_to_sheet(unavailableData);
-                ws1['!cols'] = [{ width: 10 }, { width: 50 }];
+                const ws1 = XLSX.utils.aoa_to_sheet(categorizedData);
+                ws1['!cols'] = [{ width: 10 }, { width: 20 }, { width: 20 }, { width: 20 }, { width: 20 }];
                 ws1['!merges'] = [
-                    { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }, // Merge title
-                    { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } }  // Merge date
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+                    { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
+                    { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } }
                 ];
-                XLSX.utils.book_append_sheet(wb, ws1, "請假日期");
+                XLSX.utils.book_append_sheet(wb, ws1, "出席分類");
 
-                // Sheet 2: Available dates (everyone can attend)
-                const availableData = [
-                    ['豐鳥團隊全員可出席日期統計'],
+                // Sheet 2: Detailed absence count
+                const detailData = [
+                    ['豐鳥團隊缺席人數詳細統計'],
                     ['匯出日期：' + new Date().toLocaleDateString('zh-TW')],
                     [''],
-                    ['月份', '全員可出席日期']
+                    ['月份', '日期', '缺席人數', '缺席成員']
                 ];
                 
                 [7, 8, 9, 10, 11, 12].forEach((month, idx) => {
-                    const availableDates = getAvailableDatesForMonth(month);
-                    
-                    availableData.push([
-                        monthNamesEng[idx],
-                        availableDates.length > 0 ? availableDates.join(',') : '無'
-                    ]);
+                    const dates = generateDates(month);
+                    dates.forEach(({ date, day }) => {
+                        const unavailablePlayers = getUnavailablePlayersForDate(date);
+                        if (unavailablePlayers.length > 0) {
+                            detailData.push([
+                                idx === 0 ? monthNamesEng[idx] : '',
+                                day,
+                                unavailablePlayers.length,
+                                unavailablePlayers.join(', ')
+                            ]);
+                        }
+                    });
                 });
 
-                const ws2 = XLSX.utils.aoa_to_sheet(availableData);
-                ws2['!cols'] = [{ width: 10 }, { width: 50 }];
+                const ws2 = XLSX.utils.aoa_to_sheet(detailData);
+                ws2['!cols'] = [{ width: 10 }, { width: 10 }, { width: 15 }, { width: 50 }];
                 ws2['!merges'] = [
-                    { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
-                    { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } }
+                    { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
+                    { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }
                 ];
-                XLSX.utils.book_append_sheet(wb, ws2, "可出席日期");
+                XLSX.utils.book_append_sheet(wb, ws2, "缺席詳情");
 
                 // Generate filename with current date
                 const date = new Date();
@@ -397,6 +466,7 @@
 
             // Get color based on unavailability count
             const getBarColorClass = (count) => {
+                if (count <= acceptableAbsences) return 'from-blue-400 to-blue-500';
                 if (count <= 3) return 'from-yellow-400 to-amber-500';
                 if (count <= 6) return 'from-orange-400 to-orange-500';
                 return 'from-red-400 to-red-500';
@@ -458,6 +528,75 @@
                 );
             };
 
+            // Threshold Settings Modal
+            const ThresholdSettingsModal = ({ onClose }) => {
+                const [tempThreshold, setTempThreshold] = useState(acceptableAbsences);
+
+                return (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+                        <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-xl font-bold text-gray-800">出席門檻設定</h3>
+                                <button 
+                                    onClick={onClose}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <XIcon />
+                                </button>
+                            </div>
+                            
+                            <div className="mb-6">
+                                <p className="text-gray-600 mb-4">設定可接受的缺席人數門檻</p>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            可接受缺席人數（{tempThreshold}人）
+                                        </label>
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max={Math.max(5, Math.floor(players.length / 2))}
+                                            value={tempThreshold}
+                                            onChange={(e) => setTempThreshold(parseInt(e.target.value))}
+                                            className="w-full"
+                                        />
+                                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                            <span>0人</span>
+                                            <span>{Math.max(5, Math.floor(players.length / 2))}人</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="bg-blue-50 p-4 rounded-lg">
+                                        <p className="text-sm text-blue-800">
+                                            當缺席人數不超過 <span className="font-bold">{tempThreshold}</span> 人時，
+                                            該日期會被歸類為「可接受」的出席狀況。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        setAcceptableAbsences(tempThreshold);
+                                        onClose();
+                                    }}
+                                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all"
+                                >
+                                    確認
+                                </button>
+                                <button
+                                    onClick={onClose}
+                                    className="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-all"
+                                >
+                                    取消
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
             // Team Summary View
             const TeamSummaryView = () => {
                 const monthNames = ['七月', '八月', '九月', '十月', '十一月', '十二月'];
@@ -473,9 +612,17 @@
                                             <img src="fungbird-logo.jpg" alt="豐鳥 Logo" className="w-12 h-12 object-contain" />
                                             豐鳥 🦜 團隊出席狀況總覽
                                         </h1>
-                                        <p className="text-gray-600">此網頁由Earnest建立，若您更新資料，請WhatsApp通知Earnest，否則主辦單位將不會得知。</p>
+                                        <p className="text-gray-600">此網頁由Earnest建立</p>
+                                        <p className="text-gray-600 text-sm">若您更新資料，請WhatsApp通知Earnest，否則主辦單位將不會得知。</p>
                                     </div>
                                     <div className="flex flex-col sm:flex-row gap-3">
+                                        <button
+                                            onClick={() => setShowThresholdSettings(true)}
+                                            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
+                                        >
+                                            <SettingsIcon />
+                                            門檻設定
+                                        </button>
                                         <button
                                             onClick={exportToExcel}
                                             className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
@@ -499,7 +646,9 @@
                                 <div className="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-200">
                                     <div className="flex items-center gap-2 text-orange-800">
                                         <AlertIcon />
-                                        <p className="font-medium">顯示所有可出席與無法出席的日期（點擊查看詳情）</p>
+                                        <p className="font-medium">
+                                            目前設定：缺席 {acceptableAbsences} 人以內視為可接受的出席狀況
+                                        </p>
                                     </div>
                                 </div>
 
@@ -510,9 +659,7 @@
                                 ) : (
                                     <div className="space-y-6">
                                         {[7, 8, 9, 10, 11, 12].map((month, idx) => {
-                                            const unavailableDatesAsc = getAllUnavailableDatesForMonth(month, false);
-                                            const unavailableDatesDesc = getAllUnavailableDatesForMonth(month, true);
-                                            const availableDates = getAvailableDatesForMonth(month);
+                                            const categories = getCategorizedDatesForMonth(month);
                                             const monthName = monthNames[idx];
                                             const isExpanded = expandedMonths[month];
                                             
@@ -535,46 +682,34 @@
                                                                 </div>
                                                             </div>
                                                             
-                                                            {/* Date preview when collapsed - showing both available and unavailable dates */}
+                                                            {/* Date preview when collapsed */}
                                                             {!isExpanded && (
                                                                 <div className="space-y-2">
-                                                                    {/* Available dates */}
-                                                                    <div className="flex flex-wrap items-center gap-2">
-                                                                        <span className="text-sm font-medium text-green-700">可出席：</span>
-                                                                        {availableDates.length > 0 ? (
-                                                                            availableDates.map((day) => (
-                                                                                <span 
-                                                                                    key={day}
-                                                                                    className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700"
-                                                                                >
-                                                                                    {day}日
+                                                                    {Object.entries(categories).map(([category, dates]) => {
+                                                                        const colorClass = getCategoryColorClass(category);
+                                                                        if (dates.length === 0) return null;
+                                                                        
+                                                                        return (
+                                                                            <div key={category} className="flex flex-wrap items-center gap-2">
+                                                                                <span className={`text-sm font-medium ${colorClass.text}`}>
+                                                                                    {colorClass.label}：
                                                                                 </span>
-                                                                            ))
-                                                                        ) : (
-                                                                            <span className="text-sm text-gray-500">無</span>
-                                                                        )}
-                                                                    </div>
-                                                                    
-                                                                    {/* Unavailable dates */}
-                                                                    <div className="flex flex-wrap items-center gap-2">
-                                                                        <span className="text-sm font-medium text-red-700">無法出席：</span>
-                                                                        {unavailableDatesAsc.length > 0 ? (
-                                                                            unavailableDatesAsc.map((date) => (
-                                                                                <span 
-                                                                                    key={date.date}
-                                                                                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                                                                        date.count >= 7 ? 'bg-red-100 text-red-700' :
-                                                                                        date.count >= 4 ? 'bg-orange-100 text-orange-700' :
-                                                                                        'bg-yellow-100 text-yellow-700'
-                                                                                    }`}
-                                                                                >
-                                                                                    {date.day}日
-                                                                                </span>
-                                                                            ))
-                                                                        ) : (
-                                                                            <span className="text-sm text-gray-500">無</span>
-                                                                        )}
-                                                                    </div>
+                                                                                {dates.slice(0, 8).map((date) => (
+                                                                                    <span 
+                                                                                        key={date.date}
+                                                                                        className={`px-3 py-1 rounded-full text-xs font-medium ${colorClass.bg} ${colorClass.text}`}
+                                                                                    >
+                                                                                        {date.day}日
+                                                                                    </span>
+                                                                                ))}
+                                                                                {dates.length > 8 && (
+                                                                                    <span className="text-xs text-gray-500">
+                                                                                        ...還有{dates.length - 8}天
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        );
+                                                                    })}
                                                                 </div>
                                                             )}
                                                         </div>
@@ -582,45 +717,55 @@
                                                     
                                                     {isExpanded && (
                                                         <div className="px-6 pb-6 border-t border-gray-200">
-                                                            {unavailableDatesDesc.length === 0 ? (
-                                                                <p className="text-gray-500 italic text-center py-8">所有日期都全員可出席！ 🎉</p>
-                                                            ) : (
-                                                                <div className="mt-4 space-y-2">
-                                                                    {unavailableDatesDesc.map((slot) => (
-                                                                        <div 
-                                                                            key={slot.date}
-                                                                            className="group cursor-pointer hover:bg-gray-100 p-3 rounded-lg transition-all"
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                setSelectedDateDetails(slot);
-                                                                            }}
-                                                                        >
-                                                                            <div className="flex items-center justify-between gap-4">
-                                                                                <div className="flex items-center gap-3 min-w-0">
-                                                                                    <div className="text-sm font-semibold text-gray-700">
-                                                                                        {slot.day}日
+                                                            <div className="mt-4 space-y-6">
+                                                                {Object.entries(categories).map(([category, dates]) => {
+                                                                    const colorClass = getCategoryColorClass(category);
+                                                                    if (dates.length === 0) return null;
+                                                                    
+                                                                    return (
+                                                                        <div key={category}>
+                                                                            <h3 className={`font-semibold mb-2 ${colorClass.text}`}>
+                                                                                {colorClass.label} ({dates.length}天)
+                                                                            </h3>
+                                                                            <div className="space-y-2">
+                                                                                {dates.map((slot) => (
+                                                                                    <div 
+                                                                                        key={slot.date}
+                                                                                        className="group cursor-pointer hover:bg-gray-100 p-3 rounded-lg transition-all"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            setSelectedDateDetails(slot);
+                                                                                        }}
+                                                                                    >
+                                                                                        <div className="flex items-center justify-between gap-4">
+                                                                                            <div className="flex items-center gap-3 min-w-0">
+                                                                                                <div className="text-sm font-semibold text-gray-700">
+                                                                                                    {slot.day}日
+                                                                                                </div>
+                                                                                                <div className="text-xs text-gray-500">
+                                                                                                    {slot.dayOfWeek}
+                                                                                                </div>
+                                                                                            </div>
+                                                                                            
+                                                                                            <div className="flex-1 flex items-center gap-3">
+                                                                                                <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
+                                                                                                    <div 
+                                                                                                        className={`h-full bg-gradient-to-r ${getBarColorClass(slot.count)} bar-animate transition-all group-hover:opacity-90`}
+                                                                                                        style={{ width: `${(slot.count / maxUnavailable) * 100}%` }}
+                                                                                                    />
+                                                                                                </div>
+                                                                                                <div className="text-sm font-bold text-gray-700 min-w-12 text-right">
+                                                                                                    {slot.count}人
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
                                                                                     </div>
-                                                                                    <div className="text-xs text-gray-500">
-                                                                                        {slot.dayOfWeek}
-                                                                                    </div>
-                                                                                </div>
-                                                                                
-                                                                                <div className="flex-1 flex items-center gap-3">
-                                                                                    <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
-                                                                                        <div 
-                                                                                            className={`h-full bg-gradient-to-r ${getBarColorClass(slot.count)} bar-animate transition-all group-hover:opacity-90`}
-                                                                                            style={{ width: `${(slot.count / maxUnavailable) * 100}%` }}
-                                                                                        />
-                                                                                    </div>
-                                                                                    <div className="text-sm font-bold text-gray-700 min-w-12 text-right">
-                                                                                        {slot.count}人
-                                                                                    </div>
-                                                                                </div>
+                                                                                ))}
                                                                             </div>
                                                                         </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
+                                                                    );
+                                                                })}
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -635,6 +780,12 @@
                             <UnavailablePlayersModal 
                                 dateInfo={selectedDateDetails}
                                 onClose={() => setSelectedDateDetails(null)}
+                            />
+                        )}
+
+                        {showThresholdSettings && (
+                            <ThresholdSettingsModal 
+                                onClose={() => setShowThresholdSettings(false)}
                             />
                         )}
                     </div>
