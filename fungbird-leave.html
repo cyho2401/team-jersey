@@ -24,6 +24,26 @@
         .animate-spin {
             animation: spin 1s linear infinite;
         }
+        
+        /* Custom scrollbar for date containers */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
     </style>
 </head>
 <body>
@@ -55,6 +75,7 @@
             const [loading, setLoading] = useState(true);
             const [selectedDateDetails, setSelectedDateDetails] = useState(null);
             const [players, setPlayers] = useState([]);
+            const [expandedMonths, setExpandedMonths] = useState({});
 
             // SVG Icons
             const CalendarIcon = () => (
@@ -90,6 +111,24 @@
             const AlertIcon = () => (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            );
+
+            const ChevronDownIcon = () => (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+            );
+
+            const ChevronUpIcon = () => (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                </svg>
+            );
+
+            const LinkIcon = () => (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
             );
 
@@ -216,29 +255,28 @@
                 return unavailablePlayers;
             };
 
-            // Get top 8 most unavailable dates for a specific month
-            const getTop8UnavailableForMonth = (month) => {
+            // Get all unavailable dates for a month sorted by count
+            const getAllUnavailableDatesForMonth = (month) => {
                 const dates = generateDates(month);
-                const dateCounts = {};
+                const dateCounts = [];
                 
-                dates.forEach(({ date }) => {
+                dates.forEach(({ date, day, dayOfWeek, dayIndex }) => {
                     let count = 0;
                     players.forEach(player => {
                         if (availabilityData[player]?.[date]) {
                             count++;
                         }
                     });
-                    dateCounts[date] = count;
+                    if (count > 0) {
+                        dateCounts.push({ date, day, dayOfWeek, dayIndex, count });
+                    }
                 });
                 
-                return Object.entries(dateCounts)
-                    .map(([date, count]) => {
-                        const dateObj = dates.find(d => d.date === date);
-                        return { ...dateObj, count };
-                    })
-                    .sort((a, b) => b.count - a.count)
-                    .slice(0, 8)
-                    .filter(item => item.count > 0);
+                // Sort by count (descending) then by date
+                return dateCounts.sort((a, b) => {
+                    if (b.count !== a.count) return b.count - a.count;
+                    return a.date.localeCompare(b.date);
+                });
             };
 
             // Get player's unavailable dates for a month
@@ -253,6 +291,14 @@
                 if (count <= 3) return 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white';
                 if (count <= 6) return 'bg-gradient-to-br from-orange-400 to-orange-500 text-white';
                 return 'bg-gradient-to-br from-red-400 to-red-500 text-white';
+            };
+
+            // Toggle month expansion
+            const toggleMonthExpansion = (month) => {
+                setExpandedMonths(prev => ({
+                    ...prev,
+                    [month]: !prev[month]
+                }));
             };
 
             // Modal for showing unavailable players
@@ -281,7 +327,7 @@
                                 {unavailablePlayers.length === 0 ? (
                                     <p className="text-green-600 text-center py-4">所有成員都可以出席！ 🎉</p>
                                 ) : (
-                                    <div className="space-y-2">
+                                    <div className="space-y-2 max-h-96 overflow-y-auto custom-scrollbar">
                                         {unavailablePlayers.map((player, index) => (
                                             <div key={player} className="flex items-center gap-2 p-2 bg-red-50 rounded-lg">
                                                 <span className="text-red-600 font-medium">{index + 1}.</span>
@@ -310,6 +356,25 @@
                 return (
                     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 py-8 px-4">
                         <div className="max-w-7xl mx-auto">
+                            {/* Notice Banner */}
+                            <div className="bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl p-4 mb-6 shadow-lg">
+                                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-3xl">🦜</span>
+                                        <div>
+                                            <p className="font-bold text-lg">尚未登記球衣號碼？</p>
+                                            <p className="text-sm opacity-90">請先完成球衣號碼登記才能管理出席狀況</p>
+                                        </div>
+                                    </div>
+                                    <a 
+                                        href="fungbird.html" 
+                                        className="bg-white text-orange-600 px-6 py-2 rounded-lg font-semibold hover:bg-orange-50 transition-all flex items-center gap-2 shadow-md"
+                                    >
+                                        前往球衣登記 <LinkIcon />
+                                    </a>
+                                </div>
+                            </div>
+
                             <div className="bg-white rounded-2xl shadow-xl p-8">
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                                     <div>
@@ -333,7 +398,7 @@
                                 <div className="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-200">
                                     <div className="flex items-center gap-2 text-orange-800">
                                         <AlertIcon />
-                                        <p className="font-medium">顯示每個月最多人無法出席的前 8 個日期（點擊查看詳情）</p>
+                                        <p className="font-medium">顯示所有有人無法出席的日期，按無法出席人數排序（點擊日期查看詳情）</p>
                                     </div>
                                 </div>
 
@@ -342,33 +407,63 @@
                                         <p className="text-gray-500">目前沒有球員資料，請先在球衣登記系統中新增球員</p>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="space-y-6">
                                         {[7, 8, 9, 10, 11, 12].map((month, idx) => {
-                                            const top8 = getTop8UnavailableForMonth(month);
+                                            const unavailableDates = getAllUnavailableDatesForMonth(month);
                                             const monthName = monthNames[idx];
+                                            const isExpanded = expandedMonths[month];
                                             
                                             return (
-                                                <div key={month} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
-                                                    <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                                        <CalendarIcon />
-                                                        {monthName} 2025
-                                                    </h2>
+                                                <div key={month} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 overflow-hidden">
+                                                    <div 
+                                                        className="p-6 cursor-pointer hover:bg-gray-100 transition-colors"
+                                                        onClick={() => toggleMonthExpansion(month)}
+                                                    >
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <CalendarIcon />
+                                                                <h2 className="text-xl font-bold text-gray-800">
+                                                                    {monthName} 2025
+                                                                </h2>
+                                                                <span className="text-sm text-gray-600 bg-gray-200 px-3 py-1 rounded-full">
+                                                                    {unavailableDates.length} 個日期有人請假
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="text-sm text-gray-500">
+                                                                    {unavailableDates.length > 0 && (
+                                                                        <span>最多 {unavailableDates[0]?.count || 0} 人請假</span>
+                                                                    )}
+                                                                </div>
+                                                                {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     
-                                                    {top8.length === 0 ? (
-                                                        <p className="text-gray-500 italic text-center py-8">所有日期都全員可出席！ 🎉</p>
-                                                    ) : (
-                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                            {top8.map((slot) => (
-                                                                <button
-                                                                    key={slot.date}
-                                                                    onClick={() => setSelectedDateDetails(slot)}
-                                                                    className={`p-4 rounded-lg ${getColorClass(slot.count)} shadow-md transform transition-all hover:scale-105 cursor-pointer`}
-                                                                >
-                                                                    <div className="font-bold text-lg">{slot.day}</div>
-                                                                    <div className="text-sm opacity-90">{slot.dayOfWeek}</div>
-                                                                    <div className="text-xs mt-1">{slot.count} 人無法出席</div>
-                                                                </button>
-                                                            ))}
+                                                    {isExpanded && (
+                                                        <div className="px-6 pb-6 border-t border-gray-200">
+                                                            {unavailableDates.length === 0 ? (
+                                                                <p className="text-gray-500 italic text-center py-8">所有日期都全員可出席！ 🎉</p>
+                                                            ) : (
+                                                                <div className="mt-4 max-h-96 overflow-y-auto custom-scrollbar">
+                                                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                                                                        {unavailableDates.map((slot) => (
+                                                                            <button
+                                                                                key={slot.date}
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setSelectedDateDetails(slot);
+                                                                                }}
+                                                                                className={`p-3 rounded-lg ${getColorClass(slot.count)} shadow-md transform transition-all hover:scale-105 cursor-pointer`}
+                                                                            >
+                                                                                <div className="font-bold text-base">{slot.day}</div>
+                                                                                <div className="text-xs opacity-90">{slot.dayOfWeek}</div>
+                                                                                <div className="text-xs mt-1 font-semibold">{slot.count} 人</div>
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
@@ -526,6 +621,15 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                {players.length === 0 && (
+                                    <div className="mb-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+                                        <div className="flex items-center gap-2 text-yellow-800">
+                                            <AlertIcon />
+                                            <p>尚未在球衣登記系統中找到球員資料。<a href="fungbird.html" className="underline font-semibold">前往登記</a></p>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {currentPlayer ? (
                                     <>
