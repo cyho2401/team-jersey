@@ -344,6 +344,16 @@
       font-weight: bold;
       text-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .logo-img {
+      height: 50px;
+      width: auto;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
     }
 
     .form-subtitle {
@@ -449,6 +459,109 @@
       font-size: 13px;
       color: #6c757d;
       font-style: italic;
+    }
+
+    /* Size chart button */
+    .size-chart-btn {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .size-chart-btn:hover {
+      background: #5a6268;
+      transform: translateY(-1px);
+    }
+
+    /* Size chart modal */
+    .size-chart-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      backdrop-filter: blur(5px);
+    }
+
+    .size-chart-modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .size-chart-content {
+      background: white;
+      border-radius: 20px;
+      padding: 0;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      transform: translateY(20px);
+      opacity: 0;
+      animation: modalAppear 0.3s ease forwards;
+    }
+
+    .size-chart-header {
+      background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .size-chart-header h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .close-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      color: white;
+      font-size: 24px;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+    }
+
+    .size-chart-body {
+      padding: 20px;
+      overflow-y: auto;
+      max-height: calc(90vh - 76px);
+    }
+
+    .size-chart-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
     }
 
     .size-buttons {
@@ -876,11 +989,19 @@
         padding: 12px 10px;
         font-size: 14px;
       }
+
+      .logo-img {
+        height: 40px;
+      }
     }
 
     @media (max-width: 480px) {
       .form-header h2 {
         font-size: 24px;
+      }
+
+      .logo-img {
+        height: 35px;
       }
 
       .size-buttons {
@@ -949,6 +1070,11 @@
         width: 100%;
         justify-content: center;
       }
+
+      .size-chart-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -1008,11 +1134,27 @@
     </div>
   </div>
 
+  <!-- Size Chart Modal -->
+  <div class="size-chart-modal" id="sizeChartModal">
+    <div class="size-chart-content">
+      <div class="size-chart-header">
+        <h3>球衣尺寸對照表</h3>
+        <button class="close-btn" onclick="closeSizeChart()">×</button>
+      </div>
+      <div class="size-chart-body">
+        <img src="size-chart.jpg" alt="尺寸對照表" class="size-chart-img">
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <!-- Form -->
     <div class="form-container">
       <div class="form-header">
-        <h2>豐鳥 🦜</h2>
+        <h2>
+          <img src="fungbird-logo.jpg" alt="豐鳥 Logo" class="logo-img">
+          豐鳥 🦜
+        </h2>
         <div class="form-subtitle">球衣資料登記</div>
       </div>
       
@@ -1067,7 +1209,10 @@
               選擇尺寸
               <span class="required">*</span>
             </div>
-            <div class="size-hint">請選擇一個尺寸</div>
+            <button type="button" class="size-chart-btn" onclick="showSizeChart()">
+              <span>📏</span>
+              <span>查看尺寸表</span>
+            </button>
           </div>
           <div class="size-buttons" id="sizeButtons">
             <button type="button" class="size-btn" data-size="M"><span>M</span></button>
@@ -1159,6 +1304,22 @@
         button.classList.add('selected');
         hiddenInput.value = button.getAttribute('data-size');
       });
+    });
+
+    // Size chart modal functions
+    window.showSizeChart = function() {
+      document.getElementById('sizeChartModal').classList.add('show');
+    }
+
+    window.closeSizeChart = function() {
+      document.getElementById('sizeChartModal').classList.remove('show');
+    }
+
+    // Click outside to close size chart modal
+    document.getElementById('sizeChartModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeSizeChart();
+      }
     });
   </script>
 
