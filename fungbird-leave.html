@@ -90,7 +90,7 @@
             const [selectedDateDetails, setSelectedDateDetails] = useState(null);
             const [players, setPlayers] = useState([]);
             const [expandedMonths, setExpandedMonths] = useState({});
-            const [acceptableAbsences, setAcceptableAbsences] = useState(1); // New state for threshold
+            const [acceptableAbsences, setAcceptableAbsences] = useState(3); // Changed default to 3
             const [showThresholdSettings, setShowThresholdSettings] = useState(false);
 
             // SVG Icons
@@ -221,25 +221,25 @@
                         return {
                             bg: 'bg-green-100',
                             text: 'text-green-700',
-                            label: '全員可出席'
+                            label: '全員可出席比賽'
                         };
                     case 'acceptable':
                         return {
                             bg: 'bg-blue-100',
                             text: 'text-blue-700',
-                            label: `可接受 (≤${acceptableAbsences}人缺席)`
+                            label: `可接受比賽 (≤${acceptableAbsences}人缺席)`
                         };
                     case 'partiallyAvailable':
                         return {
                             bg: 'bg-yellow-100',
                             text: 'text-yellow-700',
-                            label: '部分缺席'
+                            label: '不能比賽(達門檻缺席人數)'
                         };
                     case 'mostlyUnavailable':
                         return {
                             bg: 'bg-red-100',
                             text: 'text-red-700',
-                            label: '多數缺席'
+                            label: '不能比賽(多數缺席)'
                         };
                     default:
                         return {
@@ -262,7 +262,7 @@
                     ['匯出日期：' + new Date().toLocaleDateString('zh-TW')],
                     [`可接受缺席人數設定：${acceptableAbsences}人`],
                     [''],
-                    ['月份', '全員可出席', `可接受(≤${acceptableAbsences}人)`, '部分缺席', '多數缺席']
+                    ['月份', '全員可出席比賽', `可接受比賽(≤${acceptableAbsences}人)`, '不能比賽(達門檻缺席人數)', '不能比賽(多數缺席)']
                 ];
                 
                 [7, 8, 9, 10, 11, 12].forEach((month, idx) => {
@@ -555,21 +555,21 @@
                                         <input
                                             type="range"
                                             min="0"
-                                            max={Math.max(5, Math.floor(players.length / 2))}
+                                            max="7"
                                             value={tempThreshold}
                                             onChange={(e) => setTempThreshold(parseInt(e.target.value))}
                                             className="w-full"
                                         />
                                         <div className="flex justify-between text-xs text-gray-500 mt-1">
                                             <span>0人</span>
-                                            <span>{Math.max(5, Math.floor(players.length / 2))}人</span>
+                                            <span>7人</span>
                                         </div>
                                     </div>
                                     
                                     <div className="bg-blue-50 p-4 rounded-lg">
                                         <p className="text-sm text-blue-800">
                                             當缺席人數不超過 <span className="font-bold">{tempThreshold}</span> 人時，
-                                            該日期會被歸類為「可接受」的出席狀況。
+                                            該日期會被歸類為「可接受比賽」的出席狀況。
                                         </p>
                                     </div>
                                 </div>
@@ -613,23 +613,9 @@
                                             豐鳥 🦜 團隊出席狀況總覽
                                         </h1>
                                         <p className="text-gray-600">此網頁由Earnest建立</p>
-                                        <p className="text-gray-600 text-sm">若您更新資料，請WhatsApp通知Earnest，否則主辦單位將不會得知。</p>
+                                        <p className="text-gray-600 text-sm">若您在7月或更後時間更新資料，請WhatsApp通知Earnest，否則主辦單位將不會得知。</p>
                                     </div>
                                     <div className="flex flex-col sm:flex-row gap-3">
-                                        <button
-                                            onClick={() => setShowThresholdSettings(true)}
-                                            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
-                                        >
-                                            <SettingsIcon />
-                                            門檻設定
-                                        </button>
-                                        <button
-                                            onClick={exportToExcel}
-                                            className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
-                                        >
-                                            <DownloadIcon />
-                                            匯出 Excel
-                                        </button>
                                         <button
                                             onClick={() => {
                                                 setCurrentPlayer('');
@@ -640,6 +626,20 @@
                                             <UserIcon />
                                             更新我的出席狀況
                                         </button>
+                                        <button
+                                            onClick={exportToExcel}
+                                            className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
+                                        >
+                                            <DownloadIcon />
+                                            匯出 Excel
+                                        </button>
+                                        <button
+                                            onClick={() => setShowThresholdSettings(true)}
+                                            className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
+                                        >
+                                            <SettingsIcon />
+                                            門檻設定
+                                        </button>
                                     </div>
                                 </div>
 
@@ -647,7 +647,7 @@
                                     <div className="flex items-center gap-2 text-orange-800">
                                         <AlertIcon />
                                         <p className="font-medium">
-                                            目前設定：缺席 {acceptableAbsences} 人以內視為可接受的出席狀況
+                                            目前設定：缺席 {acceptableAbsences} 人以內仍可參加比賽
                                         </p>
                                     </div>
                                 </div>
@@ -747,17 +747,27 @@
                                                                                                 </div>
                                                                                             </div>
                                                                                             
-                                                                                            <div className="flex-1 flex items-center gap-3">
-                                                                                                <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
-                                                                                                    <div 
-                                                                                                        className={`h-full bg-gradient-to-r ${getBarColorClass(slot.count)} bar-animate transition-all group-hover:opacity-90`}
-                                                                                                        style={{ width: `${(slot.count / maxUnavailable) * 100}%` }}
-                                                                                                    />
+                                                                                            {/* Only show bar chart for dates that cannot compete */}
+                                                                                            {(category === 'partiallyAvailable' || category === 'mostlyUnavailable') && (
+                                                                                                <div className="flex-1 flex items-center gap-3">
+                                                                                                    <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
+                                                                                                        <div 
+                                                                                                            className={`h-full bg-gradient-to-r ${getBarColorClass(slot.count)} bar-animate transition-all group-hover:opacity-90`}
+                                                                                                            style={{ width: `${(slot.count / maxUnavailable) * 100}%` }}
+                                                                                                        />
+                                                                                                    </div>
+                                                                                                    <div className="text-sm font-bold text-gray-700 min-w-12 text-right">
+                                                                                                        {slot.count}人
+                                                                                                    </div>
                                                                                                 </div>
-                                                                                                <div className="text-sm font-bold text-gray-700 min-w-12 text-right">
-                                                                                                    {slot.count}人
+                                                                                            )}
+                                                                                            
+                                                                                            {/* For dates that can compete, just show the count */}
+                                                                                            {(category === 'fullyAvailable' || category === 'acceptable') && (
+                                                                                                <div className="text-sm text-gray-600">
+                                                                                                    {slot.count > 0 ? `${slot.count}人缺席` : '全員出席'}
                                                                                                 </div>
-                                                                                            </div>
+                                                                                            )}
                                                                                         </div>
                                                                                     </div>
                                                                                 ))}
