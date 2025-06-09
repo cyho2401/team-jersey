@@ -1089,13 +1089,18 @@
       document.getElementById('customArrival').value = '';
     }
 
-    // Format date for display
-    function formatDate(dateString) {
-      const date = new Date(dateString);
-      const month = date.getMonth() + 1;
-      const day = date.getDate();
-      return `${month}月${day}日`;
-    }
+ // Format date for display in DD/MM/YYYY format
+function formatDateDMY(dateString) {
+  const date = new Date(dateString + 'T00:00:00'); // Force local timezone
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  
+  const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+  const weekday = weekdays[date.getDay()];
+  
+  return `${day}/${month}/${year} (${weekday})`;
+}
 
     // Form submission
     document.getElementById('flightForm').addEventListener('submit', function(e) {
