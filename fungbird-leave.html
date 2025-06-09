@@ -171,36 +171,39 @@
                 return dates;
             };
 
-            // Export to Excel function - Modified to only export specific July dates
+            // Export to Excel function - Modified format
             const exportToExcel = () => {
                 const wb = XLSX.utils.book_new();
+                const monthNames = ['July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 
-                // Only export specific July dates
-                const julyDatesToExport = [2, 4, 6, 7, 19, 30];
-                const julyData = [];
+                // Create data in the requested format
+                const exportData = [];
                 
-                julyDatesToExport.forEach(day => {
-                    const dateStr = `2025-07-${day.toString().padStart(2, '0')}`;
-                    const unavailablePlayers = getUnavailablePlayersForDate(dateStr);
+                [7, 8, 9, 10, 11, 12].forEach((month, idx) => {
+                    const unavailableDates = getAllUnavailableDatesForMonth(month, false); // Get dates sorted by day
+                    const dateNumbers = unavailableDates.map(d => d.day);
                     
-                    if (unavailablePlayers.length > 0) {
-                        julyData.push({
-                            '日期': `7月${day}日`,
-                            '星期': generateDates(7).find(d => d.day === day)?.dayOfWeek || '',
-                            '無法出席人數': unavailablePlayers.length,
-                            '無法出席名單': unavailablePlayers.join(', ')
-                        });
-                    }
+                    exportData.push({
+                        'Month': monthNames[idx],
+                        'Dates': dateNumbers.join(',')
+                    });
                 });
 
                 // Create worksheet
-                const ws = XLSX.utils.json_to_sheet(julyData);
-                XLSX.utils.book_append_sheet(wb, ws, "七月請假資料");
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                
+                // Set column widths
+                ws['!cols'] = [
+                    { width: 10 },  // Month column
+                    { width: 50 }   // Dates column
+                ];
+                
+                XLSX.utils.book_append_sheet(wb, ws, "請假日期統計");
 
                 // Generate filename with current date
                 const date = new Date();
                 const dateStr = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
-                const filename = `豐鳥七月請假資料_${dateStr}.xlsx`;
+                const filename = `豐鳥請假統計_${dateStr}.xlsx`;
                 
                 // Save the file
                 XLSX.writeFile(wb, filename);
@@ -419,7 +422,7 @@
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                                     <div>
                                         <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-                                            <img src="fungbird-logo.jpg" alt="豐鳥 Logo" className="w-12 h-12 object-contain" />
+                                            <img src="https://i.imgur.com/jk3Z99M.png" alt="豐鳥 Logo" className="w-12 h-12 object-contain" />
                                             豐鳥 🦜 團隊出席狀況總覽
                                         </h1>
                                         <p className="text-gray-600">追蹤並管理團隊所有月份的出席狀況</p>
