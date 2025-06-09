@@ -17,6 +17,9 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    
     <style>
         @keyframes spin {
             to { transform: rotate(360deg); }
@@ -143,6 +146,12 @@
                 </svg>
             );
 
+            const DownloadIcon = () => (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                </svg>
+            );
+
             // Generate dates for a month
             const generateDates = (month) => {
                 const year = 2025;
@@ -160,6 +169,99 @@
                     });
                 }
                 return dates;
+            };
+
+            // Export to Excel function
+            const exportToExcel = () => {
+                const wb = XLSX.utils.book_new();
+                const monthNames = ['七月', '八月', '九月', '十月', '十一月', '十二月'];
+                
+                // Summary data
+                const summaryData = [
+                    ['豐鳥團隊出席狀況報表'],
+                    [''],
+                    ['匯出日期', new Date().toLocaleString('zh-TW')],
+                    ['總球員數', players.length],
+                    [''],
+                    ['各月份無法出席統計']
+                ];
+
+                // Add monthly summary
+                [7, 8, 9, 10, 11, 12].forEach((month, idx) => {
+                    const unavailableDates = getAllUnavailableDatesForMonth(month);
+                    summaryData.push([monthNames[idx], `${unavailableDates.length} 個日期有人請假`]);
+                });
+
+                const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+                XLSX.utils.book_append_sheet(wb, summarySheet, "總覽");
+
+                // Detailed data for each month
+                [7, 8, 9, 10, 11, 12].forEach((month, idx) => {
+                    const monthName = monthNames[idx];
+                    const unavailableDates = getAllUnavailableDatesForMonth(month);
+                    
+                    const monthData = [
+                        [`${monthName} 2025 出席狀況`],
+                        [''],
+                        ['日期', '星期', '無法出席人數', '無法出席名單']
+                    ];
+
+                    unavailableDates.forEach(date => {
+                        const unavailablePlayers = getUnavailablePlayersForDate(date.date);
+                        monthData.push([
+                            `${date.day}日`,
+                            date.dayOfWeek,
+                            date.count,
+                            unavailablePlayers.join(', ')
+                        ]);
+                    });
+
+                    if (unavailableDates.length === 0) {
+                        monthData.push(['', '所有日期都全員可出席', '', '']);
+                    }
+
+                    const monthSheet = XLSX.utils.aoa_to_sheet(monthData);
+                    XLSX.utils.book_append_sheet(wb, monthSheet, monthName);
+                });
+
+                // Player details sheet
+                const playerData = [
+                    ['球員個人出席統計'],
+                    [''],
+                    ['球員姓名', '總無法出席天數', '出席率', '無法出席日期']
+                ];
+
+                players.forEach(player => {
+                    const playerUnavailableDates = [];
+                    [7, 8, 9, 10, 11, 12].forEach(month => {
+                        const dates = getPlayerUnavailableDates(player, month);
+                        dates.forEach(date => {
+                            playerUnavailableDates.push(`${month}/${date.day}`);
+                        });
+                    });
+                    
+                    const totalUnavailable = playerUnavailableDates.length;
+                    const totalDays = 184;
+                    const attendanceRate = Math.round(((totalDays - totalUnavailable) / totalDays) * 100);
+                    
+                    playerData.push([
+                        player,
+                        totalUnavailable,
+                        `${attendanceRate}%`,
+                        playerUnavailableDates.join(', ')
+                    ]);
+                });
+
+                const playerSheet = XLSX.utils.aoa_to_sheet(playerData);
+                XLSX.utils.book_append_sheet(wb, playerSheet, "球員統計");
+
+                // Generate filename with current date
+                const date = new Date();
+                const dateStr = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+                const filename = `豐鳥團隊出席狀況_${dateStr}.xlsx`;
+                
+                // Save the file
+                XLSX.writeFile(wb, filename);
             };
 
             // Load data on component mount
@@ -367,43 +469,34 @@
                 return (
                     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 py-8 px-4">
                         <div className="max-w-7xl mx-auto">
-                            {/* Notice Banner */}
-                            <div className="bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl p-4 mb-6 shadow-lg">
-                                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-3xl">🦜</span>
-                                        <div>
-                                            <p className="font-bold text-lg">尚未登記球衣號碼？</p>
-                                            <p className="text-sm opacity-90">請先完成球衣號碼登記才能管理出席狀況</p>
-                                        </div>
-                                    </div>
-                                    <a 
-                                        href="fungbird.html" 
-                                        className="bg-white text-orange-600 px-6 py-2 rounded-lg font-semibold hover:bg-orange-50 transition-all flex items-center gap-2 shadow-md"
-                                    >
-                                        前往球衣登記 <LinkIcon />
-                                    </a>
-                                </div>
-                            </div>
-
                             <div className="bg-white rounded-2xl shadow-xl p-8">
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                                     <div>
-                                        <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                        <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+                                            <img src="https://i.imgur.com/jk3Z99M.png" alt="豐鳥 Logo" className="w-12 h-12 object-contain" />
                                             豐鳥 🦜 團隊出席狀況總覽
                                         </h1>
                                         <p className="text-gray-600">追蹤並管理團隊所有月份的出席狀況</p>
                                     </div>
-                                    <button
-                                        onClick={() => {
-                                            setCurrentPlayer('');
-                                            setView('playerInput');
-                                        }}
-                                        className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-6 py-3 rounded-xl hover:from-orange-700 hover:to-amber-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
-                                    >
-                                        <UserIcon />
-                                        更新我的出席狀況
-                                    </button>
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <button
+                                            onClick={exportToExcel}
+                                            className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
+                                        >
+                                            <DownloadIcon />
+                                            匯出 Excel
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setCurrentPlayer('');
+                                                setView('playerInput');
+                                            }}
+                                            className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-6 py-3 rounded-xl hover:from-orange-700 hover:to-amber-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
+                                        >
+                                            <UserIcon />
+                                            更新我的出席狀況
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-200">
@@ -577,6 +670,25 @@
                 return (
                     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 py-8 px-4">
                         <div className="max-w-6xl mx-auto">
+                            {/* Notice Banner - Moved here */}
+                            <div className="bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl p-4 mb-6 shadow-lg">
+                                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-3xl">🦜</span>
+                                        <div>
+                                            <p className="font-bold text-lg">尚未登記球衣號碼？</p>
+                                            <p className="text-sm opacity-90">請先完成球衣號碼登記才能管理出席狀況</p>
+                                        </div>
+                                    </div>
+                                    <a 
+                                        href="fungbird.html" 
+                                        className="bg-white text-orange-600 px-6 py-2 rounded-lg font-semibold hover:bg-orange-50 transition-all flex items-center gap-2 shadow-md"
+                                    >
+                                        前往球衣登記 <LinkIcon />
+                                    </a>
+                                </div>
+                            </div>
+
                             <div className="bg-white rounded-2xl shadow-xl p-8">
                                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                                     <div className="flex items-center">
@@ -650,15 +762,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                {players.length === 0 && (
-                                    <div className="mb-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
-                                        <div className="flex items-center gap-2 text-yellow-800">
-                                            <AlertIcon />
-                                            <p>尚未在球衣登記系統中找到球員資料。<a href="fungbird.html" className="underline font-semibold">前往登記</a></p>
-                                        </div>
-                                    </div>
-                                )}
 
                                 {currentPlayer ? (
                                     <>
@@ -884,7 +987,8 @@
                                 </div>
 
                                 <div className="mt-8 p-4 bg-orange-50 rounded-lg border border-orange-200">
-                                    <p className="text-sm text-orange-800 text-center">
+                                    <p className="text-sm text-orange-800 text-center flex items-center justify-center gap-2">
+                                        <img src="https://i.imgur.com/jk3Z99M.png" alt="豐鳥 Logo" className="w-6 h-6 object-contain" />
                                         🦜 豐鳥團隊出席管理系統
                                     </p>
                                 </div>
