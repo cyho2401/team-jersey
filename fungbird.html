@@ -645,6 +645,12 @@
       text-transform: uppercase;
     }
 
+    .no-print {
+      color: #6c757d;
+      font-style: italic;
+      font-weight: normal;
+    }
+
     /* Size badge styling */
     .size-badge {
       display: inline-block;
@@ -1035,7 +1041,7 @@
             id="printedName" 
             placeholder="請輸入要印在球衣上的名字（可選）"
           />
-          <span class="hint-text">如不填寫，將使用球員名字作為印字</span>
+          <span class="hint-text">如不填寫，將不會印字</span>
         </div>
 
         <div class="form-group">
@@ -1335,7 +1341,7 @@
       e.preventDefault();
 
       const name = document.getElementById('playerName').value.trim();
-      const printedName = document.getElementById('printedName').value.trim() || name; // 如果沒填印字，使用球員名字
+      const printedName = document.getElementById('printedName').value.trim(); // 不設定預設值
       const number = document.getElementById('jerseyNumber').value.trim();
       const size = document.getElementById('selectedSize').value;
 
@@ -1356,7 +1362,7 @@
 
       const entry = {
         name,
-        printedName,
+        printedName, // 可能是空字串
         jerseyNumber: number,
         size,
         timestamp: Date.now()
@@ -1448,7 +1454,7 @@
         
         const exportRowData = {
           '球員姓名': entry.name,
-          '球衣印字': entry.printedName || entry.name,
+          '球衣印字': entry.printedName || '無印字',
           '尺寸': entry.size,
           '球衣號碼': entry.jerseyNumber,
           '狀態': statusText.length > 0 ? statusText.join('、') : '正常'
@@ -1461,9 +1467,13 @@
         if (nameDup) nameCell.classList.add('duplicate-name');
         row.appendChild(nameCell);
 
-        // Printed name cell
+        // Printed name cell - 顯示「無印字」如果沒有填寫
         const printedCell = document.createElement('td');
-        printedCell.innerHTML = `<span class="printed-name">${entry.printedName || entry.name}</span>`;
+        if (entry.printedName) {
+          printedCell.innerHTML = `<span class="printed-name">${entry.printedName}</span>`;
+        } else {
+          printedCell.innerHTML = `<span class="no-print">無印字</span>`;
+        }
         row.appendChild(printedCell);
 
         // Size cell with badge
