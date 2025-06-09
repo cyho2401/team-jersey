@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>豐鳥團隊出席管理系統</title>
     
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    
     <!-- React and Babel -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -14,7 +18,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        /* Loading animation */
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -26,12 +29,10 @@
 <body>
     <div id="root"></div>
 
-    <script type="module">
-        // Firebase imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-        // Firebase configuration (same as fungbird.html)
+        // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCGCaWivohAhxZDkKp7YGNp9deNetR3K4Y",
             authDomain: "jersey-app-bcefa.firebaseapp.com",
@@ -42,21 +43,9 @@
             appId: "1:778327507472:web:057e3db1b767f0b137c095"
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Database paths
-        const JERSEY_DB_PATH = 'fungbird-jerseys';
-        const AVAILABILITY_DB_PATH = 'fungbird-availability';
-
-        // Make database available globally
-        window.firebaseDb = db;
-        window.availabilityRef = ref(db, AVAILABILITY_DB_PATH);
-    </script>
-
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+        // Initialize Firebase app
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
         const TeamAvailabilitySystem = () => {
             const [currentPlayer, setCurrentPlayer] = useState('');
@@ -65,7 +54,7 @@
             const [selectedMonth, setSelectedMonth] = useState(7);
             const [loading, setLoading] = useState(true);
             const [selectedDateDetails, setSelectedDateDetails] = useState(null);
-            const [players, setPlayers] = useState([]); // Dynamic player list from Firebase
+            const [players, setPlayers] = useState([]);
 
             // SVG Icons
             const CalendarIcon = () => (
@@ -123,99 +112,83 @@
                 return dates;
             };
 
-            // Load player names from Firebase jerseys data
-            const loadPlayers = async () => {
-                const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
-                const db = window.firebaseDb;
-                
-                try {
-                    const snapshot = await get(ref(db, 'fungbird-jerseys'));
-                    if (snapshot.exists()) {
+            // Load data on component mount
+            useEffect(() => {
+                // Load players from jerseys
+                const loadPlayers = () => {
+                    database.ref('fungbird-jerseys').once('value', (snapshot) => {
                         const data = snapshot.val();
-                        const uniqueNames = [...new Set(Object.values(data).map(entry => entry.name))];
-                        setPlayers(uniqueNames.sort());
-                    }
-                } catch (error) {
-                    console.error('Error loading players:', error);
-                }
-            };
+                        if (data) {
+                            const uniqueNames = [...new Set(Object.values(data).map(entry => entry.name))];
+                            setPlayers(uniqueNames.sort());
+                        } else {
+                            // Use demo players if no data
+                            setPlayers(['測試球員1', '測試球員2', '測試球員3']);
+                        }
+                    });
+                };
 
-            // Load availability data from Firebase
-            const loadAvailabilityData = async () => {
-                const { onValue } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+                // Load availability data
+                const loadAvailability = () => {
+                    database.ref('fungbird-availability').on('value', (snapshot) => {
+                        const data = snapshot.val();
+                        setAvailabilityData(data || {});
+                        setLoading(false);
+                    });
+                };
+
+                loadPlayers();
+                loadAvailability();
+
+                // Cleanup
+                return () => {
+                    database.ref('fungbird-availability').off();
+                };
+            }, []);
+
+            // Save player's availability
+            const savePlayerAvailability = (player, date, isUnavailable) => {
+                const updates = {};
+                const playerData = availabilityData[player] || {};
                 
-                onValue(window.availabilityRef, (snapshot) => {
-                    const data = snapshot.val();
-                    if (data) {
-                        setAvailabilityData(data);
-                    } else {
-                        setAvailabilityData({});
-                    }
-                    setLoading(false);
+                if (isUnavailable) {
+                    playerData[date] = true;
+                } else {
+                    delete playerData[date];
+                }
+                
+                updates[`fungbird-availability/${player}`] = playerData;
+                
+                database.ref().update(updates).catch((error) => {
+                    console.error('Error saving:', error);
+                    alert('儲存失敗，請重試');
                 });
             };
 
-            // Save player's availability to Firebase
-            const savePlayerAvailability = async (player, date, isUnavailable) => {
-                const { set, ref } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
-                const db = window.firebaseDb;
-                
-                const newData = { ...availabilityData };
-                if (!newData[player]) {
-                    newData[player] = {};
-                }
-                
-                if (isUnavailable) {
-                    newData[player][date] = true;
-                } else {
-                    delete newData[player][date];
-                }
-                
-                // Update local state immediately
-                setAvailabilityData(newData);
-                
-                // Save to Firebase
-                try {
-                    await set(ref(db, `${AVAILABILITY_DB_PATH}/${player}`), newData[player]);
-                } catch (error) {
-                    console.error('Error saving availability:', error);
-                    alert('儲存失敗，請重試');
-                }
-            };
-
-            // Toggle all days of a specific weekday in the current month
-            const toggleAllDaysOfWeek = async (dayIndex, makeUnavailable) => {
+            // Toggle all days of a specific weekday
+            const toggleAllDaysOfWeek = (dayIndex, makeUnavailable) => {
                 if (!currentPlayer) return;
                 
                 const dates = generateDates(selectedMonth);
                 const datesOfWeekday = dates.filter(date => date.dayIndex === dayIndex);
                 
-                const newAvailability = { ...availabilityData };
-                if (!newAvailability[currentPlayer]) {
-                    newAvailability[currentPlayer] = {};
-                }
+                const playerData = { ...(availabilityData[currentPlayer] || {}) };
                 
                 datesOfWeekday.forEach(date => {
                     if (makeUnavailable) {
-                        newAvailability[currentPlayer][date.date] = true;
+                        playerData[date.date] = true;
                     } else {
-                        delete newAvailability[currentPlayer][date.date];
+                        delete playerData[date.date];
                     }
                 });
                 
-                // Update local state
-                setAvailabilityData(newAvailability);
+                const updates = {};
+                updates[`fungbird-availability/${currentPlayer}`] = playerData;
                 
-                // Save to Firebase
-                const { set, ref } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
-                const db = window.firebaseDb;
-                
-                try {
-                    await set(ref(db, `${AVAILABILITY_DB_PATH}/${currentPlayer}`), newAvailability[currentPlayer]);
-                } catch (error) {
-                    console.error('Error saving availability:', error);
+                database.ref().update(updates).catch((error) => {
+                    console.error('Error saving:', error);
                     alert('儲存失敗，請重試');
-                }
+                });
             };
 
             // Check if all days of a weekday are unavailable
@@ -281,15 +254,6 @@
                 if (count <= 6) return 'bg-gradient-to-br from-orange-400 to-orange-500 text-white';
                 return 'bg-gradient-to-br from-red-400 to-red-500 text-white';
             };
-
-            // Initialize data on component mount
-            useEffect(() => {
-                const initializeData = async () => {
-                    await loadPlayers();
-                    await loadAvailabilityData();
-                };
-                initializeData();
-            }, []);
 
             // Modal for showing unavailable players
             const UnavailablePlayersModal = ({ dateInfo, onClose }) => {
