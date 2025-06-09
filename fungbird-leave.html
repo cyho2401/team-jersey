@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>團隊出席管理系統</title>
+    <title>豐鳥團隊出席管理系統</title>
     
     <!-- React and Babel -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -26,6 +26,35 @@
 <body>
     <div id="root"></div>
 
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        // Firebase configuration (same as fungbird.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGCaWivohAhxZDkKp7YGNp9deNetR3K4Y",
+            authDomain: "jersey-app-bcefa.firebaseapp.com",
+            databaseURL: "https://jersey-app-bcefa-default-rtdb.firebaseio.com",
+            projectId: "jersey-app-bcefa",
+            storageBucket: "jersey-app-bcefa.appspot.com",
+            messagingSenderId: "778327507472",
+            appId: "1:778327507472:web:057e3db1b767f0b137c095"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Database paths
+        const JERSEY_DB_PATH = 'fungbird-jerseys';
+        const AVAILABILITY_DB_PATH = 'fungbird-availability';
+
+        // Make database available globally
+        window.firebaseDb = db;
+        window.availabilityRef = ref(db, AVAILABILITY_DB_PATH);
+    </script>
+
     <script type="text/babel">
         const { useState, useEffect } = React;
 
@@ -34,15 +63,9 @@
             const [view, setView] = useState('teamSummary');
             const [availabilityData, setAvailabilityData] = useState({});
             const [selectedMonth, setSelectedMonth] = useState(7);
-            const [loading, setLoading] = useState(false);
+            const [loading, setLoading] = useState(true);
             const [selectedDateDetails, setSelectedDateDetails] = useState(null);
-
-            // Player names
-            const players = [
-                '陳小明', '林建宏', '王美玲', '張志偉',
-                '李佳蓉', '黃俊傑', '劉雅婷', '吳宗翰',
-                '蔡依林', '許志安', '楊丞琳', '周杰倫'
-            ];
+            const [players, setPlayers] = useState([]); // Dynamic player list from Firebase
 
             // SVG Icons
             const CalendarIcon = () => (
@@ -100,45 +123,68 @@
                 return dates;
             };
 
-            // Load availability data
-            const loadAvailabilityData = async () => {
-                setLoading(true);
+            // Load player names from Firebase jerseys data
+            const loadPlayers = async () => {
+                const { getDatabase, ref, get } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+                const db = window.firebaseDb;
+                
                 try {
-                    // Simulated data - replace with Firebase calls
-                    const simulatedData = {};
-                    players.forEach(player => {
-                        simulatedData[player] = {};
-                        // Add some random unavailability for demo
-                        for (let i = 0; i < 20; i++) {
-                            const randomMonth = Math.floor(Math.random() * 6) + 7;
-                            const randomDay = Math.floor(Math.random() * 28) + 1;
-                            const date = `2025-${randomMonth.toString().padStart(2, '0')}-${randomDay.toString().padStart(2, '0')}`;
-                            simulatedData[player][date] = true;
-                        }
-                    });
-                    setAvailabilityData(simulatedData);
+                    const snapshot = await get(ref(db, 'fungbird-jerseys'));
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        const uniqueNames = [...new Set(Object.values(data).map(entry => entry.name))];
+                        setPlayers(uniqueNames.sort());
+                    }
                 } catch (error) {
-                    console.error('Error loading data:', error);
+                    console.error('Error loading players:', error);
                 }
-                setLoading(false);
             };
 
-            // Save player's availability
+            // Load availability data from Firebase
+            const loadAvailabilityData = async () => {
+                const { onValue } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+                
+                onValue(window.availabilityRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        setAvailabilityData(data);
+                    } else {
+                        setAvailabilityData({});
+                    }
+                    setLoading(false);
+                });
+            };
+
+            // Save player's availability to Firebase
             const savePlayerAvailability = async (player, date, isUnavailable) => {
+                const { set, ref } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+                const db = window.firebaseDb;
+                
                 const newData = { ...availabilityData };
                 if (!newData[player]) {
                     newData[player] = {};
                 }
+                
                 if (isUnavailable) {
                     newData[player][date] = true;
                 } else {
                     delete newData[player][date];
                 }
+                
+                // Update local state immediately
                 setAvailabilityData(newData);
+                
+                // Save to Firebase
+                try {
+                    await set(ref(db, `${AVAILABILITY_DB_PATH}/${player}`), newData[player]);
+                } catch (error) {
+                    console.error('Error saving availability:', error);
+                    alert('儲存失敗，請重試');
+                }
             };
 
             // Toggle all days of a specific weekday in the current month
-            const toggleAllDaysOfWeek = (dayIndex, makeUnavailable) => {
+            const toggleAllDaysOfWeek = async (dayIndex, makeUnavailable) => {
                 if (!currentPlayer) return;
                 
                 const dates = generateDates(selectedMonth);
@@ -157,7 +203,19 @@
                     }
                 });
                 
+                // Update local state
                 setAvailabilityData(newAvailability);
+                
+                // Save to Firebase
+                const { set, ref } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js");
+                const db = window.firebaseDb;
+                
+                try {
+                    await set(ref(db, `${AVAILABILITY_DB_PATH}/${currentPlayer}`), newAvailability[currentPlayer]);
+                } catch (error) {
+                    console.error('Error saving availability:', error);
+                    alert('儲存失敗，請重試');
+                }
             };
 
             // Check if all days of a weekday are unavailable
@@ -224,8 +282,13 @@
                 return 'bg-gradient-to-br from-red-400 to-red-500 text-white';
             };
 
+            // Initialize data on component mount
             useEffect(() => {
-                loadAvailabilityData();
+                const initializeData = async () => {
+                    await loadPlayers();
+                    await loadAvailabilityData();
+                };
+                initializeData();
             }, []);
 
             // Modal for showing unavailable players
@@ -281,12 +344,14 @@
                 const monthNames = ['七月', '八月', '九月', '十月', '十一月', '十二月'];
 
                 return (
-                    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+                    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 py-8 px-4">
                         <div className="max-w-7xl mx-auto">
                             <div className="bg-white rounded-2xl shadow-xl p-8">
                                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                                     <div>
-                                        <h1 className="text-3xl font-bold text-gray-800 mb-2">團隊出席狀況總覽</h1>
+                                        <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                            豐鳥 🦜 團隊出席狀況總覽
+                                        </h1>
                                         <p className="text-gray-600">追蹤並管理團隊所有月份的出席狀況</p>
                                     </div>
                                     <button
@@ -294,53 +359,59 @@
                                             setCurrentPlayer('');
                                             setView('playerInput');
                                         }}
-                                        className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
+                                        className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-6 py-3 rounded-xl hover:from-orange-700 hover:to-amber-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
                                     >
                                         <UserIcon />
                                         更新我的出席狀況
                                     </button>
                                 </div>
 
-                                <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                                    <div className="flex items-center gap-2 text-blue-800">
+                                <div className="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-200">
+                                    <div className="flex items-center gap-2 text-orange-800">
                                         <AlertIcon />
                                         <p className="font-medium">顯示每個月最多人無法出席的前 8 個日期（點擊查看詳情）</p>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    {[7, 8, 9, 10, 11, 12].map((month, idx) => {
-                                        const top8 = getTop8UnavailableForMonth(month);
-                                        const monthName = monthNames[idx];
-                                        
-                                        return (
-                                            <div key={month} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
-                                                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                                    <CalendarIcon />
-                                                    {monthName} 2025
-                                                </h2>
-                                                
-                                                {top8.length === 0 ? (
-                                                    <p className="text-gray-500 italic text-center py-8">所有日期都全員可出席！ 🎉</p>
-                                                ) : (
-                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                        {top8.map((slot) => (
-                                                            <button
-                                                                key={slot.date}
-                                                                onClick={() => setSelectedDateDetails(slot)}
-                                                                className={`p-4 rounded-lg ${getColorClass(slot.count)} shadow-md transform transition-all hover:scale-105 cursor-pointer`}
-                                                            >
-                                                                <div className="font-bold text-lg">{slot.day}</div>
-                                                                <div className="text-sm opacity-90">{slot.dayOfWeek}</div>
-                                                                <div className="text-xs mt-1">{slot.count} 人無法出席</div>
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                {players.length === 0 ? (
+                                    <div className="text-center py-12">
+                                        <p className="text-gray-500">目前沒有球員資料，請先在球衣登記系統中新增球員</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        {[7, 8, 9, 10, 11, 12].map((month, idx) => {
+                                            const top8 = getTop8UnavailableForMonth(month);
+                                            const monthName = monthNames[idx];
+                                            
+                                            return (
+                                                <div key={month} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
+                                                    <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                                        <CalendarIcon />
+                                                        {monthName} 2025
+                                                    </h2>
+                                                    
+                                                    {top8.length === 0 ? (
+                                                        <p className="text-gray-500 italic text-center py-8">所有日期都全員可出席！ 🎉</p>
+                                                    ) : (
+                                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                            {top8.map((slot) => (
+                                                                <button
+                                                                    key={slot.date}
+                                                                    onClick={() => setSelectedDateDetails(slot)}
+                                                                    className={`p-4 rounded-lg ${getColorClass(slot.count)} shadow-md transform transition-all hover:scale-105 cursor-pointer`}
+                                                                >
+                                                                    <div className="font-bold text-lg">{slot.day}</div>
+                                                                    <div className="text-sm opacity-90">{slot.dayOfWeek}</div>
+                                                                    <div className="text-xs mt-1">{slot.count} 人無法出席</div>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
 
                                 <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm">
                                     <div className="flex items-center gap-2">
@@ -416,7 +487,7 @@
                 ];
 
                 return (
-                    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+                    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 py-8 px-4">
                         <div className="max-w-6xl mx-auto">
                             <div className="bg-white rounded-2xl shadow-xl p-8">
                                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
@@ -443,7 +514,7 @@
                                         }}
                                         className={`px-6 py-3 rounded-xl transition-all transform hover:scale-105 shadow-lg flex items-center gap-2 ${
                                             currentPlayer 
-                                                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700' 
+                                                ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white hover:from-orange-700 hover:to-amber-700' 
                                                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                         }`}
                                         disabled={!currentPlayer}
@@ -461,7 +532,7 @@
                                         <select
                                             value={currentPlayer}
                                             onChange={(e) => setCurrentPlayer(e.target.value)}
-                                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-gray-800"
+                                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-gray-800"
                                         >
                                             <option value="">請選擇您的姓名...</option>
                                             {players.map(player => (
@@ -481,7 +552,7 @@
                                                     onClick={() => setSelectedMonth(month)}
                                                     className={`px-4 py-2 rounded-lg transition-all ${
                                                         selectedMonth === month
-                                                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+                                                            ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md'
                                                             : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                                     }`}
                                                 >
@@ -494,8 +565,8 @@
 
                                 {currentPlayer ? (
                                     <>
-                                        <div className="mb-6 p-4 bg-indigo-50 rounded-xl border border-indigo-200">
-                                            <p className="text-sm font-semibold text-indigo-800 mb-3">快速設定：點擊下方按鈕來標記該月所有特定星期幾</p>
+                                        <div className="mb-6 p-4 bg-orange-50 rounded-xl border border-orange-200">
+                                            <p className="text-sm font-semibold text-orange-800 mb-3">快速設定：點擊下方按鈕來標記該月所有特定星期幾</p>
                                             <div className="grid grid-cols-7 gap-2">
                                                 {weekDays.map(({ index, name }) => {
                                                     const isAllUnavailable = areAllDaysOfWeekUnavailable(index);
@@ -581,7 +652,12 @@
                                         <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                                             <UserIcon />
                                         </div>
-                                        <p className="text-xl text-gray-500">請選擇您的姓名以更新出席狀況</p>
+                                        <p className="text-xl text-gray-500">
+                                            {players.length > 0 
+                                                ? '請選擇您的姓名以更新出席狀況' 
+                                                : '目前沒有球員資料，請先在球衣登記系統中新增球員'
+                                            }
+                                        </p>
                                     </div>
                                 )}
                             </div>
@@ -598,7 +674,7 @@
                 const availabilityPercentage = Math.round(((totalDays - totalUnavailable) / totalDays) * 100);
                 
                 return (
-                    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+                    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-100 py-8 px-4">
                         <div className="max-w-5xl mx-auto">
                             <div className="bg-white rounded-2xl shadow-xl p-8">
                                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
@@ -619,7 +695,7 @@
                                             setCurrentPlayer('');
                                             setView('teamSummary');
                                         }}
-                                        className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg"
+                                        className="bg-gradient-to-r from-orange-600 to-amber-600 text-white px-6 py-3 rounded-xl hover:from-orange-700 hover:to-amber-700 transition-all transform hover:scale-105 shadow-lg"
                                     >
                                         返回團隊總覽
                                     </button>
@@ -709,6 +785,12 @@
                                         );
                                     })}
                                 </div>
+
+                                <div className="mt-8 p-4 bg-orange-50 rounded-lg border border-orange-200">
+                                    <p className="text-sm text-orange-800 text-center">
+                                        🦜 豐鳥團隊出席管理系統
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -717,9 +799,9 @@
 
             if (loading) {
                 return (
-                    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+                    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-100">
                         <div className="bg-white p-8 rounded-2xl shadow-xl">
-                            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto"></div>
+                            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-600 mx-auto"></div>
                             <p className="mt-4 text-gray-600">載入出席資料中...</p>
                         </div>
                     </div>
