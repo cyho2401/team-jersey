@@ -6,22 +6,28 @@
     <title>團隊出席管理系統</title>
     
     <!-- React and Babel -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        /* Loading animation */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
-        const { Calendar, Users, ChevronRight, Check, X, ArrowLeft, User, CalendarDays, AlertCircle } = lucide;
 
         const TeamAvailabilitySystem = () => {
             const [currentPlayer, setCurrentPlayer] = useState('');
@@ -38,10 +44,42 @@
                 '蔡依林', '許志安', '楊丞琳', '周杰倫'
             ];
 
-            // Icon component wrapper
-            const Icon = ({ icon: IconComponent, className }) => {
-                return <IconComponent className={className} />;
-            };
+            // SVG Icons
+            const CalendarIcon = () => (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+            );
+
+            const UserIcon = () => (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            );
+
+            const ArrowLeftIcon = () => (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+            );
+
+            const XIcon = () => (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            );
+
+            const CheckIcon = () => (
+                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+            );
+
+            const AlertIcon = () => (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            );
 
             // Generate dates for a month
             const generateDates = (month) => {
@@ -87,14 +125,16 @@
 
             // Save player's availability
             const savePlayerAvailability = async (player, date, isUnavailable) => {
-                setAvailabilityData(prev => ({
-                    ...prev,
-                    [player]: {
-                        ...prev[player],
-                        [date]: isUnavailable
-                    }
-                }));
-                // Add Firebase save here
+                const newData = { ...availabilityData };
+                if (!newData[player]) {
+                    newData[player] = {};
+                }
+                if (isUnavailable) {
+                    newData[player][date] = true;
+                } else {
+                    delete newData[player][date];
+                }
+                setAvailabilityData(newData);
             };
 
             // Toggle all days of a specific weekday in the current month
@@ -118,7 +158,6 @@
                 });
                 
                 setAvailabilityData(newAvailability);
-                // Add Firebase batch save here
             };
 
             // Check if all days of a weekday are unavailable
@@ -206,7 +245,7 @@
                                     onClick={onClose}
                                     className="text-gray-400 hover:text-gray-600 transition-colors"
                                 >
-                                    <Icon icon={X} className="w-6 h-6" />
+                                    <XIcon />
                                 </button>
                             </div>
                             
@@ -257,14 +296,14 @@
                                         }}
                                         className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
                                     >
-                                        <Icon icon={User} className="w-5 h-5" />
+                                        <UserIcon />
                                         更新我的出席狀況
                                     </button>
                                 </div>
 
                                 <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
                                     <div className="flex items-center gap-2 text-blue-800">
-                                        <Icon icon={AlertCircle} className="w-5 h-5" />
+                                        <AlertIcon />
                                         <p className="font-medium">顯示每個月最多人無法出席的前 8 個日期（點擊查看詳情）</p>
                                     </div>
                                 </div>
@@ -277,7 +316,7 @@
                                         return (
                                             <div key={month} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
                                                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                                    <Icon icon={CalendarDays} className="w-5 h-5 text-indigo-600" />
+                                                    <CalendarIcon />
                                                     {monthName} 2025
                                                 </h2>
                                                 
@@ -389,7 +428,7 @@
                                             }}
                                             className="mr-4 text-gray-600 hover:text-gray-800 hover:bg-gray-100 p-2 rounded-lg transition-all"
                                         >
-                                            <Icon icon={ArrowLeft} className="w-6 h-6" />
+                                            <ArrowLeftIcon />
                                         </button>
                                         <div>
                                             <h1 className="text-3xl font-bold text-gray-800">更新您的出席狀況</h1>
@@ -409,7 +448,7 @@
                                         }`}
                                         disabled={!currentPlayer}
                                     >
-                                        <Icon icon={Calendar} className="w-5 h-5" />
+                                        <CalendarIcon />
                                         查看我的總結
                                     </button>
                                 </div>
@@ -539,7 +578,9 @@
                                     </>
                                 ) : (
                                     <div className="text-center py-16">
-                                        <Icon icon={User} className="w-24 h-24 text-gray-300 mx-auto mb-4" />
+                                        <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <UserIcon />
+                                        </div>
                                         <p className="text-xl text-gray-500">請選擇您的姓名以更新出席狀況</p>
                                     </div>
                                 )}
@@ -566,7 +607,7 @@
                                             onClick={() => setView('playerInput')}
                                             className="mr-4 text-gray-600 hover:text-gray-800 hover:bg-gray-100 p-2 rounded-lg transition-all"
                                         >
-                                            <Icon icon={ArrowLeft} className="w-6 h-6" />
+                                            <ArrowLeftIcon />
                                         </button>
                                         <div>
                                             <h1 className="text-3xl font-bold text-gray-800">{currentPlayer} 的出席總結</h1>
@@ -591,7 +632,7 @@
                                                 <p className="text-green-600 font-semibold">總可出席天數</p>
                                                 <p className="text-3xl font-bold text-green-700">{totalDays - totalUnavailable}</p>
                                             </div>
-                                            <Icon icon={Check} className="w-12 h-12 text-green-500" />
+                                            <CheckIcon />
                                         </div>
                                     </div>
                                     
@@ -601,7 +642,7 @@
                                                 <p className="text-red-600 font-semibold">總無法出席天數</p>
                                                 <p className="text-3xl font-bold text-red-700">{totalUnavailable}</p>
                                             </div>
-                                            <Icon icon={X} className="w-12 h-12 text-red-500" />
+                                            <XIcon />
                                         </div>
                                     </div>
                                     
@@ -611,7 +652,7 @@
                                                 <p className="text-blue-600 font-semibold">出席率</p>
                                                 <p className="text-3xl font-bold text-blue-700">{availabilityPercentage}%</p>
                                             </div>
-                                            <Icon icon={Calendar} className="w-12 h-12 text-blue-500" />
+                                            <CalendarIcon />
                                         </div>
                                     </div>
                                 </div>
@@ -695,7 +736,8 @@
         };
 
         // Render the app
-        ReactDOM.render(<TeamAvailabilitySystem />, document.getElementById('root'));
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<TeamAvailabilitySystem />);
     </script>
 </body>
 </html>
