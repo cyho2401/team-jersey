@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>豐玉 🏀 球衣號碼登記系統</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Background pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Admin link styled */
+    .admin-link {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+    }
+
+    .admin-link > a {
+      color: #6c757d;
+      text-decoration: none;
+      font-size: 14px;
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+      cursor: pointer;
+    }
+
+    .admin-link > a:hover {
+      opacity: 1;
+    }
+
+    .admin-logged-in {
+      display: none;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 10px 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .admin-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: white;
+      font-size: 14px;
+    }
+
+    .admin-email {
+      font-weight: 500;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .admin-btn {
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+
+    .admin-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Export button styling */
+    .export-btn {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .export-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    .export-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Admin Login Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-modal {
+      background: white;
+      border-radius: 20px;
+      padding: 0;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: modalAppear 0.3s ease forwards;
+    }
+
+    @keyframes modalAppear {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 30px;
+      text-align: center;
+      color: white;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #344054;
+    }
+
+    .login-input {
+      padding: 14px 18px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+
+    .login-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background-color: white;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .login-error {
+      color: #dc3545;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+      background: #fee;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #fcc;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    .login-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .login-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .login-btn.primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .login-btn.primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .login-btn.secondary {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 2px solid #e9ecef;
+    }
+
+    .login-btn.secondary:hover {
+      background: #e9ecef;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Form container */
+    .form-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      padding: 0;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      margin-bottom: 30px;
+      margin-top: 40px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .form-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-header::before {
+      content: "🏀";
+      position: absolute;
+      font-size: 150px;
+      opacity: 0.1;
+      right: -30px;
+      top: -30px;
+      transform: rotate(-15deg);
+    }
+
+    .form-header::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .form-header h2 {
+      margin: 0;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .form-subtitle {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+      margin-top: 8px;
+    }
+
+    form {
+      padding: 35px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    label {
+      font-weight: 600;
+      color: #344054;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .label-icon {
+      font-size: 18px;
+    }
+
+    .required {
+      color: #dc3545;
+      margin-left: 4px;
+    }
+
+    input[type="text"], input[type="number"] {
+      padding: 14px 18px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: #667eea;
+      background-color: white;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    input.error {
+      border-color: #dc3545;
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 13px;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    /* Size selection section */
+    .size-selection {
+      background: linear-gradient(145deg, #f8f9fa, #ffffff);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid #e9ecef;
+    }
+
+    .size-selection-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .size-selection-title {
+      font-weight: 600;
+      color: #344054;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .size-hint {
+      font-size: 13px;
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    .size-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .size-btn {
+      padding: 14px;
+      border: 2px solid #e9ecef;
+      background-color: white;
+      cursor: pointer;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .size-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 0;
+    }
+
+    .size-btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .size-btn:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.25);
+    }
+
+    .size-btn.selected {
+      border-color: transparent;
+      color: white;
+    }
+
+    .size-btn.selected::before {
+      opacity: 1;
+    }
+
+    /* Submit button */
+    button[type="submit"] {
+      padding: 16px 32px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      margin-top: 8px;
+    }
+
+    button[type="submit"]::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: left 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    button[type="submit"]:hover::before {
+      left: 100%;
+    }
+
+    button[type="submit"]:active {
+      transform: translateY(0);
+    }
+
+    /* Section card */
+    .section-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    /* Table container */
+    .table-container {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #e9ecef;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    th {
+      padding: 18px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: white;
+      font-size: 15px;
+      letter-spacing: 0.3px;
+      border: none;
+    }
+
+    th:nth-child(3),
+    th:nth-child(4),
+    td:nth-child(3),
+    td:nth-child(4) {
+      text-align: center;
+    }
+
+    tbody tr {
+      transition: all 0.2s ease;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    tbody tr:hover {
+      background-color: #f8f9fa;
+      transform: scale(1.01);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    td {
+      padding: 16px;
+      color: #495057;
+      font-size: 15px;
+      border: none;
+    }
+
+    /* Player name styling */
+    td:first-child {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    /* Size badge styling */
+    .size-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+      color: #1565c0;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Jersey number styling */
+    .jersey-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(145deg, #f5f5f5, #e0e0e0);
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 17px;
+      color: #333;
+    }
+
+    /* Duplicate styling */
+    .duplicate .jersey-number {
+      background: linear-gradient(145deg, #ffe5e5, #ffcccc);
+      border-color: #ff6b6b;
+      color: #c92a2a;
+    }
+
+    .duplicate-name {
+      color: #c92a2a !important;
+      position: relative;
+    }
+
+    .duplicate-name::after {
+      content: "⚠";
+      margin-left: 6px;
+      color: #ff6b6b;
+    }
+
+    /* Remarks styling */
+    .remark-warning {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: linear-gradient(145deg, #fff3cd, #ffe5a1);
+      color: #856404;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .remark-ok {
+      color: #28a745;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6c757d;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    /* Distribution header */
+    .distribution-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .distribution-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .total-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-size: 15px;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .size-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .size-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+    }
+
+    .size-name {
+      min-width: 55px;
+      font-weight: 600;
+      color: #495057;
+      font-size: 15px;
+    }
+
+    .bar-container {
+      flex: 1;
+      height: 36px;
+      background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4CAF50, #45a049);
+      border-radius: 18px;
+      transition: width 0.5s ease;
+      position: relative;
+      min-width: 0;
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    }
+
+    .bar-label {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: bold;
+      font-size: 14px;
+      color: #333;
+      z-index: 1;
+    }
+
+    .bar-percentage {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      color: white;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    .bar-fill:hover .bar-percentage {
+      opacity: 1;
+    }
+
+    .size-legend {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #6c757d;
+    }
+
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #4CAF50, #45a049);
+      box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: #6c757d;
+      font-size: 14px;
+    }
+
+    @keyframes submitSuccess {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+
+    .submit-success {
+      animation: submitSuccess 0.3s ease;
+    }
+
+    @media (max-width: 480px) {
+      .form-header h2 {
+        font-size: 24px;
+      }
+
+      .size-buttons {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .size-btn {
+        padding: 12px 8px;
+        font-size: 14px;
+      }
+
+      .size-name {
+        min-width: 45px;
+        font-size: 13px;
+      }
+      
+      .bar-container {
+        height: 32px;
+      }
+      
+      .section-title {
+        font-size: 20px;
+      }
+
+      th, td {
+        padding: 14px 10px;
+        font-size: 14px;
+      }
+
+      .jersey-number {
+        width: 38px;
+        height: 38px;
+        font-size: 15px;
+      }
+
+      .remark-warning {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+
+      .total-badge {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+
+      .admin-logged-in {
+        position: static;
+        margin-bottom: 20px;
+        border-radius: 16px;
+      }
+
+      .admin-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .export-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Admin link -->
+  <div class="admin-link">
+    <a onclick="showAdminLogin()" id="adminLoginLink">管理員登入</a>
+    <div class="admin-logged-in" id="adminLoggedIn">
+      <div class="admin-info">
+        <span class="admin-email" id="adminEmail"></span>
+        <div class="admin-actions">
+          <a href="toyotama-admin.html" class="admin-btn" target="_blank">管理面板</a>
+          <button class="admin-btn" onclick="logout()">登出</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="login-modal">
+      <div class="modal-header">
+        <h3>管理員登入</h3>
+      </div>
+      <div class="modal-body">
+        <form class="login-form" id="adminLoginForm">
+          <div class="form-field">
+            <label class="form-label">Email</label>
+            <input 
+              type="email" 
+              class="login-input" 
+              id="adminEmailInput"
+              placeholder="admin@example.com"
+              required
+            />
+          </div>
+          <div class="form-field">
+            <label class="form-label">密碼</label>
+            <input 
+              type="password" 
+              class="login-input" 
+              id="adminPasswordInput"
+              placeholder="請輸入密碼"
+              required
+            />
+          </div>
+          <div class="login-error" id="loginError">登入失敗：<span id="errorMessage"></span></div>
+          <div class="login-buttons">
+            <button type="submit" class="login-btn primary" id="loginSubmitBtn">
+              <span id="loginBtnText">登入</span>
+            </button>
+            <button type="button" class="login-btn secondary" onclick="closeAdminLogin()">取消</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Form -->
+    <div class="form-container">
+      <div class="form-header">
+        <h2>豐玉 🏀</h2>
+        <div class="form-subtitle">球衣資料登記</div>
+      </div>
+      
+      <form id="jerseyForm">
+        <div class="form-group">
+          <label>
+            <span class="label-icon">👤</span>
+            球員名字
+            <span class="required">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="playerName" 
+            placeholder="請輸入您的名字"
+            required 
+          />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="label-icon">🔢</span>
+            球衣號碼 (0-99)
+            <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="jerseyNumber"
+            inputmode="numeric"
+            placeholder="請選擇您的號碼"
+            required
+          />
+          <span class="error-message" id="jerseyError">請輸入 0, 00, 或 1-99 (不可輸入文字或 01-09)</span>
+        </div>
+
+        <div class="size-selection">
+          <div class="size-selection-header">
+            <div class="size-selection-title">
+              <span class="label-icon">👕</span>
+              選擇尺寸(Nike碼)
+              <span class="required">*</span>
+            </div>
+            <div class="size-hint">請選擇一個尺寸</div>
+          </div>
+          <div class="size-buttons" id="sizeButtons">
+            <button type="button" class="size-btn" data-size="3XS"><span>3XS</span></button>
+            <button type="button" class="size-btn" data-size="2XS"><span>2XS</span></button>
+            <button type="button" class="size-btn" data-size="XS"><span>XS</span></button>
+            <button type="button" class="size-btn" data-size="S"><span>S</span></button>
+            <button type="button" class="size-btn" data-size="M"><span>M</span></button>
+            <button type="button" class="size-btn" data-size="L"><span>L</span></button>
+            <button type="button" class="size-btn" data-size="XL"><span>XL</span></button>
+            <button type="button" class="size-btn" data-size="2XL"><span>2XL</span></button>
+            <button type="button" class="size-btn" data-size="3XL"><span>3XL</span></button>
+          </div>
+        </div>
+
+        <input type="hidden" id="selectedSize" name="shirtSize" required />
+
+        <button type="submit">提交登記</button>
+      </form>
+    </div>
+
+    <!-- Current selections table -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <span>📋</span>
+          <span>目前登記狀況</span>
+        </div>
+        <button class="export-btn" onclick="exportToExcel()">
+          <span>📥</span>
+          <span>匯出 Excel</span>
+        </button>
+      </div>
+      <div class="table-container">
+        <table id="selectionTable">
+          <thead>
+            <tr>
+              <th>球員姓名</th>
+              <th>尺寸</th>
+              <th>球衣號碼</th>
+              <th>狀態</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Size distribution -->
+    <div class="section-card">
+      <div class="distribution-header">
+        <div class="distribution-title">
+          <span>📊</span>
+          <span>尺寸分佈統計</span>
+        </div>
+        <div class="total-badge" id="totalBadge">
+          總計: 0 件
+        </div>
+      </div>
+      <div class="size-chart" id="sizeChart">
+        <!-- Filled by JS -->
+      </div>
+      <div class="size-legend">
+        <div class="legend-item">
+          <div class="legend-dot"></div>
+          <span>各尺寸訂購數量分佈</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>© 2025 豐玉🏀 | 球衣登記系統</p>
+    </div>
+  </div>
+
+  <!-- SheetJS library for Excel export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
+  <!-- Size button selection -->
+  <script>
+    const sizeButtons = document.querySelectorAll('.size-btn');
+    const hiddenInput = document.getElementById('selectedSize');
+
+    sizeButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        sizeButtons.forEach(btn => btn.classList.remove('selected'));
+        button.classList.add('selected');
+        hiddenInput.value = button.getAttribute('data-size');
+      });
+    });
+  </script>
+
+  <!-- Firebase & Logic -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGCaWivohAhxZDkKp7YGNp9deNetR3K4Y",
+      authDomain: "jersey-app-bcefa.firebaseapp.com",
+      databaseURL: "https://jersey-app-bcefa-default-rtdb.firebaseio.com",
+      projectId: "jersey-app-bcefa",
+      storageBucket: "jersey-app-bcefa.appspot.com",
+      messagingSenderId: "778327507472",
+      appId: "1:778327507472:web:057e3db1b767f0b137c095"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    // 使用豐玉隊的專屬路徑
+    const TEAM_DB_PATH = 'toyotama-jerseys';
+
+    // Make functions available globally
+    window.showAdminLogin = showAdminLogin;
+    window.closeAdminLogin = closeAdminLogin;
+    window.logout = logout;
+    window.currentData = []; // Store current data for export
+    window.sizeDistribution = {}; // Store size distribution
+
+    // Auth state observer
+    onAuthStateChanged(auth, (user) => {
+      const adminLoginLink = document.getElementById('adminLoginLink');
+      const adminLoggedIn = document.getElementById('adminLoggedIn');
+      const adminEmailSpan = document.getElementById('adminEmail');
+      
+      if (user) {
+        // User is signed in
+        adminLoginLink.style.display = 'none';
+        adminLoggedIn.style.display = 'block';
+        adminEmailSpan.textContent = user.email;
+      } else {
+        // User is signed out
+        adminLoginLink.style.display = 'block';
+        adminLoggedIn.style.display = 'none';
+      }
+    });
+
+    // Admin login functions
+    function showAdminLogin() {
+      document.getElementById('adminModal').classList.add('show');
+      document.getElementById('adminEmailInput').focus();
+    }
+
+    function closeAdminLogin() {
+      document.getElementById('adminModal').classList.remove('show');
+      document.getElementById('adminLoginForm').reset();
+      document.getElementById('loginError').classList.remove('show');
+      // Clear input fields
+      document.getElementById('adminEmailInput').value = '';
+      document.getElementById('adminPasswordInput').value = '';
+    }
+
+    async function logout() {
+      try {
+        await signOut(auth);
+        alert('已成功登出');
+      } catch (error) {
+        console.error('登出錯誤:', error);
+        alert('登出失敗，請重試');
+      }
+    }
+
+    // Admin login form handler
+    document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('adminEmailInput').value;
+      const password = document.getElementById('adminPasswordInput').value;
+      const loginBtn = document.getElementById('loginSubmitBtn');
+      const loginBtnText = document.getElementById('loginBtnText');
+      const loginError = document.getElementById('loginError');
+      const errorMessage = document.getElementById('errorMessage');
+      
+      // Show loading state
+      loginBtn.disabled = true;
+      loginBtnText.innerHTML = '<span class="loading-spinner"></span>登入中...';
+      loginError.classList.remove('show');
+      
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        closeAdminLogin();
+      } catch (error) {
+        let errorText = '登入失敗';
+        
+        switch (error.code) {
+          case 'auth/invalid-email':
+            errorText = 'Email 格式錯誤';
+            break;
+          case 'auth/user-disabled':
+            errorText = '此帳號已被停用';
+            break;
+          case 'auth/user-not-found':
+            errorText = '找不到此使用者';
+            break;
+          case 'auth/wrong-password':
+            errorText = '密碼錯誤';
+            break;
+          case 'auth/invalid-credential':
+            errorText = 'Email 或密碼錯誤';
+            break;
+          case 'auth/too-many-requests':
+            errorText = '登入嘗試次數過多，請稍後再試';
+            break;
+          case 'auth/missing-email':
+            errorText = '請輸入 Email';
+            break;
+          default:
+            errorText = error.message;
+        }
+        
+        errorMessage.textContent = errorText;
+        loginError.classList.add('show');
+      } finally {
+        // Reset button state
+        loginBtn.disabled = false;
+        loginBtnText.textContent = '登入';
+      }
+    });
+
+    // Click outside to close modal
+    document.getElementById('adminModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeAdminLogin();
+      }
+    });
+
+    // Jersey form handling
+    const form = document.getElementById('jerseyForm');
+    const tableBody = document.querySelector('#selectionTable tbody');
+    const sizeChart = document.getElementById('sizeChart');
+    const totalBadge = document.getElementById('totalBadge');
+    const submitButton = form.querySelector('button[type="submit"]');
+
+    // Enhanced jersey number validation
+    const jerseyNumberInput = document.getElementById('jerseyNumber');
+    const jerseyError = document.getElementById('jerseyError');
+    
+    // Validate jersey number on input
+    jerseyNumberInput.addEventListener('input', function() {
+      const value = this.value.trim();
+      const validPattern = /^(0|00|[1-9][0-9]?)$/;
+      
+      if (value && !validPattern.test(value)) {
+        this.classList.add('error');
+        jerseyError.classList.add('show');
+      } else {
+        this.classList.remove('error');
+        jerseyError.classList.remove('show');
+      }
+    });
+
+    // Prevent non-numeric input
+    jerseyNumberInput.addEventListener('keypress', function(e) {
+      const char = String.fromCharCode(e.which);
+      if (!/[0-9]/.test(char)) {
+        e.preventDefault();
+      }
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('playerName').value.trim();
+      const number = document.getElementById('jerseyNumber').value.trim();
+      const size = document.getElementById('selectedSize').value;
+
+      // Validate jersey number format
+      const validPattern = /^(0|00|[1-9][0-9]?)$/;
+      if (!validPattern.test(number)) {
+        jerseyNumberInput.classList.add('error');
+        jerseyError.classList.add('show');
+        jerseyNumberInput.focus();
+        alert("球衣號碼格式錯誤！請輸入 0, 00, 或 1-99");
+        return;
+      }
+
+      if (!name || !number || !size) {
+        alert("請填寫所有必填欄位");
+        return;
+      }
+
+      const entry = {
+        name,
+        jerseyNumber: number,
+        size,
+        timestamp: Date.now()
+      };
+
+      // Add submit animation
+      submitButton.classList.add('submit-success');
+      setTimeout(() => submitButton.classList.remove('submit-success'), 300);
+
+      push(ref(db, TEAM_DB_PATH), entry).catch((err) => {
+        alert("❌ 儲存失敗，請再試一次");
+        console.error(err);
+      });
+
+      form.reset();
+      document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('selected'));
+      document.getElementById('selectedSize').value = '';
+      jerseyNumberInput.classList.remove('error');
+      jerseyError.classList.remove('show');
+    });
+
+    onValue(ref(db, TEAM_DB_PATH), (snapshot) => {
+      const data = snapshot.val();
+      tableBody.innerHTML = '';
+      sizeChart.innerHTML = '';
+      window.currentData = []; // Reset current data
+      window.sizeDistribution = {}; // Reset size distribution
+
+      if (!data) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="4" class="empty-state">
+              <div class="empty-state-icon">🏀</div>
+              <div>目前還沒有任何球衣登記</div>
+            </td>
+          </tr>
+        `;
+        sizeChart.innerHTML = '<div class="empty-state">目前還沒有任何訂購記錄</div>';
+        totalBadge.textContent = '總計: 0 件';
+        return;
+      }
+
+      const entries = Object.entries(data);
+      const numberCount = {};
+      const nameCount = {};
+      const sizeCount = {};
+
+      for (const [id, entry] of entries) {
+        const num = entry.jerseyNumber;
+        const name = entry.name.trim().toLowerCase();
+        const size = entry.size;
+
+        numberCount[num] = (numberCount[num] || 0) + 1;
+        nameCount[name] = (nameCount[name] || 0) + 1;
+        sizeCount[size] = (sizeCount[size] || 0) + 1;
+      }
+
+      // Custom sorting: "00" first, then "0", then numeric order
+      entries.sort((a, b) => {
+        const numA = a[1].jerseyNumber;
+        const numB = b[1].jerseyNumber;
+        
+        // "00" comes first
+        if (numA === "00" && numB !== "00") return -1;
+        if (numA !== "00" && numB === "00") return 1;
+        
+        // "0" comes second
+        if (numA === "0" && numB !== "0" && numB !== "00") return -1;
+        if (numA !== "0" && numA !== "00" && numB === "0") return 1;
+        
+        // For all other numbers, sort numerically
+        return parseInt(numA) - parseInt(numB);
+      });
+
+      for (const [id, entry] of entries) {
+        const row = document.createElement('tr');
+
+        const nameKey = entry.name.trim().toLowerCase();
+        const numKey = entry.jerseyNumber;
+        const nameDup = nameCount[nameKey] > 1;
+        const numDup = numberCount[numKey] > 1;
+
+        // Prepare data for export
+        const statusText = [];
+        if (nameDup) statusText.push('姓名重複');
+        if (numDup) statusText.push('號碼重複');
+        
+        const exportRowData = {
+          '球員姓名': entry.name,
+          '尺寸': entry.size,
+          '球衣號碼': entry.jerseyNumber,
+          '狀態': statusText.length > 0 ? statusText.join('、') : '正常'
+        };
+        window.currentData.push(exportRowData);
+
+        // Player name cell
+        const nameCell = document.createElement('td');
+        nameCell.textContent = entry.name;
+        if (nameDup) nameCell.classList.add('duplicate-name');
+        row.appendChild(nameCell);
+
+        // Size cell with badge
+        const sizeCell = document.createElement('td');
+        sizeCell.innerHTML = `<span class="size-badge">${entry.size}</span>`;
+        row.appendChild(sizeCell);
+
+        // Jersey number cell with circle - Display as entered
+        const numberCell = document.createElement('td');
+        const numberDiv = document.createElement('div');
+        numberDiv.className = 'jersey-number';
+        numberDiv.textContent = entry.jerseyNumber;
+        numberCell.appendChild(numberDiv);
+        if (numDup) numberCell.classList.add('duplicate');
+        row.appendChild(numberCell);
+
+        // Status/Remarks cell
+        const remarksCell = document.createElement('td');
+        if (nameDup && numDup) {
+          remarksCell.innerHTML = '<span class="remark-warning">⚠ 姓名與號碼重複</span>';
+        } else if (nameDup) {
+          remarksCell.innerHTML = '<span class="remark-warning">⚠ 姓名重複</span>';
+        } else if (numDup) {
+          remarksCell.innerHTML = '<span class="remark-warning">⚠ 號碼重複</span>';
+        } else {
+          remarksCell.innerHTML = '<span class="remark-ok">✓</span>';
+        }
+        row.appendChild(remarksCell);
+
+        tableBody.appendChild(row);
+      }
+
+      // Create horizontal bar chart
+      const allSizes = ['3XS', '2XS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+      const maxCount = Math.max(...Object.values(sizeCount), 1);
+      let totalPlayers = 0;
+
+      allSizes.forEach(size => {
+        const count = sizeCount[size] || 0;
+        totalPlayers += count;
+        window.sizeDistribution[size] = count;
+        
+        if (count > 0) {
+          const percentage = Math.round((count / entries.length) * 100);
+          const barWidth = (count / maxCount) * 100;
+          
+          const sizeRow = document.createElement('div');
+          sizeRow.className = 'size-row';
+          
+          sizeRow.innerHTML = `
+            <div class="size-name">${size}</div>
+            <div class="bar-container">
+              <div class="bar-fill" style="width: ${barWidth}%">
+                <span class="bar-percentage">${percentage}%</span>
+              </div>
+              <div class="bar-label">${count}</div>
+            </div>
+          `;
+          
+          sizeChart.appendChild(sizeRow);
+        }
+      });
+
+      totalBadge.textContent = `總計: ${totalPlayers} 件`;
+    });
+  </script>
+
+  <!-- Excel export function -->
+  <script>
+    function exportToExcel() {
+      if (!window.currentData || window.currentData.length === 0) {
+        alert('沒有資料可以匯出！');
+        return;
+      }
+
+      // Create a new workbook
+      const wb = XLSX.utils.book_new();
+      
+      // Create summary sheet
+      const summaryData = [
+        ['豐玉 球衣登記報表'],
+        [''],
+        ['匯出日期', new Date().toLocaleString('zh-TW')],
+        ['總登記數量', window.currentData.length],
+        [''],
+        ['尺寸分佈統計'],
+      ];
+
+      // Add size distribution to summary
+      const allSizes = ['3XS', '2XS', 'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+      allSizes.forEach(size => {
+        const count = window.sizeDistribution[size] || 0;
+        if (count > 0) {
+          summaryData.push([size, count, `${Math.round((count / window.currentData.length) * 100)}%`]);
+        }
+      });
+
+      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(wb, summarySheet, "統計摘要");
+      
+      // Create detail sheet
+      const ws = XLSX.utils.json_to_sheet(window.currentData);
+      XLSX.utils.book_append_sheet(wb, ws, "球衣登記清單");
+      
+      // Generate filename with current date
+      const date = new Date();
+      const dateStr = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+      const filename = `豐玉球衣登記_${dateStr}.xlsx`;
+      
+      // Save the file
+      XLSX.writeFile(wb, filename);
+    }
+  </script>
+</body>
+</html>
