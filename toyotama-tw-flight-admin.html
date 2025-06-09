@@ -529,7 +529,7 @@
   <div class="unauthorized" id="unauthorizedMessage">
     <h2>🔒 需要管理員權限</h2>
     <p>請先登入管理員帳號才能存取此頁面</p>
-    <a href="index.html" class="login-btn">返回主頁面登入</a>
+    <a href="toyotama-tw-flight.html" class="login-btn">返回主頁面登入</a>
   </div>
 
   <!-- Admin Dashboard -->
@@ -544,7 +544,7 @@
           <span>管理員：</span>
           <span id="adminEmail"></span>
         </div>
-        <a href="index.html" class="action-btn">
+        <a href="toyotama-tw-flight.html" class="action-btn">
           <span>🏠</span>
           <span>返回主頁</span>
         </a>
@@ -739,7 +739,7 @@
     async function logout() {
       try {
         await signOut(auth);
-        window.location.href = 'index.html';
+        window.location.href = 'toyotama-tw-flight.html';
       } catch (error) {
         console.error('登出錯誤:', error);
         alert('登出失敗，請重試');
@@ -769,7 +769,7 @@
 
     // Load data from Firebase
     function loadData() {
-      const flightsRef = ref(db, 'fungyu-flights');
+      const flightsRef = ref(db, 'toyotama-flights');
       onValue(flightsRef, (snapshot) => {
         allData = snapshot.val() || {};
         updateStatistics();
@@ -928,7 +928,7 @@
       };
 
       try {
-        const memberRef = ref(db, `fungyu-flights/${member}`);
+        const memberRef = ref(db, `toyotama-flights/${member}`);
         await set(memberRef, updatedFlight);
         closeEditModal();
         alert('更新成功！');
@@ -945,7 +945,7 @@
       }
 
       try {
-        const memberRef = ref(db, `fungyu-flights/${member}`);
+        const memberRef = ref(db, `toyotama-flights/${member}`);
         await remove(memberRef);
         alert('刪除成功！');
       } catch (error) {
