@@ -406,9 +406,13 @@
       border-radius: 10px;
       padding: 20px;
       margin-bottom: 30px;
-      display: flex;
+      display: none;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .past-classes-toggle.show {
+      display: flex;
     }
 
     .toggle-container {
@@ -1110,6 +1114,10 @@
         flex-direction: column;
         gap: 15px;
       }
+
+      .past-classes-toggle.show {
+        display: flex;
+      }
     }
   </style>
 </head>
@@ -1206,10 +1214,10 @@
     </div>
 
     <!-- Past Classes Toggle -->
-    <div class="past-classes-toggle">
+    <div class="past-classes-toggle" id="pastClassesToggle">
       <div class="toggle-container">
         <span class="toggle-label">Show past classes this month</span>
-        <div class="toggle-switch" id="pastClassesToggle">
+        <div class="toggle-switch" id="pastClassesSwitch">
           <div class="toggle-slider"></div>
         </div>
       </div>
@@ -1577,6 +1585,11 @@
       document.getElementById('editingClassId').value = '';
       document.getElementById('conflictWarning').classList.remove('show');
       
+      // Reset form
+      document.getElementById('addClassForm').reset();
+      document.getElementById('selectedDateDisplay').textContent = '';
+      document.querySelectorAll('.class-type-btn').forEach(btn => btn.classList.remove('selected'));
+      
       if (classData) {
         // Pre-fill form with duplicated class data
         setTimeout(() => {
@@ -1585,12 +1598,11 @@
           
           // Select class type
           document.querySelectorAll('.class-type-btn').forEach(btn => {
-            btn.classList.remove('selected');
             if (btn.getAttribute('data-type') === classData.classType) {
               btn.classList.add('selected');
+              document.getElementById('classType').value = classData.classType;
             }
           });
-          document.getElementById('classType').value = classData.classType;
         }, 100);
       }
       
@@ -1660,7 +1672,7 @@
     // Toggle past classes
     function togglePastClasses() {
       showPastClasses = !showPastClasses;
-      const toggle = document.getElementById('pastClassesToggle');
+      const toggle = document.getElementById('pastClassesSwitch');
       const pastSection = document.getElementById('pastSection');
       
       if (showPastClasses) {
@@ -1702,7 +1714,7 @@
       document.getElementById('closeAddClassModal').addEventListener('click', () => closeModal('addClassModal'));
       
       // Past classes toggle
-      document.getElementById('pastClassesToggle').addEventListener('click', togglePastClasses);
+      document.getElementById('pastClassesSwitch').addEventListener('click', togglePastClasses);
       
       // Calendar navigation
       document.getElementById('prevMonth').addEventListener('click', () => {
@@ -1766,6 +1778,7 @@
       const adminLoggedIn = document.getElementById('adminLoggedIn');
       const adminEmailSpan = document.getElementById('adminEmail');
       const adminPanel = document.getElementById('adminPanel');
+      const pastClassesToggle = document.getElementById('pastClassesToggle');
       
       if (user) {
         currentUser = user;
@@ -1774,11 +1787,17 @@
         adminEmailSpan.textContent = user.email;
         adminEmail = user.email; // Update admin email
         adminPanel.classList.add('active');
+        pastClassesToggle.classList.add('show');
       } else {
         currentUser = null;
         adminLoginLink.style.display = 'block';
         adminLoggedIn.style.display = 'none';
         adminPanel.classList.remove('active');
+        pastClassesToggle.classList.remove('show');
+        // Reset past classes view
+        showPastClasses = false;
+        document.getElementById('pastClassesSwitch').classList.remove('active');
+        document.getElementById('pastSection').style.display = 'none';
       }
       
       renderClasses(); // Re-render to show/hide admin features
@@ -2004,8 +2023,10 @@
       pastClasses.sort((a, b) => new Date(b[1].date) - new Date(a[1].date));
       
       // Update counts
-      document.getElementById('classesCount').textContent = 
-        `${upcomingClasses.length} upcoming, ${pastClasses.length} past this month`;
+      if (currentUser) {
+        document.getElementById('classesCount').textContent = 
+          `${upcomingClasses.length} upcoming, ${pastClasses.length} past this month`;
+      }
 
       // Render upcoming classes
       if (upcomingClasses.length === 0) {
@@ -2017,8 +2038,8 @@
         });
       }
       
-      // Render past classes if toggle is on
-      if (showPastClasses) {
+      // Render past classes if toggle is on and user is admin
+      if (showPastClasses && currentUser) {
         if (pastClasses.length === 0) {
           pastGrid.innerHTML = '<div class="loading">No past classes this month</div>';
         } else {
