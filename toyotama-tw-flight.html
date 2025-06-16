@@ -1146,33 +1146,6 @@
       return `${day}/${month}/${year} (${weekday})`;
     }
 
-    // 隊員選擇處理 - 自動填入已儲存的資料
-    document.getElementById('memberName').addEventListener('change', async function() {
-      const memberName = this.value;
-      if (!memberName) {
-        resetForm();
-        return;
-      }
-
-      // 檢查 Firebase 中是否有該隊員的資料
-      const memberRef = ref(db, `toyotama-members/${memberName}`);
-      onValue(memberRef, (snapshot) => {
-        const memberData = snapshot.val();
-        if (memberData) {
-          // 填入個人資料
-          if (memberData.chineseName) {
-            document.getElementById('chineseName').value = memberData.chineseName;
-          }
-          if (memberData.height) {
-            document.getElementById('height').value = memberData.height;
-          }
-          if (memberData.weight) {
-            document.getElementById('weight').value = memberData.weight;
-          }
-        }
-      }, { onlyOnce: true });
-    });
-
     function resetForm() {
       document.getElementById('chineseName').value = '';
       document.getElementById('height').value = '';
@@ -1240,8 +1213,8 @@
         };
       }
 
-      // 儲存到 Firebase - 使用隊員姓名作為 key
-      const memberRef = ref(db, `toyotama-members/${memberName}`);
+      // 儲存到 Firebase - 使用 toyotama-flights 路徑
+      const memberRef = ref(db, `toyotama-flights/${memberName}`);
       set(memberRef, {
         chineseName: chineseName,
         height: parseInt(height),
@@ -1261,8 +1234,8 @@
     });
 
     // 監聽資料變更
-    const membersRef = ref(db, 'toyotama-members');
-    onValue(membersRef, (snapshot) => {
+    const flightsRef = ref(db, 'toyotama-flights');
+    onValue(flightsRef, (snapshot) => {
       const data = snapshot.val();
       const tableBody = document.getElementById('tableBody');
       const emptyState = document.getElementById('emptyState');
@@ -1301,9 +1274,9 @@
         
         row.innerHTML = `
           <td class="member-name">${member}</td>
-          <td>${memberData.chineseName}</td>
-          <td>${memberData.height} cm</td>
-          <td>${memberData.weight} kg</td>
+          <td>${memberData.chineseName || '-'}</td>
+          <td>${memberData.height ? memberData.height + ' cm' : '-'}</td>
+          <td>${memberData.weight ? memberData.weight + ' kg' : '-'}</td>
           <td>
             <span class="date-badge">${formatDateDMY(memberData.date)}</span>
           </td>
