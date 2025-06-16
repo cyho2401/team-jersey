@@ -78,6 +78,7 @@
       text-decoration: none;
       transition: all 0.3s ease;
       border-left: 3px solid transparent;
+      cursor: pointer;
     }
 
     .nav-item:hover {
@@ -463,16 +464,6 @@
       color: var(--gray-600);
     }
 
-    /* Charts */
-    .chart-container {
-      background-color: var(--white);
-      border: 2px solid var(--black);
-      border-radius: 10px;
-      padding: 25px;
-      margin-bottom: 30px;
-      height: 400px;
-    }
-
     /* Mobile Menu Toggle */
     .mobile-toggle {
       display: none;
@@ -523,6 +514,15 @@
       100% { transform: rotate(360deg); }
     }
 
+    /* Section */
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .sidebar {
@@ -561,50 +561,32 @@
         min-width: 600px;
       }
     }
-
-    /* Print Styles */
-    @media print {
-      .sidebar, .topbar-actions, .btn, .table-actions-cell {
-        display: none !important;
-      }
-
-      .main-content {
-        margin-left: 0 !important;
-      }
-
-      .table-container {
-        border: 1px solid var(--black) !important;
-      }
-    }
   </style>
 </head>
 <body>
   <!-- Mobile Menu Toggle -->
-  <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+  <button class="mobile-toggle" id="mobileToggle">☰</button>
 
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <div class="sidebar-logo">Admin Dashboard</div>
-      <div class="sidebar-user" id="adminEmail">admin@example.com</div>
+      <div class="sidebar-user" id="adminEmail">Loading...</div>
     </div>
     <nav class="sidebar-nav">
-      <a href="#" class="nav-item active" onclick="showSection('dashboard')">
+      <a class="nav-item active" data-section="dashboard">
         <span class="nav-icon">📊</span> Dashboard
       </a>
-      <a href="#" class="nav-item" onclick="showSection('classes')">
+      <a class="nav-item" data-section="classes">
         <span class="nav-icon">📅</span> Classes
       </a>
-      <a href="#" class="nav-item" onclick="showSection('students')">
+      <a class="nav-item" data-section="students">
         <span class="nav-icon">👥</span> Students
       </a>
-      <a href="#" class="nav-item" onclick="showSection('reports')">
-        <span class="nav-icon">📈</span> Reports
-      </a>
-      <a href="#" class="nav-item" onclick="showSection('settings')">
+      <a class="nav-item" data-section="settings">
         <span class="nav-icon">⚙️</span> Settings
       </a>
-      <a href="#" class="nav-item" onclick="logout()">
+      <a class="nav-item" id="logoutBtn">
         <span class="nav-icon">🚪</span> Logout
       </a>
     </nav>
@@ -616,10 +598,10 @@
     <div class="topbar">
       <h1 class="page-title" id="pageTitle">Dashboard</h1>
       <div class="topbar-actions">
-        <button class="btn btn-secondary" onclick="exportData()">
+        <button class="btn btn-secondary" id="exportBtn">
           <span>📥</span> Export Data
         </button>
-        <button class="btn btn-primary" onclick="showAddClassModal()">
+        <button class="btn btn-primary" id="addClassBtn">
           <span>➕</span> Add Class
         </button>
       </div>
@@ -628,7 +610,7 @@
     <!-- Content -->
     <div class="content" id="content">
       <!-- Dashboard Section -->
-      <div id="dashboardSection" class="section">
+      <div id="dashboardSection" class="section active">
         <!-- Stats Cards -->
         <div class="stats-grid">
           <div class="stat-card">
@@ -676,38 +658,16 @@
             </tbody>
           </table>
         </div>
-
-        <!-- Recent Activity -->
-        <div class="table-container">
-          <div class="table-header">
-            <h2 class="table-title">Recent Activity</h2>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Action</th>
-                <th>Student</th>
-                <th>Class</th>
-              </tr>
-            </thead>
-            <tbody id="activityTable">
-              <tr>
-                <td colspan="4" class="loading">Loading...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
 
       <!-- Classes Section -->
-      <div id="classesSection" class="section" style="display: none;">
+      <div id="classesSection" class="section">
         <div class="table-container">
           <div class="table-header">
             <h2 class="table-title">All Classes</h2>
             <div class="table-actions">
-              <input type="text" class="search-box" placeholder="Search classes..." onkeyup="searchClasses(this.value)">
-              <button class="btn btn-primary btn-sm" onclick="showAddClassModal()">Add Class</button>
+              <input type="text" class="search-box" id="classSearch" placeholder="Search classes...">
+              <button class="btn btn-primary btn-sm" id="addClassBtn2">Add Class</button>
             </div>
           </div>
           <table>
@@ -732,12 +692,12 @@
       </div>
 
       <!-- Students Section -->
-      <div id="studentsSection" class="section" style="display: none;">
+      <div id="studentsSection" class="section">
         <div class="table-container">
           <div class="table-header">
             <h2 class="table-title">All Students</h2>
             <div class="table-actions">
-              <input type="text" class="search-box" placeholder="Search students..." onkeyup="searchStudents(this.value)">
+              <input type="text" class="search-box" id="studentSearch" placeholder="Search students...">
             </div>
           </div>
           <table>
@@ -759,44 +719,8 @@
         </div>
       </div>
 
-      <!-- Reports Section -->
-      <div id="reportsSection" class="section" style="display: none;">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">📊</div>
-            <div class="stat-value" id="monthlyClasses">0</div>
-            <div class="stat-label">Classes This Month</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon">🎯</div>
-            <div class="stat-value" id="fillRate">0%</div>
-            <div class="stat-label">Average Fill Rate</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon">🌟</div>
-            <div class="stat-value" id="popularDay">-</div>
-            <div class="stat-label">Most Popular Day</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon">⏰</div>
-            <div class="stat-value" id="popularTime">-</div>
-            <div class="stat-label">Most Popular Time</div>
-          </div>
-        </div>
-
-        <div class="chart-container">
-          <h3>Weekly Class Distribution</h3>
-          <canvas id="weeklyChart"></canvas>
-        </div>
-
-        <div class="chart-container">
-          <h3>Monthly Attendance Trend</h3>
-          <canvas id="monthlyChart"></canvas>
-        </div>
-      </div>
-
       <!-- Settings Section -->
-      <div id="settingsSection" class="section" style="display: none;">
+      <div id="settingsSection" class="section">
         <div class="table-container">
           <div class="table-header">
             <h2 class="table-title">System Settings</h2>
@@ -816,10 +740,6 @@
                 <input type="number" class="form-input" id="lateCancelWindow" value="1" min="0" max="24">
               </div>
               <div class="form-group">
-                <label class="form-label">Default Class Duration (minutes)</label>
-                <input type="number" class="form-input" id="classDuration" value="90" min="30" max="240" step="30">
-              </div>
-              <div class="form-group">
                 <label class="form-label">Studio Address</label>
                 <textarea class="form-textarea" id="studioAddress">Flat C, 11th floor, Po Hon Building, 24-30 Percival St, Causeway Bay</textarea>
               </div>
@@ -836,7 +756,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title" id="classModalTitle">Add New Class</h3>
-        <button class="modal-close" onclick="closeModal('classModal')">&times;</button>
+        <button class="modal-close" id="closeClassModal">&times;</button>
       </div>
       <div class="modal-body">
         <form id="classForm">
@@ -872,8 +792,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('classModal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveClass()">Save Class</button>
+        <button class="btn btn-secondary" id="cancelClassModal">Cancel</button>
+        <button class="btn btn-primary" id="saveClassBtn">Save Class</button>
       </div>
     </div>
   </div>
@@ -883,7 +803,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title">Class Details</h3>
-        <button class="modal-close" onclick="closeModal('classDetailsModal')">&times;</button>
+        <button class="modal-close" id="closeDetailsModal">&times;</button>
       </div>
       <div class="modal-body">
         <div id="classDetailsContent">
@@ -891,14 +811,27 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('classDetailsModal')">Close</button>
-        <button class="btn btn-primary" onclick="printClassDetails()">Print</button>
+        <button class="btn btn-secondary" id="closeDetailsBtn">Close</button>
       </div>
     </div>
   </div>
 
-  <!-- Notifications -->
-  <div id="notificationContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 3000;"></div>
+  <!-- Define global functions -->
+  <script>
+    // Define placeholder functions
+    window.showSection = function() {};
+    window.logout = function() {};
+    window.showAddClassModal = function() {};
+    window.showEditClassModal = function() {};
+    window.viewClassDetails = function() {};
+    window.deleteClass = function() {};
+    window.removeStudentFromClass = function() {};
+    window.closeModal = function() {};
+    window.saveClass = function() {};
+    window.searchClasses = function() {};
+    window.searchStudents = function() {};
+    window.exportData = function() {};
+  </script>
 
   <!-- Firebase & Scripts -->
   <script type="module">
@@ -920,15 +853,15 @@
       signOut
     } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-    // Firebase configuration - Replace with your config
+    // Firebase configuration - 使用與主頁面相同的配置
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      databaseURL: "YOUR_DATABASE_URL",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyCGCaWivohAhxZDkKp7YGNp9deNetR3K4Y",
+      authDomain: "jersey-app-bcefa.firebaseapp.com",
+      databaseURL: "https://jersey-app-bcefa-default-rtdb.firebaseio.com",
+      projectId: "jersey-app-bcefa",
+      storageBucket: "jersey-app-bcefa.appspot.com",
+      messagingSenderId: "778327507472",
+      appId: "1:778327507472:web:057e3db1b767f0b137c095"
     };
 
     // Initialize Firebase
@@ -946,27 +879,13 @@
       if (user) {
         currentUser = user;
         document.getElementById('adminEmail').textContent = user.email;
+        console.log('User authenticated:', user.email);
         loadDashboard();
       } else {
+        console.log('No user authenticated, redirecting to index');
         window.location.href = 'index.html';
       }
     });
-
-    // Make functions available globally
-    window.toggleSidebar = toggleSidebar;
-    window.showSection = showSection;
-    window.logout = logout;
-    window.showAddClassModal = showAddClassModal;
-    window.showEditClassModal = showEditClassModal;
-    window.viewClassDetails = viewClassDetails;
-    window.deleteClass = deleteClass;
-    window.removeStudentFromClass = removeStudentFromClass;
-    window.closeModal = closeModal;
-    window.saveClass = saveClass;
-    window.searchClasses = searchClasses;
-    window.searchStudents = searchStudents;
-    window.exportData = exportData;
-    window.printClassDetails = printClassDetails;
 
     // Toggle sidebar for mobile
     function toggleSidebar() {
@@ -975,29 +894,33 @@
 
     // Show section
     function showSection(section) {
+      console.log('Showing section:', section);
+      
       // Update nav active state
       document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
       });
-      event.target.closest('.nav-item').classList.add('active');
+      document.querySelector(`[data-section="${section}"]`).classList.add('active');
 
       // Hide all sections
       document.querySelectorAll('.section').forEach(sec => {
-        sec.style.display = 'none';
+        sec.classList.remove('active');
       });
 
       // Show selected section
-      document.getElementById(section + 'Section').style.display = 'block';
+      const sectionElement = document.getElementById(section + 'Section');
+      if (sectionElement) {
+        sectionElement.classList.add('active');
+      }
 
       // Update page title
       const titles = {
         dashboard: 'Dashboard',
         classes: 'Classes Management',
         students: 'Students',
-        reports: 'Reports & Analytics',
         settings: 'Settings'
       };
-      document.getElementById('pageTitle').textContent = titles[section];
+      document.getElementById('pageTitle').textContent = titles[section] || 'Dashboard';
 
       // Load section data
       switch(section) {
@@ -1009,9 +932,6 @@
           break;
         case 'students':
           loadStudents();
-          break;
-        case 'reports':
-          loadReports();
           break;
       }
 
@@ -1028,29 +948,24 @@
           await signOut(auth);
           window.location.href = 'index.html';
         } catch (error) {
-          showNotification('Logout failed: ' + error.message, 'error');
+          alert('Logout failed: ' + error.message);
         }
       }
     }
 
     // Load dashboard data
     function loadDashboard() {
+      console.log('Loading dashboard data...');
+      
       // Listen to classes
       onValue(ref(database, 'classes'), (snapshot) => {
         const data = snapshot.val() || {};
         allClasses = data;
+        console.log('Classes loaded:', Object.keys(data).length);
         updateDashboardStats();
         renderUpcomingClasses();
-      });
-
-      // Listen to activities
-      onValue(ref(database, 'activities'), (snapshot) => {
-        const data = snapshot.val() || {};
-        allActivities = Object.entries(data).map(([id, activity]) => ({
-          id,
-          ...activity
-        })).sort((a, b) => b.timestamp - a.timestamp);
-        renderRecentActivity();
+      }, (error) => {
+        console.error('Error loading classes:', error);
       });
     }
 
@@ -1094,7 +1009,6 @@
       tbody.innerHTML = upcomingClasses.map(([id, cls]) => {
         const students = cls.students || [];
         const activeStudents = students.filter(s => s && !s.lateCancel).length;
-        const isFull = activeStudents >= 4;
         const status = activeStudents >= 2 ? 'Confirmed' : 'Needs Students';
 
         return `
@@ -1109,41 +1023,25 @@
               </span>
             </td>
             <td class="table-actions-cell">
-              <button class="btn btn-sm btn-secondary" onclick="viewClassDetails('${id}')">View</button>
-              <button class="btn btn-sm btn-primary" onclick="showEditClassModal('${id}')">Edit</button>
+              <button class="btn btn-sm btn-secondary" id="view-${id}">View</button>
+              <button class="btn btn-sm btn-primary" id="edit-${id}">Edit</button>
             </td>
           </tr>
         `;
       }).join('');
-    }
 
-    // Render recent activity
-    function renderRecentActivity() {
-      const tbody = document.getElementById('activityTable');
-      const recentActivities = allActivities.slice(0, 10);
-
-      if (recentActivities.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No recent activity</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = recentActivities.map(activity => {
-        return `
-          <tr>
-            <td>${formatTime(activity.timestamp)}</td>
-            <td>${activity.action}</td>
-            <td>${activity.studentName || '-'}</td>
-            <td>${activity.classInfo || '-'}</td>
-          </tr>
-        `;
-      }).join('');
+      // Add event listeners
+      upcomingClasses.forEach(([id, cls]) => {
+        document.getElementById(`view-${id}`)?.addEventListener('click', () => viewClassDetails(id));
+        document.getElementById(`edit-${id}`)?.addEventListener('click', () => showEditClassModal(id));
+      });
     }
 
     // Load all classes
     function loadClasses() {
       const tbody = document.getElementById('allClassesTable');
       const classes = Object.entries(allClasses).sort((a, b) => 
-        new Date(a[1].date) - new Date(b[1].date)
+        new Date(b[1].date) - new Date(a[1].date)
       );
 
       if (classes.length === 0) {
@@ -1173,13 +1071,20 @@
               </span>
             </td>
             <td class="table-actions-cell">
-              <button class="btn btn-sm btn-secondary" onclick="viewClassDetails('${id}')">View</button>
-              <button class="btn btn-sm btn-primary" onclick="showEditClassModal('${id}')">Edit</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteClass('${id}')">Delete</button>
+              <button class="btn btn-sm btn-secondary" id="viewAll-${id}">View</button>
+              <button class="btn btn-sm btn-primary" id="editAll-${id}">Edit</button>
+              <button class="btn btn-sm btn-danger" id="deleteAll-${id}">Delete</button>
             </td>
           </tr>
         `;
       }).join('');
+
+      // Add event listeners
+      classes.forEach(([id, cls]) => {
+        document.getElementById(`viewAll-${id}`)?.addEventListener('click', () => viewClassDetails(id));
+        document.getElementById(`editAll-${id}`)?.addEventListener('click', () => showEditClassModal(id));
+        document.getElementById(`deleteAll-${id}`)?.addEventListener('click', () => deleteClass(id));
+      });
     }
 
     // Load students
@@ -1238,54 +1143,13 @@
       }).join('');
     }
 
-    // Load reports
-    function loadReports() {
-      const classes = Object.values(allClasses);
-      const thisMonth = new Date().getMonth();
-      const thisYear = new Date().getFullYear();
-
-      // Calculate monthly stats
-      const monthlyClasses = classes.filter(cls => {
-        const date = new Date(cls.date);
-        return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
-      });
-
-      let totalStudents = 0;
-      let totalCapacity = 0;
-      const dayCount = {};
-      const timeCount = {};
-
-      monthlyClasses.forEach(cls => {
-        const students = cls.students || [];
-        totalStudents += students.filter(s => s && !s.lateCancel).length;
-        totalCapacity += 4;
-
-        dayCount[cls.dayOfWeek] = (dayCount[cls.dayOfWeek] || 0) + 1;
-        const hour = parseInt(cls.startTime.split(':')[0]);
-        const timeSlot = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
-        timeCount[timeSlot] = (timeCount[timeSlot] || 0) + 1;
-      });
-
-      const fillRate = totalCapacity > 0 ? Math.round((totalStudents / totalCapacity) * 100) : 0;
-      const popularDay = Object.entries(dayCount).sort((a, b) => b[1] - a[1])[0];
-      const popularTime = Object.entries(timeCount).sort((a, b) => b[1] - a[1])[0];
-
-      document.getElementById('monthlyClasses').textContent = monthlyClasses.length;
-      document.getElementById('fillRate').textContent = fillRate + '%';
-      document.getElementById('popularDay').textContent = popularDay ? popularDay[0] : '-';
-      document.getElementById('popularTime').textContent = popularTime ? popularTime[0] : '-';
-    }
-
     // Show add class modal
     function showAddClassModal() {
       document.getElementById('classModalTitle').textContent = 'Add New Class';
       document.getElementById('classForm').reset();
       document.getElementById('classId').value = '';
-      
-      // Set default date to today
       document.getElementById('classDate').valueAsDate = new Date();
-      
-      showModal('classModal');
+      document.getElementById('classModal').classList.add('active');
     }
 
     // Show edit class modal
@@ -1301,7 +1165,7 @@
       document.getElementById('classEndTime').value = cls.endTime;
       document.getElementById('classType').value = cls.classType;
 
-      showModal('classModal');
+      document.getElementById('classModal').classList.add('active');
     }
 
     // Save class
@@ -1320,19 +1184,17 @@
         if (classId) {
           // Update existing class
           await update(ref(database, `classes/${classId}`), classData);
-          logActivity('Class Updated', null, `${classData.date} ${classData.startTime}`);
-          showNotification('Class updated successfully', 'success');
+          alert('Class updated successfully');
         } else {
           // Add new class
           classData.createdAt = Date.now();
           classData.students = [];
           await push(ref(database, 'classes'), classData);
-          logActivity('Class Added', null, `${classData.date} ${classData.startTime}`);
-          showNotification('Class added successfully', 'success');
+          alert('Class added successfully');
         }
         closeModal('classModal');
       } catch (error) {
-        showNotification('Error saving class: ' + error.message, 'error');
+        alert('Error saving class: ' + error.message);
       }
     }
 
@@ -1342,10 +1204,9 @@
 
       try {
         await remove(ref(database, `classes/${classId}`));
-        logActivity('Class Deleted', null, 'Class ID: ' + classId);
-        showNotification('Class deleted successfully', 'success');
+        alert('Class deleted successfully');
       } catch (error) {
-        showNotification('Error deleting class: ' + error.message, 'error');
+        alert('Error deleting class: ' + error.message);
       }
     }
 
@@ -1380,7 +1241,7 @@
                       <div class="student-meta">Joined: ${formatTime(student.joinedAt)}</div>
                     </div>
                   </div>
-                  <button class="btn btn-sm btn-danger" onclick="removeStudentFromClass('${classId}', ${index})">Remove</button>
+                  <button class="btn btn-sm btn-danger" id="removeStudent-${classId}-${index}">Remove</button>
                 </div>
               `;
             }).join('')}
@@ -1388,7 +1249,16 @@
         </div>
       `;
 
-      showModal('classDetailsModal');
+      document.getElementById('classDetailsModal').classList.add('active');
+
+      // Add event listeners for remove buttons
+      students.forEach((student, index) => {
+        if (student) {
+          document.getElementById(`removeStudent-${classId}-${index}`)?.addEventListener('click', 
+            () => removeStudentFromClass(classId, index)
+          );
+        }
+      });
     }
 
     // Remove student from class
@@ -1398,47 +1268,26 @@
       try {
         const cls = allClasses[classId];
         const students = cls.students || [];
-        const studentName = students[studentIndex]?.name || 'Unknown';
-        
         students.splice(studentIndex, 1);
-        await set(ref(database, `classes/${classId}/students`), students);
         
-        logActivity('Student Removed', studentName, `${cls.date} ${cls.startTime}`);
-        showNotification('Student removed successfully', 'success');
+        await set(ref(database, `classes/${classId}/students`), students);
+        alert('Student removed successfully');
         closeModal('classDetailsModal');
       } catch (error) {
-        showNotification('Error removing student: ' + error.message, 'error');
+        alert('Error removing student: ' + error.message);
       }
     }
 
-    // Search classes
-    function searchClasses(query) {
-      const rows = document.querySelectorAll('#allClassesTable tr');
-      const lowerQuery = query.toLowerCase();
-
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(lowerQuery) ? '' : 'none';
-      });
-    }
-
-    // Search students
-    function searchStudents(query) {
-      const rows = document.querySelectorAll('#studentsTable tr');
-      const lowerQuery = query.toLowerCase();
-
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(lowerQuery) ? '' : 'none';
-      });
+    // Close modal
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
     }
 
     // Export data
     function exportData() {
       const data = {
         exportDate: new Date().toISOString(),
-        classes: allClasses,
-        activities: allActivities
+        classes: allClasses
       };
 
       const jsonStr = JSON.stringify(data, null, 2);
@@ -1452,62 +1301,31 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      showNotification('Data exported successfully', 'success');
+      alert('Data exported successfully');
     }
 
-    // Print class details
-    function printClassDetails() {
-      window.print();
+    // Search classes
+    function searchClasses(query) {
+      const rows = document.querySelectorAll('#allClassesTable tr');
+      const lowerQuery = query.toLowerCase();
+
+      rows.forEach((row, index) => {
+        if (index === 0) return; // Skip header
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(lowerQuery) ? '' : 'none';
+      });
     }
 
-    // Log activity
-    async function logActivity(action, studentName, classInfo) {
-      const activity = {
-        action,
-        studentName,
-        classInfo,
-        timestamp: Date.now(),
-        admin: currentUser.email
-      };
+    // Search students
+    function searchStudents(query) {
+      const rows = document.querySelectorAll('#studentsTable tr');
+      const lowerQuery = query.toLowerCase();
 
-      try {
-        await push(ref(database, 'activities'), activity);
-      } catch (error) {
-        console.error('Error logging activity:', error);
-      }
-    }
-
-    // Show modal
-    function showModal(modalId) {
-      document.getElementById(modalId).classList.add('active');
-    }
-
-    // Close modal
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
-
-    // Show notification
-    function showNotification(message, type = 'info') {
-      const container = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      notification.style.cssText = `
-        background: ${type === 'error' ? 'var(--danger)' : type === 'success' ? 'var(--success)' : 'var(--black)'};
-        color: white;
-        padding: 15px 20px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        animation: slideIn 0.3s ease;
-      `;
-      notification.textContent = message;
-
-      container.appendChild(notification);
-
-      setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-      }, 5000);
+      rows.forEach((row, index) => {
+        if (index === 0) return; // Skip header
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(lowerQuery) ? '' : 'none';
+      });
     }
 
     // Utility functions
@@ -1529,53 +1347,75 @@
       });
     }
 
-    // Settings form handler
-    document.getElementById('settingsForm')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const settings = {
-        minStudents: document.getElementById('minStudents').value,
-        maxStudents: document.getElementById('maxStudents').value,
-        lateCancelWindow: document.getElementById('lateCancelWindow').value,
-        classDuration: document.getElementById('classDuration').value,
-        studioAddress: document.getElementById('studioAddress').value
-      };
+    // Assign global functions
+    window.showSection = showSection;
+    window.logout = logout;
+    window.showAddClassModal = showAddClassModal;
+    window.showEditClassModal = showEditClassModal;
+    window.viewClassDetails = viewClassDetails;
+    window.deleteClass = deleteClass;
+    window.removeStudentFromClass = removeStudentFromClass;
+    window.closeModal = closeModal;
+    window.saveClass = saveClass;
+    window.searchClasses = searchClasses;
+    window.searchStudents = searchStudents;
+    window.exportData = exportData;
 
-      try {
-        await set(ref(database, 'settings'), settings);
-        showNotification('Settings saved successfully', 'success');
-      } catch (error) {
-        showNotification('Error saving settings: ' + error.message, 'error');
-      }
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Mobile toggle
+      document.getElementById('mobileToggle').addEventListener('click', toggleSidebar);
+
+      // Navigation
+      document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+        item.addEventListener('click', (e) => {
+          const section = e.currentTarget.getAttribute('data-section');
+          showSection(section);
+        });
+      });
+
+      // Logout
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+
+      // Add class buttons
+      document.getElementById('addClassBtn').addEventListener('click', showAddClassModal);
+      document.getElementById('addClassBtn2').addEventListener('click', showAddClassModal);
+
+      // Export button
+      document.getElementById('exportBtn').addEventListener('click', exportData);
+
+      // Modal close buttons
+      document.getElementById('closeClassModal').addEventListener('click', () => closeModal('classModal'));
+      document.getElementById('cancelClassModal').addEventListener('click', () => closeModal('classModal'));
+      document.getElementById('closeDetailsModal').addEventListener('click', () => closeModal('classDetailsModal'));
+      document.getElementById('closeDetailsBtn').addEventListener('click', () => closeModal('classDetailsModal'));
+
+      // Save class button
+      document.getElementById('saveClassBtn').addEventListener('click', saveClass);
+
+      // Search inputs
+      document.getElementById('classSearch')?.addEventListener('keyup', (e) => searchClasses(e.target.value));
+      document.getElementById('studentSearch')?.addEventListener('keyup', (e) => searchStudents(e.target.value));
+
+      // Settings form
+      document.getElementById('settingsForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const settings = {
+          minStudents: document.getElementById('minStudents').value,
+          maxStudents: document.getElementById('maxStudents').value,
+          lateCancelWindow: document.getElementById('lateCancelWindow').value,
+          studioAddress: document.getElementById('studioAddress').value
+        };
+
+        try {
+          await set(ref(database, 'settings'), settings);
+          alert('Settings saved successfully');
+        } catch (error) {
+          alert('Error saving settings: ' + error.message);
+        }
+      });
     });
-
-    // Initialize
-    loadDashboard();
   </script>
-
-  <!-- Animation styles -->
-  <style>
-    @keyframes slideIn {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    @keyframes slideOut {
-      from {
-        transform: translateX(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-    }
-  </style>
 </body>
 </html>
