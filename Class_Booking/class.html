@@ -771,31 +771,32 @@
       font-weight: bold;
     }
 
-    /* Calendar Styles */
+    /* Compact Calendar Styles */
     .calendar-container {
       margin-bottom: 20px;
+      max-width: 350px;
     }
 
     .calendar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .calendar-nav {
       display: flex;
-      gap: 10px;
+      gap: 5px;
     }
 
     .calendar-nav-btn {
       background: var(--black);
       color: var(--white);
       border: none;
-      padding: 8px 15px;
-      border-radius: 5px;
+      padding: 6px 12px;
+      border-radius: 4px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .calendar-nav-btn:hover {
@@ -805,15 +806,16 @@
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
+      gap: 2px;
     }
 
     .calendar-day-header {
       text-align: center;
       font-weight: bold;
-      padding: 10px;
+      padding: 8px 0;
       background: var(--gray-100);
-      border-radius: 5px;
+      border-radius: 3px;
+      font-size: 12px;
     }
 
     .calendar-day {
@@ -821,11 +823,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid var(--gray-300);
-      border-radius: 5px;
+      border: 1px solid var(--gray-300);
+      border-radius: 4px;
       cursor: pointer;
       transition: all 0.2s;
       font-weight: 500;
+      font-size: 13px;
+      padding: 8px;
     }
 
     .calendar-day:hover {
@@ -847,6 +851,7 @@
       border-color: var(--warning);
       background: var(--warning);
       color: var(--black);
+      font-weight: 600;
     }
 
     /* Time Selection */
@@ -1117,6 +1122,10 @@
 
       .past-classes-toggle.show {
         display: flex;
+      }
+
+      .calendar-container {
+        max-width: 100%;
       }
     }
   </style>
@@ -1404,6 +1413,14 @@
     let adminEmail = 'admin@example.com'; // 這會在登入後更新
     let showPastClasses = false;
 
+    // Helper function to format date without timezone issues
+    function formatDateToLocal(date) {
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
     // Firebase Email Queue Function
     async function sendEmailNotification(type, data) {
       // Store email in Firebase for Cloud Function to process
@@ -1515,8 +1532,8 @@
       });
       event.target.classList.add('selected');
       
-      // Update hidden input and display
-      const dateStr = date.toISOString().split('T')[0];
+      // Update hidden input and display - use local date formatting
+      const dateStr = formatDateToLocal(date);
       document.getElementById('classDate').value = dateStr;
       
       const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -1879,7 +1896,7 @@
       }
 
       const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-      const baseDate = new Date(date);
+      const baseDate = new Date(date + 'T00:00:00'); // Ensure local time
       
       const classesToAdd = [];
 
@@ -1912,7 +1929,7 @@
             
             // Only add if the date is in the future
             if (targetDate >= baseDate) {
-              const targetDateStr = targetDate.toISOString().split('T')[0];
+              const targetDateStr = formatDateToLocal(targetDate);
               
               // Check for conflicts
               const conflicts = checkTimeConflicts(targetDateStr, startTime, endTime);
@@ -2009,7 +2026,7 @@
       const pastClasses = [];
       
       Object.entries(allClasses).forEach(([classId, classData]) => {
-        const classDate = new Date(classData.date);
+        const classDate = new Date(classData.date + 'T00:00:00'); // Ensure local time
         
         if (classDate >= today) {
           upcomingClasses.push([classId, classData]);
@@ -2061,7 +2078,7 @@
       const card = document.createElement('div');
       card.className = `class-card ${isFull ? 'class-full' : ''} ${isPast ? 'past' : ''}`;
 
-      const dateObj = new Date(classData.date);
+      const dateObj = new Date(classData.date + 'T00:00:00'); // Ensure local time
       const formattedDate = `${dateObj.getDate().toString().padStart(2, '0')}/${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getFullYear()}`;
 
       card.innerHTML = `
