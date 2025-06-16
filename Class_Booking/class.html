@@ -513,7 +513,9 @@
       top: 15px;
       right: 15px;
       display: flex;
-      gap: 8px;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
     }
 
     .class-action-btn {
@@ -525,6 +527,7 @@
       font-size: 12px;
       cursor: pointer;
       transition: all 0.2s;
+      white-space: nowrap;
     }
 
     .class-action-btn:hover {
@@ -633,6 +636,12 @@
       font-size: 12px;
       font-weight: bold;
       margin-left: 10px;
+    }
+
+    .late-cancel-separator {
+      border-top: 2px dashed var(--gray-400);
+      margin: 20px 0;
+      padding-top: 15px;
     }
 
     .remove-btn {
@@ -2271,8 +2280,11 @@
       const students = classData.students || [];
       const standby = classData.standby || [];
       const maxStudents = classData.maxStudents || 4; // Default to 4 if not set
-      const isFull = students.length >= maxStudents;
-      const spotsLeft = maxStudents - students.length;
+      
+      // Count only active students (not late cancelled)
+      const activeStudents = students.filter(s => !s.lateCancel);
+      const isFull = activeStudents.length >= maxStudents;
+      const spotsLeft = Math.max(0, maxStudents - activeStudents.length);
 
       const card = document.createElement('div');
       card.className = `class-card ${isFull ? 'class-full' : ''} ${isPast ? 'past' : ''}`;
@@ -2289,22 +2301,22 @@
             <div class="class-actions">
               ${!isPast ? `
                 <button class="class-action-btn edit" id="edit-${classId}">Edit</button>
-                <button class="class-action-btn" id="duplicate-${classId}">Duplicate</button>
               ` : ''}
+              <button class="class-action-btn" id="duplicate-${classId}">Duplicate</button>
               <button class="class-action-btn delete" id="delete-${classId}">Delete</button>
             </div>
           ` : ''}
         </div>
         <div class="class-body">
           <div class="spots-indicator">
-            <span class="spots-filled">${students.length}/${maxStudents} Students</span>
+            <span class="spots-filled">${activeStudents.length}/${maxStudents} Students</span>
             <span class="spots-available">${spotsLeft} spots left</span>
           </div>
           
           <div class="list-section">
             <div class="list-title">
               Confirmed Students
-              ${students.length >= maxStudents ? '<span class="list-badge">FULL</span>' : ''}
+              ${activeStudents.length >= maxStudents ? '<span class="list-badge">FULL</span>' : ''}
             </div>
             <div class="students-list" id="students-${classId}">
               ${renderStudentsList(classId, students, maxStudents, isPast)}
@@ -2350,11 +2362,11 @@
             if (editBtn) {
               editBtn.addEventListener('click', () => editClass(classId));
             }
-            
-            const duplicateBtn = document.getElementById(`duplicate-${classId}`);
-            if (duplicateBtn) {
-              duplicateBtn.addEventListener('click', () => duplicateClass(classId));
-            }
+          }
+          
+          const duplicateBtn = document.getElementById(`duplicate-${classId}`);
+          if (duplicateBtn) {
+            duplicateBtn.addEventListener('click', () => duplicateClass(classId));
           }
           
           const deleteBtn = document.getElementById(`delete-${classId}`);
@@ -2407,21 +2419,25 @@
         }
       }
       
-      // Show late cancel students at the end
-      lateCancelStudents.forEach((student) => {
-        const studentIndex = students.indexOf(student);
-        html += `
-          <div class="student-item">
-            <div>
-              <span class="student-number">-</span>
-              <span class="student-name">${student.name}</span>
-              ${student.email ? `<span class="student-email">(${student.email})</span>` : ''}
-              <span class="late-cancel-badge">Late Cancel</span>
+      // Add separator and show late cancel students
+      if (lateCancelStudents.length > 0) {
+        html += '<div class="late-cancel-separator">';
+        lateCancelStudents.forEach((student) => {
+          const studentIndex = students.indexOf(student);
+          html += `
+            <div class="student-item">
+              <div>
+                <span class="student-number">-</span>
+                <span class="student-name">${student.name}</span>
+                ${student.email ? `<span class="student-email">(${student.email})</span>` : ''}
+                <span class="late-cancel-badge">Late Cancel</span>
+              </div>
+              ${!isPast ? `<button class="remove-btn" id="remove-${classId}-${studentIndex}">Remove</button>` : ''}
             </div>
-            ${!isPast ? `<button class="remove-btn" id="remove-${classId}-${studentIndex}">Remove</button>` : ''}
-          </div>
-        `;
-      });
+          `;
+        });
+        html += '</div>';
+      }
       
       // Add event listeners for remove buttons
       if (!isPast) {
@@ -2487,8 +2503,9 @@
       const classData = allClasses[classId];
       const students = classData.students || [];
       const maxStudents = classData.maxStudents || 4;
+      const activeStudents = students.filter(s => !s.lateCancel);
 
-      if (students.length >= maxStudents) {
+      if (activeStudents.length >= maxStudents) {
         showNotification('Class is full! You can join the standby list.', 'error');
         return;
       }
