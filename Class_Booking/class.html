@@ -679,7 +679,7 @@
 
     .join-buttons {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 10px;
     }
 
@@ -979,6 +979,25 @@
       background-color: var(--gray-800);
     }
 
+    /* Time Conflict Warning */
+    .conflict-warning {
+      background-color: var(--danger);
+      color: var(--white);
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .conflict-warning.show {
+      display: block;
+    }
+
+    .conflict-list {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
     /* Notifications */
     .notification {
       position: fixed;
@@ -1225,6 +1244,12 @@
         <form id="addClassForm">
           <input type="hidden" id="editingClassId">
           
+          <!-- Time Conflict Warning -->
+          <div class="conflict-warning" id="conflictWarning">
+            <strong>⚠️ Time Conflict Detected!</strong>
+            <div class="conflict-list" id="conflictList"></div>
+          </div>
+          
           <!-- Calendar -->
           <div class="form-group">
             <label class="form-label">Select Date</label>
@@ -1389,6 +1414,31 @@
       }
     }
 
+    // Check time conflicts
+    function checkTimeConflicts(date, startTime, endTime, excludeClassId = null) {
+      const conflicts = [];
+      const newStart = new Date(`${date} ${startTime}`);
+      const newEnd = new Date(`${date} ${endTime}`);
+
+      Object.entries(allClasses).forEach(([classId, classData]) => {
+        if (classId === excludeClassId) return;
+        if (classData.date !== date) return;
+
+        const existingStart = new Date(`${classData.date} ${classData.startTime}`);
+        const existingEnd = new Date(`${classData.date} ${classData.endTime}`);
+
+        // Check if times overlap
+        if ((newStart < existingEnd && newEnd > existingStart)) {
+          conflicts.push({
+            time: `${classData.startTime} - ${classData.endTime}`,
+            type: classData.classType
+          });
+        }
+      });
+
+      return conflicts;
+    }
+
     // Calendar functions
     function generateCalendar() {
       const year = currentMonth.getFullYear();
@@ -1467,6 +1517,31 @@
       
       document.getElementById('selectedDateDisplay').textContent = 
         `Selected: ${dayNames[date.getDay()]}, ${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+      
+      // Check time conflicts when date changes
+      checkAndShowConflicts();
+    }
+
+    // Check and show conflicts
+    function checkAndShowConflicts() {
+      const date = document.getElementById('classDate').value;
+      const startTime = document.getElementById('classStartTime').value;
+      const endTime = document.getElementById('classEndTime').value;
+      
+      if (!date || !startTime || !endTime) return;
+      
+      const conflicts = checkTimeConflicts(date, startTime, endTime);
+      const warningElement = document.getElementById('conflictWarning');
+      const conflictListElement = document.getElementById('conflictList');
+      
+      if (conflicts.length > 0) {
+        warningElement.classList.add('show');
+        conflictListElement.innerHTML = conflicts.map(conflict => 
+          `<div>• ${conflict.time} - ${conflict.type}</div>`
+        ).join('');
+      } else {
+        warningElement.classList.remove('show');
+      }
     }
 
     // Admin login functions
@@ -1500,6 +1575,7 @@
       document.getElementById('addClassTitle').textContent = classData ? 'Duplicate Class' : 'Add New Class';
       document.getElementById('submitClassBtn').textContent = classData ? 'Create Duplicate' : 'Add Class';
       document.getElementById('editingClassId').value = '';
+      document.getElementById('conflictWarning').classList.remove('show');
       
       if (classData) {
         // Pre-fill form with duplicated class data
@@ -1649,7 +1725,11 @@
           const endTime = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
           document.getElementById('classEndTime').value = endTime;
         }
+        checkAndShowConflicts();
       });
+      
+      // End time change handler
+      document.getElementById('classEndTime').addEventListener('change', checkAndShowConflicts);
       
       // Class type selection
       document.querySelectorAll('.class-type-btn').forEach(btn => {
@@ -1813,21 +1893,38 @@
             
             // Only add if the date is in the future
             if (targetDate >= baseDate) {
-              classesToAdd.push({
-                date: targetDate.toISOString().split('T')[0],
-                dayOfWeek: dayCode,
-                startTime,
-                endTime,
-                classType,
-                students: [],
-                standby: [],
-                createdAt: Date.now()
-              });
+              const targetDateStr = targetDate.toISOString().split('T')[0];
+              
+              // Check for conflicts
+              const conflicts = checkTimeConflicts(targetDateStr, startTime, endTime);
+              if (conflicts.length === 0) {
+                classesToAdd.push({
+                  date: targetDateStr,
+                  dayOfWeek: dayCode,
+                  startTime,
+                  endTime,
+                  classType,
+                  students: [],
+                  standby: [],
+                  createdAt: Date.now()
+                });
+              }
             }
           });
         }
+        
+        if (classesToAdd.length === 0) {
+          showNotification('All selected time slots have conflicts!', 'error');
+          return;
+        }
       } else {
-        // Single class
+        // Single class - check for conflicts
+        const conflicts = checkTimeConflicts(date, startTime, endTime);
+        if (conflicts.length > 0) {
+          showNotification('Cannot create class due to time conflict!', 'error');
+          return;
+        }
+        
         classesToAdd.push({
           date,
           dayOfWeek: dayNames[baseDate.getDay()],
@@ -1974,7 +2071,7 @@
             </div>
           </div>
           
-          ${standby.length > 0 || (isFull && standby.length < 4 && !isPast) ? `
+          ${standby.length > 0 ? `
             <div class="list-section">
               <div class="list-title">
                 Standby List
@@ -1993,8 +2090,11 @@
                 <input type="email" class="join-input" id="email-${classId}" placeholder="Enter your email">
               </div>
               <div class="join-buttons">
-                ${!isFull ? `<button class="join-btn" id="join-${classId}">Join Class</button>` : ''}
-                ${standby.length < 4 ? `<button class="join-btn standby" id="joinStandby-${classId}">Join Standby</button>` : ''}
+                ${!isFull ? `
+                  <button class="join-btn" id="join-${classId}">Join Class</button>
+                ` : `
+                  <button class="join-btn standby" id="joinStandby-${classId}">Join Standby</button>
+                `}
               </div>
             </div>
           ` : ''}
@@ -2025,11 +2125,11 @@
             if (joinBtn) {
               joinBtn.addEventListener('click', () => joinClass(classId));
             }
-          }
-          
-          const joinStandbyBtn = document.getElementById(`joinStandby-${classId}`);
-          if (joinStandbyBtn) {
-            joinStandbyBtn.addEventListener('click', () => joinStandby(classId));
+          } else {
+            const joinStandbyBtn = document.getElementById(`joinStandby-${classId}`);
+            if (joinStandbyBtn) {
+              joinStandbyBtn.addEventListener('click', () => joinStandby(classId));
+            }
           }
         }
       }, 0);
