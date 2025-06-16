@@ -294,12 +294,6 @@
       margin-bottom: 20px;
     }
 
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-
     label {
       display: block;
       font-weight: 600;
@@ -465,42 +459,6 @@
       margin-bottom: 15px;
     }
 
-    .form-section {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-      border: 2px solid #e9ecef;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .status-indicator {
-      padding: 4px 12px;
-      border-radius: 15px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-left: auto;
-    }
-
-    .status-completed {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .status-required {
-      background: #f8d7da;
-      color: #721c24;
-    }
-
     .submit-btn {
       background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
       color: white;
@@ -624,25 +582,6 @@
       opacity: 0.5;
     }
 
-    .prefilled-info {
-      background: #e8f5e9;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      border-left: 4px solid #4caf50;
-    }
-
-    .prefilled-text {
-      color: #2e7d32;
-      font-weight: 500;
-      margin-bottom: 10px;
-    }
-
-    .prefilled-details {
-      font-size: 14px;
-      color: #555;
-    }
-
     @media (max-width: 768px) {
       .admin-logged-in {
         position: static;
@@ -660,7 +599,7 @@
         grid-template-columns: 1fr;
       }
 
-      .input-row, .form-row {
+      .input-row {
         grid-template-columns: 1fr;
       }
 
@@ -669,7 +608,7 @@
       }
 
       table {
-        min-width: 700px;
+        min-width: 500px;
       }
 
       .date-options {
@@ -736,16 +675,16 @@
   <div class="container">
     <div class="header">
       <h1>🏀 豐玉籃球隊 - 2025屏東盃</h1>
-      <p>隊員資訊登記系統</p>
+      <p>航班登記系統</p>
     </div>
 
     <div class="form-card">
       <h2 class="form-title">
-        <span>📝</span>
-        <span>隊員資訊登記</span>
+        <span>✈️</span>
+        <span>登記航班資訊</span>
       </h2>
 
-      <form id="memberForm">
+      <form id="flightForm">
         <div class="form-group">
           <label for="memberName">隊員姓名</label>
           <select id="memberName" required>
@@ -783,174 +722,132 @@
           </select>
         </div>
 
-        <!-- Personal Information Section -->
-        <div class="form-section" id="personalSection">
-          <div class="section-title">
-            <span>👤</span>
-            <span>個人資料</span>
-            <span class="status-indicator status-required" id="personalStatus">必填</span>
+        <div class="form-group">
+          <label>出發日期</label>
+          <div class="date-options">
+            <button type="button" class="date-btn" data-date="2025-06-19">6月19日</button>
+            <button type="button" class="date-btn" data-date="2025-06-20">6月20日</button>
+            <button type="button" class="date-btn" data-date="other">其他日期</button>
           </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="chineseName">中文全名</label>
-              <input type="text" id="chineseName" placeholder="請輸入中文全名" required>
-            </div>
-            <div class="form-group">
-              <label for="height">身高 (公分)</label>
-              <input type="number" id="height" placeholder="例如：175" min="150" max="220" required>
-            </div>
-            <div class="form-group">
-              <label for="weight">體重 (公斤)</label>
-              <input type="number" id="weight" placeholder="例如：70" min="40" max="150" required>
-            </div>
+          <div class="other-date-input" id="otherDateInput">
+            <input type="date" id="customDate" min="2025-06-01" max="2025-12-31">
+          </div>
+          <input type="hidden" id="selectedDate" required>
+        </div>
+
+        <div class="form-group">
+          <label>選擇航班</label>
+          <div class="flight-options">
+            <button type="button" class="flight-btn" data-flight="HX234-0800">
+              <div class="airline-logo">🔵</div>
+              <div class="airline-name">HK Express 香港快運</div>
+              <div class="flight-info">
+                <span class="flight-time">08:00 - 09:30</span>
+              </div>
+            </button>
+
+            <button type="button" class="flight-btn" data-flight="CX420-0835">
+              <div class="airline-logo">🟢</div>
+              <div class="airline-name">Cathay Pacific 國泰航空</div>
+              <div class="flight-info">
+                <span class="flight-time">08:35 - 10:15</span>
+              </div>
+            </button>
+
+            <button type="button" class="flight-btn" data-flight="CI920-1010">
+              <div class="airline-logo">🔴</div>
+              <div class="airline-name">China Airlines 中華航空</div>
+              <div class="flight-info">
+                <span class="flight-time">10:10 - 11:45</span>
+              </div>
+            </button>
+
+            <button type="button" class="flight-btn" data-flight="AE390-1010">
+              <div class="airline-logo">🟡</div>
+              <div class="airline-name">Mandarin Airlines 華信航空</div>
+              <div class="flight-info">
+                <span class="flight-time">10:10 - 11:45</span>
+              </div>
+            </button>
+
+            <button type="button" class="flight-btn" data-flight="CX422-1035">
+              <div class="airline-logo">🟢</div>
+              <div class="airline-name">Cathay Pacific 國泰航空</div>
+              <div class="flight-info">
+                <span class="flight-time">10:35 - 12:15</span>
+              </div>
+            </button>
+
+            <button type="button" class="flight-btn" data-flight="BR828-1205">
+              <div class="airline-logo">🟢</div>
+              <div class="airline-name">EVA Air 長榮航空</div>
+              <div class="flight-info">
+                <span class="flight-time">12:05 - 13:40</span>
+              </div>
+            </button>
+
+            <button type="button" class="flight-btn" data-flight="HX236-1245">
+              <div class="airline-logo">🔵</div>
+              <div class="airline-name">HK Express 香港快運</div>
+              <div class="flight-info">
+                <span class="flight-time">12:45 - 14:15</span>
+              </div>
+            </button>
           </div>
         </div>
 
-        <!-- Flight Information Section -->
-        <div class="form-section" id="flightSection">
-          <div class="section-title">
-            <span>✈️</span>
-            <span>航班資訊</span>
-            <span class="status-indicator status-required" id="flightStatus">必填</span>
-          </div>
+        <div class="manual-input-toggle">
+          <button type="button" class="toggle-btn" onclick="toggleManualInput()">
+            或手動輸入其他航班
+          </button>
+        </div>
 
-          <div id="prefilledFlight" class="prefilled-info" style="display: none;">
-            <div class="prefilled-text">✅ 已登記的航班資訊</div>
-            <div class="prefilled-details" id="prefilledDetails"></div>
-          </div>
-
-          <div id="flightInputs">
+        <div class="manual-input" id="manualInput">
+          <div class="input-row">
             <div class="form-group">
-              <label>出發日期</label>
-              <div class="date-options">
-                <button type="button" class="date-btn" data-date="2025-06-19">6月19日</button>
-                <button type="button" class="date-btn" data-date="2025-06-20">6月20日</button>
-                <button type="button" class="date-btn" data-date="other">其他日期</button>
-              </div>
-              <div class="other-date-input" id="otherDateInput">
-                <input type="date" id="customDate" min="2025-06-01" max="2025-12-31">
-              </div>
-              <input type="hidden" id="selectedDate" required>
+              <label for="customAirline">航空公司</label>
+              <input type="text" id="customAirline" placeholder="例如：HK Express">
             </div>
-
             <div class="form-group">
-              <label>選擇航班</label>
-              <div class="flight-options">
-                <button type="button" class="flight-btn" data-flight="HX234-0800">
-                  <div class="airline-logo">🔵</div>
-                  <div class="airline-name">HK Express 香港快運</div>
-                  <div class="flight-info">
-                    <span class="flight-time">08:00 - 09:30</span>
-                  </div>
-                </button>
-
-                <button type="button" class="flight-btn" data-flight="CX420-0835">
-                  <div class="airline-logo">🟢</div>
-                  <div class="airline-name">Cathay Pacific 國泰航空</div>
-                  <div class="flight-info">
-                    <span class="flight-time">08:35 - 10:15</span>
-                  </div>
-                </button>
-
-                <button type="button" class="flight-btn" data-flight="CI920-1010">
-                  <div class="airline-logo">🔴</div>
-                  <div class="airline-name">China Airlines 中華航空</div>
-                  <div class="flight-info">
-                    <span class="flight-time">10:10 - 11:45</span>
-                  </div>
-                </button>
-
-                <button type="button" class="flight-btn" data-flight="AE390-1010">
-                  <div class="airline-logo">🟡</div>
-                  <div class="airline-name">Mandarin Airlines 華信航空</div>
-                  <div class="flight-info">
-                    <span class="flight-time">10:10 - 11:45</span>
-                  </div>
-                </button>
-
-                <button type="button" class="flight-btn" data-flight="CX422-1035">
-                  <div class="airline-logo">🟢</div>
-                  <div class="airline-name">Cathay Pacific 國泰航空</div>
-                  <div class="flight-info">
-                    <span class="flight-time">10:35 - 12:15</span>
-                  </div>
-                </button>
-
-                <button type="button" class="flight-btn" data-flight="BR828-1205">
-                  <div class="airline-logo">🟢</div>
-                  <div class="airline-name">EVA Air 長榮航空</div>
-                  <div class="flight-info">
-                    <span class="flight-time">12:05 - 13:40</span>
-                  </div>
-                </button>
-
-                <button type="button" class="flight-btn" data-flight="HX236-1245">
-                  <div class="airline-logo">🔵</div>
-                  <div class="airline-name">HK Express 香港快運</div>
-                  <div class="flight-info">
-                    <span class="flight-time">12:45 - 14:15</span>
-                  </div>
-                </button>
-              </div>
+              <label for="customFlightNo">航班編號</label>
+              <input type="text" id="customFlightNo" placeholder="例如：HX234">
             </div>
-
-            <div class="manual-input-toggle">
-              <button type="button" class="toggle-btn" onclick="toggleManualInput()">
-                或手動輸入其他航班
-              </button>
+          </div>
+          <div class="input-row">
+            <div class="form-group">
+              <label for="customDeparture">起飛時間</label>
+              <input type="time" id="customDeparture">
             </div>
-
-            <div class="manual-input" id="manualInput">
-              <div class="input-row">
-                <div class="form-group">
-                  <label for="customAirline">航空公司</label>
-                  <input type="text" id="customAirline" placeholder="例如：HK Express">
-                </div>
-                <div class="form-group">
-                  <label for="customFlightNo">航班編號</label>
-                  <input type="text" id="customFlightNo" placeholder="例如：HX234">
-                </div>
-              </div>
-              <div class="input-row">
-                <div class="form-group">
-                  <label for="customDeparture">起飛時間</label>
-                  <input type="time" id="customDeparture">
-                </div>
-                <div class="form-group">
-                  <label for="customArrival">抵達時間</label>
-                  <input type="time" id="customArrival">
-                </div>
-              </div>
+            <div class="form-group">
+              <label for="customArrival">抵達時間</label>
+              <input type="time" id="customArrival">
             </div>
           </div>
         </div>
 
         <input type="hidden" id="selectedFlight" required>
-        <button type="submit" class="submit-btn">提交資料</button>
+        <button type="submit" class="submit-btn">提交登記</button>
       </form>
     </div>
 
     <div class="table-card">
       <div class="table-header">
         <h2 class="form-title">
-          <span>📊</span>
-          <span>隊員登記狀況</span>
+          <span>📋</span>
+          <span>隊員航班登記狀況</span>
         </h2>
         <div class="member-count" id="memberCount">已登記: 0 人</div>
       </div>
       
       <div id="tableContainer">
-        <table id="memberTable">
+        <table id="flightTable">
           <thead>
             <tr>
               <th>隊員姓名</th>
-              <th>中文姓名</th>
-              <th>身高</th>
-              <th>體重</th>
               <th>出發日期</th>
               <th>航空公司</th>
               <th>起飛時間</th>
+              <th>抵達時間</th>
             </tr>
           </thead>
           <tbody id="tableBody">
@@ -958,8 +855,8 @@
           </tbody>
         </table>
         <div class="empty-state" id="emptyState">
-          <div class="empty-state-icon">📝</div>
-          <p>尚未有隊員完成資訊登記</p>
+          <div class="empty-state-icon">✈️</div>
+          <p>尚未有隊員登記航班資訊</p>
         </div>
       </div>
     </div>
@@ -968,7 +865,7 @@
   <!-- Firebase SDKs -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
     import { 
       getAuth, 
       signInWithEmailAndPassword, 
@@ -996,13 +893,6 @@
     window.showAdminLogin = showAdminLogin;
     window.closeAdminLogin = closeAdminLogin;
     window.logout = logout;
-    window.toggleManualInput = toggleManualInput;
-
-    // Global variables
-    let existingFlightData = null;
-    let selectedDateValue = null;
-    let selectedFlightData = null;
-    let isManualInput = false;
 
     // Auth state observer
     onAuthStateChanged(auth, (user) => {
@@ -1011,27 +901,18 @@
       const adminEmailSpan = document.getElementById('adminEmail');
       
       if (user) {
+        // User is signed in
         adminLoginLink.style.display = 'none';
         adminLoggedIn.style.display = 'block';
         adminEmailSpan.textContent = user.email;
       } else {
+        // User is signed out
         adminLoginLink.style.display = 'block';
         adminLoggedIn.style.display = 'none';
       }
     });
 
-    // Flight data
-    const flightData = {
-      'HX234-0800': { airline: 'HK Express 香港快運', flightNo: 'HX234', departure: '08:00', arrival: '09:30' },
-      'CX420-0835': { airline: 'Cathay Pacific 國泰航空', flightNo: 'CX420', departure: '08:35', arrival: '10:15' },
-      'CI920-1010': { airline: 'China Airlines 中華航空', flightNo: 'CI920', departure: '10:10', arrival: '11:45' },
-      'AE390-1010': { airline: 'Mandarin Airlines 華信航空', flightNo: 'AE390', departure: '10:10', arrival: '11:45' },
-      'CX422-1035': { airline: 'Cathay Pacific 國泰航空', flightNo: 'CX422', departure: '10:35', arrival: '12:15' },
-      'BR828-1205': { airline: 'EVA Air 長榮航空', flightNo: 'BR828', departure: '12:05', arrival: '13:40' },
-      'HX236-1245': { airline: 'HK Express 香港快運', flightNo: 'HX236', departure: '12:45', arrival: '14:15' }
-    };
-
-    // Admin functions
+    // Admin login functions
     function showAdminLogin() {
       document.getElementById('adminModal').classList.add('show');
       document.getElementById('adminEmailInput').focus();
@@ -1041,6 +922,7 @@
       document.getElementById('adminModal').classList.remove('show');
       document.getElementById('adminLoginForm').reset();
       document.getElementById('loginError').classList.remove('show');
+      // Clear input fields
       document.getElementById('adminEmailInput').value = '';
       document.getElementById('adminPasswordInput').value = '';
     }
@@ -1066,12 +948,13 @@
       const loginError = document.getElementById('loginError');
       const errorMessage = document.getElementById('errorMessage');
       
+      // Show loading state
       loginBtn.disabled = true;
       loginBtnText.innerHTML = '<span class="loading-spinner"></span>登入中...';
       loginError.classList.remove('show');
       
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
         closeAdminLogin();
       } catch (error) {
         let errorText = '登入失敗';
@@ -1105,136 +988,34 @@
         errorMessage.textContent = errorText;
         loginError.classList.add('show');
       } finally {
+        // Reset button state
         loginBtn.disabled = false;
         loginBtnText.textContent = '登入';
       }
     });
 
-    // Member selection handler
-    document.getElementById('memberName').addEventListener('change', async function() {
-      const memberName = this.value;
-      if (!memberName) {
-        resetForm();
-        return;
+    // Click outside to close modal
+    document.getElementById('adminModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeAdminLogin();
       }
-
-      // Check if member has existing data
-      await checkExistingData(memberName);
     });
 
-    async function checkExistingData(memberName) {
-      try {
-        // Check flight data
-        const flightSnapshot = await get(ref(db, `toyotama-flights/${memberName}`));
-        const flightData = flightSnapshot.val();
-
-        // Check member info data
-        const memberSnapshot = await get(ref(db, `toyotama-member-info/${memberName}`));
-        const memberData = memberSnapshot.val();
-
-        if (flightData) {
-          showPrefilledFlight(flightData);
-          existingFlightData = flightData;
-        } else {
-          hidePrefilledFlight();
-          existingFlightData = null;
-        }
-
-        if (memberData) {
-          fillPersonalInfo(memberData);
-        } else {
-          clearPersonalInfo();
-        }
-
-        updateStatusIndicators(!!memberData, !!flightData);
-      } catch (error) {
-        console.error('檢查現有資料錯誤:', error);
-      }
-    }
-
-    function showPrefilledFlight(flightData) {
-      const prefilledDiv = document.getElementById('prefilledFlight');
-      const prefilledDetails = document.getElementById('prefilledDetails');
-      const flightInputs = document.getElementById('flightInputs');
-      const flightStatus = document.getElementById('flightStatus');
-      
-      prefilledDiv.style.display = 'block';
-      flightInputs.style.display = 'none';
-      
-      prefilledDetails.innerHTML = `
-        <strong>日期：</strong>${formatDateDMY(flightData.date)} | 
-        <strong>航空公司：</strong>${flightData.airline} | 
-        <strong>航班：</strong>${flightData.flightNo} | 
-        <strong>起飛：</strong>${flightData.departure} | 
-        <strong>抵達：</strong>${flightData.arrival}
-      `;
-
-      flightStatus.textContent = '已完成';
-      flightStatus.className = 'status-indicator status-completed';
-      
-      // Set hidden field
-      document.getElementById('selectedFlight').value = 'existing';
-    }
-
-    function hidePrefilledFlight() {
-      const prefilledDiv = document.getElementById('prefilledFlight');
-      const flightInputs = document.getElementById('flightInputs');
-      const flightStatus = document.getElementById('flightStatus');
-      
-      prefilledDiv.style.display = 'none';
-      flightInputs.style.display = 'block';
-      
-      flightStatus.textContent = '必填';
-      flightStatus.className = 'status-indicator status-required';
-      
-      document.getElementById('selectedFlight').value = '';
-    }
-
-    function fillPersonalInfo(memberData) {
-      document.getElementById('chineseName').value = memberData.chineseName || '';
-      document.getElementById('height').value = memberData.height || '';
-      document.getElementById('weight').value = memberData.weight || '';
-    }
-
-    function clearPersonalInfo() {
-      document.getElementById('chineseName').value = '';
-      document.getElementById('height').value = '';
-      document.getElementById('weight').value = '';
-    }
-
-    function updateStatusIndicators(hasPersonalInfo, hasFlightInfo) {
-      const personalStatus = document.getElementById('personalStatus');
-      
-      if (hasPersonalInfo) {
-        personalStatus.textContent = '已完成';
-        personalStatus.className = 'status-indicator status-completed';
-      } else {
-        personalStatus.textContent = '必填';
-        personalStatus.className = 'status-indicator status-required';
-      }
-    }
-
-    function resetForm() {
-      clearPersonalInfo();
-      hidePrefilledFlight();
-      resetFlightSelection();
-      existingFlightData = null;
-      updateStatusIndicators(false, false);
-    }
-
-    function resetFlightSelection() {
-      document.querySelectorAll('.date-btn').forEach(btn => btn.classList.remove('selected'));
-      document.querySelectorAll('.flight-btn').forEach(btn => btn.classList.remove('selected'));
-      document.getElementById('otherDateInput').classList.remove('show');
-      document.getElementById('manualInput').classList.remove('show');
-      clearManualInputs();
-      selectedDateValue = null;
-      selectedFlightData = null;
-      isManualInput = false;
-    }
+    // Flight data (without prices)
+    const flightData = {
+      'HX234-0800': { airline: 'HK Express 香港快運', flightNo: 'HX234', departure: '08:00', arrival: '09:30' },
+      'CX420-0835': { airline: 'Cathay Pacific 國泰航空', flightNo: 'CX420', departure: '08:35', arrival: '10:15' },
+      'CI920-1010': { airline: 'China Airlines 中華航空', flightNo: 'CI920', departure: '10:10', arrival: '11:45' },
+      'AE390-1010': { airline: 'Mandarin Airlines 華信航空', flightNo: 'AE390', departure: '10:10', arrival: '11:45' },
+      'CX422-1035': { airline: 'Cathay Pacific 國泰航空', flightNo: 'CX422', departure: '10:35', arrival: '12:15' },
+      'BR828-1205': { airline: 'EVA Air 長榮航空', flightNo: 'BR828', departure: '12:05', arrival: '13:40' },
+      'HX236-1245': { airline: 'HK Express 香港快運', flightNo: 'HX236', departure: '12:45', arrival: '14:15' }
+    };
 
     // Date selection
     const dateButtons = document.querySelectorAll('.date-btn');
+    let selectedDateValue = null;
+
     dateButtons.forEach(button => {
       button.addEventListener('click', function() {
         dateButtons.forEach(btn => btn.classList.remove('selected'));
@@ -1265,12 +1046,17 @@
 
     // Flight button selection
     const flightButtons = document.querySelectorAll('.flight-btn');
+    let selectedFlightData = null;
+    let isManualInput = false;
+
     flightButtons.forEach(button => {
       button.addEventListener('click', function() {
+        // Reset manual input
         isManualInput = false;
         document.getElementById('manualInput').classList.remove('show');
         clearManualInputs();
 
+        // Update selection
         flightButtons.forEach(btn => btn.classList.remove('selected'));
         this.classList.add('selected');
         
@@ -1281,7 +1067,7 @@
     });
 
     // Toggle manual input
-    function toggleManualInput() {
+    window.toggleManualInput = function() {
       const manualInput = document.getElementById('manualInput');
       manualInput.classList.toggle('show');
       
@@ -1294,7 +1080,7 @@
         isManualInput = false;
         clearManualInputs();
       }
-    }
+    };
 
     function clearManualInputs() {
       document.getElementById('customAirline').value = '';
@@ -1303,9 +1089,9 @@
       document.getElementById('customArrival').value = '';
     }
 
-    // Format date for display
+    // Format date for display in DD/MM/YYYY format
     function formatDateDMY(dateString) {
-      const date = new Date(dateString + 'T00:00:00');
+      const date = new Date(dateString + 'T00:00:00'); // Force local timezone
       const day = date.getDate().toString().padStart(2, '0');
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear();
@@ -1316,127 +1102,92 @@
       return `${day}/${month}/${year} (${weekday})`;
     }
 
-    // Click outside to close modal
-    document.getElementById('adminModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeAdminLogin();
-      }
-    });
-
     // Form submission
-    document.getElementById('memberForm').addEventListener('submit', async function(e) {
+    document.getElementById('flightForm').addEventListener('submit', function(e) {
       e.preventDefault();
 
       const memberName = document.getElementById('memberName').value;
-      const chineseName = document.getElementById('chineseName').value;
-      const height = document.getElementById('height').value;
-      const weight = document.getElementById('weight').value;
       
-      if (!memberName || !chineseName || !height || !weight) {
-        alert('請填寫完整的個人資料！');
+      if (!memberName) {
+        alert('請選擇隊員姓名！');
         return;
       }
 
-      // Prepare data to save
-      const memberInfo = {
-        chineseName: chineseName,
-        height: parseInt(height),
-        weight: parseInt(weight),
-        timestamp: Date.now()
-      };
+      if (!selectedDateValue && !document.getElementById('customDate').value) {
+        alert('請選擇出發日期！');
+        return;
+      }
 
-      try {
-        // Save personal info
-        await set(ref(db, `toyotama-member-info/${memberName}`), memberInfo);
+      const flightDate = selectedDateValue || document.getElementById('customDate').value;
 
-        // Save flight info if new flight is selected
-        if (!existingFlightData) {
-          if (!selectedDateValue && !document.getElementById('customDate').value) {
-            alert('請選擇出發日期！');
-            return;
-          }
+      let flightInfo;
 
-          const flightDate = selectedDateValue || document.getElementById('customDate').value;
-          let flightInfo;
+      if (isManualInput) {
+        // Get manual input data
+        const airline = document.getElementById('customAirline').value;
+        const flightNo = document.getElementById('customFlightNo').value;
+        const departure = document.getElementById('customDeparture').value;
+        const arrival = document.getElementById('customArrival').value;
 
-          if (isManualInput) {
-            const airline = document.getElementById('customAirline').value;
-            const flightNo = document.getElementById('customFlightNo').value;
-            const departure = document.getElementById('customDeparture').value;
-            const arrival = document.getElementById('customArrival').value;
-
-            if (!airline || !flightNo || !departure || !arrival) {
-              alert('請填寫完整的航班資訊！');
-              return;
-            }
-
-            flightInfo = {
-              airline: airline,
-              flightNo: flightNo,
-              departure: departure,
-              arrival: arrival,
-              date: flightDate
-            };
-          } else {
-            if (!selectedFlightData) {
-              alert('請選擇航班！');
-              return;
-            }
-            flightInfo = {
-              ...selectedFlightData,
-              date: flightDate
-            };
-          }
-
-          await set(ref(db, `toyotama-flights/${memberName}`), {
-            ...flightInfo,
-            timestamp: Date.now()
-          });
+        if (!airline || !flightNo || !departure || !arrival) {
+          alert('請填寫完整的航班資訊！');
+          return;
         }
 
-        alert(`✅ ${memberName} 的資料已登記成功！`);
+        flightInfo = {
+          airline: airline,
+          flightNo: flightNo,
+          departure: departure,
+          arrival: arrival,
+          date: flightDate
+        };
+      } else {
+        if (!selectedFlightData) {
+          alert('請選擇航班！');
+          return;
+        }
+        flightInfo = {
+          ...selectedFlightData,
+          date: flightDate
+        };
+      }
+
+      // Save to Firebase - using member name as key to avoid duplicates
+      const memberRef = ref(db, `toyotama-flights/${memberName}`);
+      set(memberRef, {
+        ...flightInfo,
+        timestamp: Date.now()
+      }).then(() => {
+        alert(`✅ ${memberName} 的航班資訊已登記成功！`);
         
         // Reset form
-        document.getElementById('memberForm').reset();
-        resetForm();
-        
-      } catch (error) {
+        document.getElementById('flightForm').reset();
+        flightButtons.forEach(btn => btn.classList.remove('selected'));
+        dateButtons.forEach(btn => btn.classList.remove('selected'));
+        document.getElementById('manualInput').classList.remove('show');
+        document.getElementById('otherDateInput').classList.remove('show');
+        clearManualInputs();
+        selectedFlightData = null;
+        selectedDateValue = null;
+        isManualInput = false;
+      }).catch((error) => {
         alert('❌ 登記失敗，請重試！');
         console.error(error);
-      }
+      });
     });
 
     // Listen for data changes
-    const memberInfoRef = ref(db, 'toyotama-member-info');
     const flightsRef = ref(db, 'toyotama-flights');
-
-    let memberInfoData = {};
-    let flightData = {};
-
-    onValue(memberInfoRef, (snapshot) => {
-      memberInfoData = snapshot.val() || {};
-      updateTable();
-    });
-
     onValue(flightsRef, (snapshot) => {
-      flightData = snapshot.val() || {};
-      updateTable();
-    });
-
-    function updateTable() {
+      const data = snapshot.val();
       const tableBody = document.getElementById('tableBody');
       const emptyState = document.getElementById('emptyState');
-      const table = document.getElementById('memberTable');
+      const table = document.getElementById('flightTable');
       const memberCount = document.getElementById('memberCount');
 
       tableBody.innerHTML = '';
 
-      // Get members who have both personal info and flight info
-      const completeMembers = Object.keys(memberInfoData).filter(member => 
-        memberInfoData[member] && flightData[member]
-      );
-
-      if (completeMembers.length === 0) {
+      if (!data) {
         table.style.display = 'none';
         emptyState.style.display = 'block';
         memberCount.textContent = '已登記: 0 人';
@@ -1445,14 +1196,16 @@
 
       table.style.display = 'table';
       emptyState.style.display = 'none';
-      memberCount.textContent = `已登記: ${completeMembers.length} 人`;
+
+      const members = Object.keys(data);
+      memberCount.textContent = `已登記: ${members.length} 人`;
 
       // Sort by date and departure time
-      completeMembers.sort((a, b) => {
-        const dateA = flightData[a].date;
-        const dateB = flightData[b].date;
-        const timeA = flightData[a].departure;
-        const timeB = flightData[b].departure;
+      members.sort((a, b) => {
+        const dateA = data[a].date;
+        const dateB = data[b].date;
+        const timeA = data[a].departure;
+        const timeB = data[b].departure;
         
         if (dateA !== dateB) {
           return dateA.localeCompare(dateB);
@@ -1460,16 +1213,12 @@
         return timeA.localeCompare(timeB);
       });
 
-      completeMembers.forEach(member => {
-        const memberInfo = memberInfoData[member];
-        const flight = flightData[member];
+      members.forEach(member => {
+        const flight = data[member];
         const row = document.createElement('tr');
         
         row.innerHTML = `
           <td class="member-name">${member}</td>
-          <td>${memberInfo.chineseName}</td>
-          <td>${memberInfo.height} cm</td>
-          <td>${memberInfo.weight} kg</td>
           <td>
             <span class="date-badge">${formatDateDMY(flight.date)}</span>
           </td>
@@ -1479,11 +1228,14 @@
           <td>
             <span class="time-badge">${flight.departure}</span>
           </td>
+          <td>
+            <span class="time-badge">${flight.arrival}</span>
+          </td>
         `;
         
         tableBody.appendChild(row);
       });
-    }
+    });
   </script>
 </body>
 </html>
