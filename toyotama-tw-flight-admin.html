@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>豐玉籃球隊 - 2025屏東盃</title>
+  <title>豐玉籃球隊 - 管理面板</title>
   <style>
     * {
       box-sizing: border-box;
@@ -16,75 +16,390 @@
       background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
       min-height: 100vh;
       padding: 20px;
-      position: relative;
     }
 
-    /* Admin link styled */
-    .admin-link {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 10;
-    }
-
-    .admin-link > a {
-      color: rgba(255, 255, 255, 0.8);
-      text-decoration: none;
-      font-size: 14px;
-      opacity: 0.8;
-      transition: opacity 0.3s ease;
-      cursor: pointer;
-    }
-
-    .admin-link > a:hover {
-      opacity: 1;
-    }
-
-    .admin-logged-in {
+    .unauthorized {
       display: none;
-      background: rgba(255, 255, 255, 0.2);
-      padding: 10px 20px;
-      border-radius: 20px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      text-align: center;
+      color: white;
+      padding: 100px 20px;
     }
 
-    .admin-info {
+    .unauthorized h2 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+
+    .unauthorized p {
+      font-size: 18px;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
+    .login-btn {
+      background: white;
+      color: #1565C0;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .admin-container {
+      display: none;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .admin-header {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 30px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .header-title {
       display: flex;
       align-items: center;
       gap: 15px;
-      color: white;
+    }
+
+    .header-title h1 {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .user-info {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px 20px;
+      border-radius: 10px;
       font-size: 14px;
     }
 
-    .admin-email {
-      font-weight: 500;
+    .action-btn {
+      background: white;
+      color: #1565C0;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
     }
 
-    .admin-actions {
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+    }
+
+    .action-btn.danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .action-btn.danger:hover {
+      background: #c82333;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1565C0;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .data-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    .section-header {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      display: flex;
+      align-items: center;
       gap: 10px;
     }
 
-    .admin-btn {
-      padding: 6px 14px;
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+    .filter-controls {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-select {
+      padding: 8px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #1565C0;
+    }
+
+    .search-input {
+      padding: 8px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 200px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #1565C0;
+      width: 250px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: #f8f9fa;
+    }
+
+    th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #555;
+      border-bottom: 2px solid #e0e0e0;
+      position: sticky;
+      top: 0;
+      background: #f8f9fa;
+      z-index: 10;
+    }
+
+    td {
+      padding: 15px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    .member-name {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .date-badge {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 4px 10px;
       border-radius: 8px;
       font-size: 13px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s ease;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .airline-badge {
+      background: #e3f2fd;
+      color: #0D47A1;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .time-badge {
+      background: #f3e5f5;
+      color: #7b1fa2;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .status-icon {
       display: inline-block;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 14px;
+      line-height: 24px;
+      text-align: center;
+      font-weight: bold;
     }
 
-    .admin-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-1px);
+    .status-complete {
+      background: #4caf50;
+      color: white;
     }
 
-    /* Admin Login Modal */
+    .status-incomplete {
+      background: #ff9800;
+      color: white;
+    }
+
+    .pending-input {
+      color: #ff9800;
+      font-style: italic;
+      font-size: 13px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .edit-btn, .delete-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .edit-btn {
+      background: #ffc107;
+      color: #000;
+    }
+
+    .edit-btn:hover {
+      background: #e0a800;
+    }
+
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background: #c82333;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+      opacity: 0.5;
+    }
+
+    .export-section {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .export-info {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .export-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .export-btn:hover {
+      background: #218838;
+      transform: translateY(-2px);
+    }
+
+    /* Edit Modal */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -103,892 +418,257 @@
       justify-content: center;
     }
 
-    .login-modal {
+    .edit-modal {
       background: white;
       border-radius: 20px;
       padding: 0;
       width: 90%;
-      max-width: 400px;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      overflow: hidden;
-      transform: translateY(20px);
-      opacity: 0;
-      animation: modalAppear 0.3s ease forwards;
-    }
-
-    @keyframes modalAppear {
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
     }
 
     .modal-header {
       background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
-      padding: 30px;
-      text-align: center;
+      padding: 25px;
       color: white;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .modal-header h3 {
       margin: 0;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: bold;
     }
 
     .modal-body {
-      padding: 30px;
+      padding: 25px;
     }
 
-    .login-form {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+    .form-section {
+      margin-bottom: 25px;
+      padding-bottom: 25px;
+      border-bottom: 1px solid #e0e0e0;
     }
 
-    .form-field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .form-section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
     }
 
-    .form-label {
-      font-size: 14px;
-      font-weight: 500;
-      color: #344054;
-    }
-
-    .login-input {
-      padding: 14px 18px;
-      border: 2px solid #e9ecef;
-      border-radius: 12px;
-      font-size: 16px;
-      transition: all 0.3s ease;
-      background-color: #f8f9fa;
-    }
-
-    .login-input:focus {
-      outline: none;
-      border-color: #1565C0;
-      background-color: white;
-      box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.1);
-    }
-
-    .login-error {
-      color: #dc3545;
-      font-size: 14px;
-      text-align: center;
-      display: none;
-      background: #fee;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #fcc;
-    }
-
-    .login-error.show {
-      display: block;
-    }
-
-    .login-buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .login-btn {
-      flex: 1;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
+    .section-subtitle {
       font-size: 16px;
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .login-btn.primary {
-      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
-    }
-
-    .login-btn.primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(21, 101, 192, 0.4);
-    }
-
-    .login-btn.primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .login-btn.secondary {
-      background: #f8f9fa;
-      color: #6c757d;
-      border: 2px solid #e9ecef;
-    }
-
-    .login-btn.secondary:hover {
-      background: #e9ecef;
-    }
-
-    .loading-spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 0.8s linear infinite;
-      margin-right: 8px;
-      vertical-align: middle;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding-top: 20px;
-    }
-
-    .header {
-      text-align: center;
-      color: white;
-      margin-bottom: 30px;
-    }
-
-    .header h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .header p {
-      font-size: 20px;
-      opacity: 0.95;
-      font-weight: 500;
-    }
-
-    .form-card {
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      margin-bottom: 30px;
-    }
-
-    .form-title {
-      font-size: 24px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 25px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      color: #1565C0;
+      margin-bottom: 15px;
     }
 
     .form-group {
       margin-bottom: 20px;
     }
 
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-
-    label {
+    .form-label {
       display: block;
       font-weight: 600;
       color: #555;
       margin-bottom: 8px;
-      font-size: 16px;
+      font-size: 14px;
     }
 
-    select, input {
+    .form-input {
       width: 100%;
-      padding: 12px 16px;
+      padding: 10px 15px;
       border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      font-size: 16px;
-      transition: all 0.3s;
-      background: #fafafa;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s ease;
     }
 
-    select:focus, input:focus {
+    .form-input:focus {
       outline: none;
       border-color: #1565C0;
-      background: white;
       box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
     }
 
-    /* Custom styles for member select dropdown */
-    #memberName optgroup {
-      font-weight: bold;
-      font-style: normal;
+    .modal-footer {
+      padding: 20px 25px;
       background: #f8f9fa;
-      color: #333;
-    }
-
-    #memberName option {
-      padding: 8px 16px;
-      font-size: 16px;
-    }
-
-    #memberName option.submitted {
-      color: #2e7d32;
-      font-weight: 600;
-    }
-
-    #memberName option.submitted:before {
-      content: "✓ ";
-    }
-
-    #memberName option.incomplete {
-      color: #ff9800;
-      font-weight: 600;
-    }
-
-    #memberName option.incomplete:before {
-      content: "⚠ ";
-    }
-
-    #memberName option.not-submitted {
-      color: #dc3545;
-    }
-
-    #memberName option.not-submitted:before {
-      content: "✗ ";
-    }
-
-    .member-stats {
-      background: #e3f2fd;
-      border: 1px solid #1565C0;
-      color: #0D47A1;
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-size: 14px;
       display: flex;
-      justify-content: space-around;
-      flex-wrap: wrap;
-      gap: 15px;
-    }
-
-    .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .stat-number {
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    .date-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      justify-content: flex-end;
       gap: 10px;
-      margin-bottom: 15px;
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
     }
 
-    .date-btn {
-      background: white;
-      border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      padding: 12px;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-align: center;
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .date-btn:hover {
-      border-color: #1565C0;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(21, 101, 192, 0.2);
-    }
-
-    .date-btn.selected {
-      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
-      color: white;
-      border-color: transparent;
-    }
-
-    .other-date-input {
-      display: none;
-      margin-top: 10px;
-    }
-
-    .other-date-input.show {
-      display: block;
-    }
-
-    .flight-options {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .flight-btn {
-      background: white;
-      border: 2px solid #e0e0e0;
-      border-radius: 12px;
-      padding: 15px;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-align: left;
-    }
-
-    .flight-btn:hover {
-      border-color: #1565C0;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(21, 101, 192, 0.2);
-    }
-
-    .flight-btn.selected {
-      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
-      color: white;
-      border-color: transparent;
-    }
-
-    .airline-logo {
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-
-    .flight-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-
-    .flight-time {
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .airline-name {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 3px;
-    }
-
-    .flight-btn.selected .airline-name {
-      color: rgba(255,255,255,0.8);
-    }
-
-    .manual-input-toggle {
-      text-align: center;
-      margin: 20px 0;
-    }
-
-    .toggle-btn {
-      background: none;
-      border: 2px dashed #1565C0;
-      color: #1565C0;
+    .modal-btn {
       padding: 10px 20px;
-      border-radius: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 16px;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
     }
 
-    .toggle-btn:hover {
+    .modal-btn.primary {
       background: #1565C0;
       color: white;
-      border-style: solid;
     }
 
-    .manual-input {
-      display: none;
-      margin-top: 20px;
-      padding: 20px;
-      background: #f8f9fa;
-      border-radius: 10px;
-      border: 2px solid #e0e0e0;
+    .modal-btn.primary:hover {
+      background: #0D47A1;
     }
 
-    .manual-input.show {
-      display: block;
+    .modal-btn.secondary {
+      background: #e0e0e0;
+      color: #666;
     }
 
-    .input-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-
-    .form-section {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-      border: 2px solid #e9ecef;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .submit-btn {
-      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
-      color: white;
-      border: none;
-      padding: 15px 40px;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s;
-      width: 100%;
-      box-shadow: 0 4px 15px rgba(21, 101, 192, 0.3);
-    }
-
-    .submit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(21, 101, 192, 0.4);
-    }
-
-    .table-card {
-      background: white;
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-    }
-
-    .table-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .member-count {
-      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
-      color: white;
-      padding: 8px 20px;
-      border-radius: 20px;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    thead {
-      background: #f8f9fa;
-    }
-
-    th {
-      padding: 15px;
-      text-align: left;
-      font-weight: 600;
-      color: #555;
-      border-bottom: 2px solid #e0e0e0;
-    }
-
-    td {
-      padding: 15px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    tbody tr:hover {
-      background: #f8f9fa;
-    }
-
-    .member-name {
-      font-weight: 600;
-      color: #333;
-    }
-
-    .airline-tag {
-      display: inline-block;
-      padding: 4px 12px;
-      background: #e3f2fd;
-      color: #0D47A1;
-      border-radius: 15px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .time-badge {
-      background: #f3e5f5;
-      color: #7b1fa2;
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .date-badge {
-      background: #e8f5e9;
-      color: #2e7d32;
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #999;
-    }
-
-    .empty-state-icon {
-      font-size: 48px;
-      margin-bottom: 10px;
-      opacity: 0.5;
-    }
-
-    /* New styles for incomplete data */
-    .pending-input {
-      color: #ff9800;
-      font-style: italic;
-      font-size: 13px;
-    }
-
-    .status-icon {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      font-size: 12px;
-      line-height: 20px;
-      text-align: center;
-      margin-right: 5px;
-    }
-
-    .status-complete {
-      background: #4caf50;
-      color: white;
-    }
-
-    .status-incomplete {
-      background: #ff9800;
-      color: white;
-    }
-
-    .existing-data-notice {
-      background: #e3f2fd;
-      border: 1px solid #1565C0;
-      color: #0D47A1;
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: none;
-      font-size: 14px;
-    }
-
-    .existing-data-notice.show {
-      display: block;
+    .modal-btn.secondary:hover {
+      background: #d0d0d0;
     }
 
     @media (max-width: 768px) {
-      .admin-logged-in {
-        position: static;
-        margin-bottom: 20px;
-        border-radius: 16px;
-      }
-
-      .admin-info {
+      .admin-header {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+        text-align: center;
       }
 
-      .flight-options {
-        grid-template-columns: 1fr;
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
 
-      .input-row, .form-row {
-        grid-template-columns: 1fr;
+      .section-header {
+        flex-direction: column;
+        align-items: stretch;
       }
 
-      .table-card {
+      .filter-controls {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .search-input {
+        width: 100%;
+      }
+
+      .search-input:focus {
+        width: 100%;
+      }
+
+      .data-section {
+        padding: 20px;
         overflow-x: auto;
       }
 
       table {
-        min-width: 700px;
+        min-width: 1200px;
       }
 
-      .date-options {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .member-stats {
+      .export-section {
         flex-direction: column;
-        align-items: flex-start;
+        text-align: center;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Admin link -->
-  <div class="admin-link">
-    <a onclick="showAdminLogin()" id="adminLoginLink">管理員登入</a>
-    <div class="admin-logged-in" id="adminLoggedIn">
-      <div class="admin-info">
-        <span class="admin-email" id="adminEmail"></span>
-        <div class="admin-actions">
-          <a href="toyotama-tw-flight-admin.html" class="admin-btn" target="_blank">管理面板</a>
-          <button class="admin-btn" onclick="logout()">登出</button>
-        </div>
-      </div>
-    </div>
+  <!-- Unauthorized Access Message -->
+  <div class="unauthorized" id="unauthorizedMessage">
+    <h2>🔒 需要管理員權限</h2>
+    <p>請先登入管理員帳號才能存取此頁面</p>
+    <a href="toyotama-tw-flight.html" class="login-btn">返回主頁面登入</a>
   </div>
 
-  <!-- Admin Login Modal -->
-  <div class="modal-overlay" id="adminModal">
-    <div class="login-modal">
-      <div class="modal-header">
-        <h3>管理員登入</h3>
+  <!-- Admin Dashboard -->
+  <div class="admin-container" id="adminContainer">
+    <!-- Header -->
+    <div class="admin-header">
+      <div class="header-title">
+        <h1>🏀 豐玉籃球隊 - 管理面板</h1>
       </div>
-      <div class="modal-body">
-        <form class="login-form" id="adminLoginForm">
-          <div class="form-field">
-            <label class="form-label">Email</label>
-            <input 
-              type="email" 
-              class="login-input" 
-              id="adminEmailInput"
-              placeholder="admin@example.com"
-              required
-            />
-          </div>
-          <div class="form-field">
-            <label class="form-label">密碼</label>
-            <input 
-              type="password" 
-              class="login-input" 
-              id="adminPasswordInput"
-              placeholder="請輸入密碼"
-              required
-            />
-          </div>
-          <div class="login-error" id="loginError">登入失敗：<span id="errorMessage"></span></div>
-          <div class="login-buttons">
-            <button type="submit" class="login-btn primary" id="loginSubmitBtn">
-              <span id="loginBtnText">登入</span>
-            </button>
-            <button type="button" class="login-btn secondary" onclick="closeAdminLogin()">取消</button>
-          </div>
-        </form>
+      <div class="header-actions">
+        <div class="user-info">
+          <span>管理員：</span>
+          <span id="adminEmail"></span>
+        </div>
+        <a href="toyotama-tw-flight.html" class="action-btn">
+          <span>🏠</span>
+          <span>返回主頁</span>
+        </a>
+        <button class="action-btn danger" onclick="logout()">
+          <span>🚪</span>
+          <span>登出</span>
+        </button>
       </div>
     </div>
-  </div>
 
-  <div class="container">
-    <div class="header">
-      <h1>🏀 豐玉籃球隊 - 2025屏東盃</h1>
-      <p>隊員資訊登記系統</p>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value" id="totalMembers">0</div>
+        <div class="stat-label">已登記隊員</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="completeCount">0</div>
+        <div class="stat-label">資料完整</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-value" id="incompleteCount">0</div>
+        <div class="stat-label">待補資料</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✈️</div>
+        <div class="stat-value" id="totalFlights">0</div>
+        <div class="stat-label">不同航班數</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value" id="date19Count">0</div>
+        <div class="stat-label">6月19日出發</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value" id="date20Count">0</div>
+        <div class="stat-label">6月20日出發</div>
+      </div>
     </div>
 
-    <div class="form-card">
-      <h2 class="form-title">
-        <span>📝</span>
-        <span>隊員資訊登記</span>
-      </h2>
-
-      <div class="member-stats" id="memberStats" style="display: none;">
-        <div class="stat-item">
-          <span>✓ 資料完整：</span>
-          <span class="stat-number" id="completeCount">0</span>
-          <span>人</span>
-        </div>
-        <div class="stat-item">
-          <span>⚠ 待補資料：</span>
-          <span class="stat-number" id="incompleteCount">0</span>
-          <span>人</span>
-        </div>
-        <div class="stat-item">
-          <span>✗ 未登記：</span>
-          <span class="stat-number" id="notSubmittedCount">0</span>
-          <span>人</span>
-        </div>
-      </div>
-
-      <div class="existing-data-notice" id="existingDataNotice">
-        ℹ️ 此隊員已有航班登記資料，航班資訊已自動填入。請補充個人資料。
-      </div>
-
-      <form id="memberForm">
-        <div class="form-group">
-          <label for="memberName">隊員姓名</label>
-          <select id="memberName" required>
-            <option value="">請選擇隊員</option>
-            <!-- Options will be dynamically populated -->
-          </select>
-        </div>
-
-        <!-- Personal Information Section -->
-        <div class="form-section">
-          <div class="section-title">
-            <span>👤</span>
-            <span>個人資料</span>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="chineseName">中文全名</label>
-              <input type="text" id="chineseName" placeholder="請輸入中文全名" required>
-            </div>
-            <div class="form-group">
-              <label for="height">身高 (公分)</label>
-              <input type="number" id="height" placeholder="例如：175" min="150" max="220" required>
-            </div>
-            <div class="form-group">
-              <label for="weight">體重 (公斤)</label>
-              <input type="number" id="weight" placeholder="例如：70" min="40" max="150" required>
-            </div>
-          </div>
-        </div>
-
-        <!-- Flight Information Section -->
-        <div class="form-section">
-          <div class="section-title">
-            <span>✈️</span>
-            <span>航班資訊</span>
-          </div>
-
-          <div class="form-group">
-            <label>出發日期</label>
-            <div class="date-options">
-              <button type="button" class="date-btn" data-date="2025-06-19">6月19日</button>
-              <button type="button" class="date-btn" data-date="2025-06-20">6月20日</button>
-              <button type="button" class="date-btn" data-date="other">其他日期</button>
-            </div>
-            <div class="other-date-input" id="otherDateInput">
-              <input type="date" id="customDate" min="2025-06-01" max="2025-12-31">
-            </div>
-            <input type="hidden" id="selectedDate" required>
-          </div>
-
-          <div class="form-group">
-            <label>選擇航班</label>
-            <div class="flight-options">
-              <button type="button" class="flight-btn" data-flight="HX234-0800">
-                <div class="airline-logo">🔵</div>
-                <div class="airline-name">HK Express 香港快運</div>
-                <div class="flight-info">
-                  <span class="flight-time">08:00 - 09:30</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="CX420-0835">
-                <div class="airline-logo">🟢</div>
-                <div class="airline-name">Cathay Pacific 國泰航空</div>
-                <div class="flight-info">
-                  <span class="flight-time">08:35 - 10:15</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="CI920-1010">
-                <div class="airline-logo">🔴</div>
-                <div class="airline-name">China Airlines 中華航空</div>
-                <div class="flight-info">
-                  <span class="flight-time">10:10 - 11:45</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="AE390-1010">
-                <div class="airline-logo">🟡</div>
-                <div class="airline-name">Mandarin Airlines 華信航空</div>
-                <div class="flight-info">
-                  <span class="flight-time">10:10 - 11:45</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="CX422-1035">
-                <div class="airline-logo">🟢</div>
-                <div class="airline-name">Cathay Pacific 國泰航空</div>
-                <div class="flight-info">
-                  <span class="flight-time">10:35 - 12:15</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="BR828-1205">
-                <div class="airline-logo">🟢</div>
-                <div class="airline-name">EVA Air 長榮航空</div>
-                <div class="flight-info">
-                  <span class="flight-time">12:05 - 13:40</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="HX236-1245">
-                <div class="airline-logo">🔵</div>
-                <div class="airline-name">HK Express 香港快運</div>
-                <div class="flight-info">
-                  <span class="flight-time">12:45 - 14:15</span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <div class="manual-input-toggle">
-            <button type="button" class="toggle-btn" onclick="toggleManualInput()">
-              或手動輸入其他航班
-            </button>
-          </div>
-
-          <div class="manual-input" id="manualInput">
-            <div class="input-row">
-              <div class="form-group">
-                <label for="customAirline">航空公司</label>
-                <input type="text" id="customAirline" placeholder="例如：HK Express">
-              </div>
-              <div class="form-group">
-                <label for="customFlightNo">航班編號</label>
-                <input type="text" id="customFlightNo" placeholder="例如：HX234">
-              </div>
-            </div>
-            <div class="input-row">
-              <div class="form-group">
-                <label for="customDeparture">起飛時間</label>
-                <input type="time" id="customDeparture">
-              </div>
-              <div class="form-group">
-                <label for="customArrival">抵達時間</label>
-                <input type="time" id="customArrival">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <input type="hidden" id="selectedFlight" required>
-        <button type="submit" class="submit-btn">提交資料</button>
-      </form>
-    </div>
-
-    <div class="table-card">
-      <div class="table-header">
-        <h2 class="form-title">
-          <span>📊</span>
-          <span>隊員登記狀況</span>
+    <!-- Main Data Section -->
+    <div class="data-section">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span>📋</span>
+          <span>隊員資料管理</span>
         </h2>
-        <div class="member-count" id="memberCount">已登記: 0 人</div>
+        <div class="filter-controls">
+          <select class="filter-select" id="statusFilter">
+            <option value="">所有狀態</option>
+            <option value="complete">資料完整</option>
+            <option value="incomplete">待補資料</option>
+          </select>
+          <select class="filter-select" id="dateFilter">
+            <option value="">所有日期</option>
+            <option value="2025-06-19">6月19日</option>
+            <option value="2025-06-20">6月20日</option>
+          </select>
+          <select class="filter-select" id="airlineFilter">
+            <option value="">所有航空公司</option>
+          </select>
+          <input type="text" class="search-input" id="searchInput" placeholder="搜尋隊員姓名...">
+        </div>
       </div>
-      
-      <div id="tableContainer">
-        <table id="memberTable">
+
+      <div style="overflow-x: auto;">
+        <table id="dataTable">
           <thead>
             <tr>
               <th>狀態</th>
@@ -998,33 +678,117 @@
               <th>體重</th>
               <th>出發日期</th>
               <th>航空公司</th>
+              <th>航班編號</th>
               <th>起飛時間</th>
+              <th>抵達時間</th>
+              <th>登記時間</th>
+              <th>操作</th>
             </tr>
           </thead>
           <tbody id="tableBody">
             <!-- Data will be populated here -->
           </tbody>
         </table>
-        <div class="empty-state" id="emptyState">
-          <div class="empty-state-icon">📝</div>
-          <p>尚未有隊員完成資訊登記</p>
+      </div>
+
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <div class="empty-state-icon">✈️</div>
+        <p>沒有符合條件的資料</p>
+      </div>
+
+      <div class="export-section">
+        <div class="export-info">
+          <p>匯出所有隊員資料為 Excel 檔案</p>
         </div>
+        <button class="export-btn" onclick="exportToExcel()">
+          <span>📥</span>
+          <span>匯出 Excel</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Firebase SDKs -->
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="edit-modal">
+      <div class="modal-header">
+        <h3>編輯隊員資料</h3>
+      </div>
+      <div class="modal-body">
+        <form id="editForm">
+          <input type="hidden" id="editMemberName">
+          
+          <div class="form-section">
+            <div class="section-subtitle">👤 個人資料</div>
+            
+            <div class="form-group">
+              <label class="form-label">隊員姓名</label>
+              <input type="text" class="form-input" id="editMemberDisplay" disabled>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">中文全名</label>
+              <input type="text" class="form-input" id="editChineseName" placeholder="請輸入中文全名">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">身高 (公分)</label>
+              <input type="number" class="form-input" id="editHeight" placeholder="例如：175" min="150" max="220">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">體重 (公斤)</label>
+              <input type="number" class="form-input" id="editWeight" placeholder="例如：70" min="40" max="150">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-subtitle">✈️ 航班資訊</div>
+
+            <div class="form-group">
+              <label class="form-label">出發日期</label>
+              <input type="date" class="form-input" id="editDate" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">航空公司</label>
+              <input type="text" class="form-input" id="editAirline" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">航班編號</label>
+              <input type="text" class="form-input" id="editFlightNo" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">起飛時間</label>
+              <input type="time" class="form-input" id="editDeparture" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">抵達時間</label>
+              <input type="time" class="form-input" id="editArrival" required>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn secondary" onclick="closeEditModal()">取消</button>
+        <button class="modal-btn primary" onclick="saveEdit()">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
+  <!-- Firebase & Admin Logic -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-    import { 
-      getAuth, 
-      signInWithEmailAndPassword, 
-      onAuthStateChanged, 
-      signOut 
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getDatabase, ref, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // Your Firebase configuration
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCGCaWivohAhxZDkKp7YGNp9deNetR3K4Y",
       authDomain: "jersey-app-bcefa.firebaseapp.com",
@@ -1040,517 +804,193 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
-    // Make functions available globally
-    window.showAdminLogin = showAdminLogin;
-    window.closeAdminLogin = closeAdminLogin;
+    let allData = {};
+    let filteredData = {};
+
+    // Make functions global
     window.logout = logout;
-    window.toggleManualInput = toggleManualInput;
+    window.editFlight = editFlight;
+    window.deleteFlight = deleteFlight;
+    window.closeEditModal = closeEditModal;
+    window.saveEdit = saveEdit;
+    window.exportToExcel = exportToExcel;
 
-    // 所有隊員名單
-    const allMembers = [
-      "趙教", "布", "adain", "Alvin", "Earnest", "James", "Jason", "Martin", 
-      "Pine", "Rex", "Tak", "Tf", "tsan", "wingsun", "Yee", "大師兄", 
-      "仁", "光", "天", "奶", "宏", "巨峰", "文威", "杰", "毛", "洲", 
-      "皮", "表", "達", "銘"
-    ];
-
-    // Auth state observer
+    // Check authentication
     onAuthStateChanged(auth, (user) => {
-      const adminLoginLink = document.getElementById('adminLoginLink');
-      const adminLoggedIn = document.getElementById('adminLoggedIn');
-      const adminEmailSpan = document.getElementById('adminEmail');
-      
       if (user) {
         // User is signed in
-        adminLoginLink.style.display = 'none';
-        adminLoggedIn.style.display = 'block';
-        adminEmailSpan.textContent = user.email;
+        document.getElementById('unauthorizedMessage').style.display = 'none';
+        document.getElementById('adminContainer').style.display = 'block';
+        document.getElementById('adminEmail').textContent = user.email;
+        loadData();
       } else {
-        // User is signed out
-        adminLoginLink.style.display = 'block';
-        adminLoggedIn.style.display = 'none';
+        // User is not signed in
+        document.getElementById('unauthorizedMessage').style.display = 'block';
+        document.getElementById('adminContainer').style.display = 'none';
       }
     });
 
-    // Admin login functions
-    function showAdminLogin() {
-      document.getElementById('adminModal').classList.add('show');
-      document.getElementById('adminEmailInput').focus();
-    }
-
-    function closeAdminLogin() {
-      document.getElementById('adminModal').classList.remove('show');
-      document.getElementById('adminLoginForm').reset();
-      document.getElementById('loginError').classList.remove('show');
-      // Clear input fields
-      document.getElementById('adminEmailInput').value = '';
-      document.getElementById('adminPasswordInput').value = '';
-    }
-
+    // Logout function
     async function logout() {
       try {
         await signOut(auth);
-        alert('已成功登出');
+        window.location.href = 'toyotama-tw-flight.html';
       } catch (error) {
         console.error('登出錯誤:', error);
         alert('登出失敗，請重試');
       }
     }
 
-    // Admin login form handler
-    document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const email = document.getElementById('adminEmailInput').value;
-      const password = document.getElementById('adminPasswordInput').value;
-      const loginBtn = document.getElementById('loginSubmitBtn');
-      const loginBtnText = document.getElementById('loginBtnText');
-      const loginError = document.getElementById('loginError');
-      const errorMessage = document.getElementById('errorMessage');
-      
-      // Show loading state
-      loginBtn.disabled = true;
-      loginBtnText.innerHTML = '<span class="loading-spinner"></span>登入中...';
-      loginError.classList.remove('show');
-      
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        closeAdminLogin();
-      } catch (error) {
-        let errorText = '登入失敗';
-        
-        switch (error.code) {
-          case 'auth/invalid-email':
-            errorText = 'Email 格式錯誤';
-            break;
-          case 'auth/user-disabled':
-            errorText = '此帳號已被停用';
-            break;
-          case 'auth/user-not-found':
-            errorText = '找不到此使用者';
-            break;
-          case 'auth/wrong-password':
-            errorText = '密碼錯誤';
-            break;
-          case 'auth/invalid-credential':
-            errorText = 'Email 或密碼錯誤';
-            break;
-          case 'auth/too-many-requests':
-            errorText = '登入嘗試次數過多，請稍後再試';
-            break;
-          case 'auth/missing-email':
-            errorText = '請輸入 Email';
-            break;
-          default:
-            errorText = error.message;
-        }
-        
-        errorMessage.textContent = errorText;
-        loginError.classList.add('show');
-      } finally {
-        // Reset button state
-        loginBtn.disabled = false;
-        loginBtnText.textContent = '登入';
-      }
-    });
-
-    // Click outside to close modal
-    document.getElementById('adminModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeAdminLogin();
-      }
-    });
-
-    // 航班資料
-    const flightData = {
-      'HX234-0800': { airline: 'HK Express 香港快運', flightNo: 'HX234', departure: '08:00', arrival: '09:30' },
-      'CX420-0835': { airline: 'Cathay Pacific 國泰航空', flightNo: 'CX420', departure: '08:35', arrival: '10:15' },
-      'CI920-1010': { airline: 'China Airlines 中華航空', flightNo: 'CI920', departure: '10:10', arrival: '11:45' },
-      'AE390-1010': { airline: 'Mandarin Airlines 華信航空', flightNo: 'AE390', departure: '10:10', arrival: '11:45' },
-      'CX422-1035': { airline: 'Cathay Pacific 國泰航空', flightNo: 'CX422', departure: '10:35', arrival: '12:15' },
-      'BR828-1205': { airline: 'EVA Air 長榮航空', flightNo: 'BR828', departure: '12:05', arrival: '13:40' },
-      'HX236-1245': { airline: 'HK Express 香港快運', flightNo: 'HX236', departure: '12:45', arrival: '14:15' }
-    };
-
-    // 全域變數
-    let selectedDateValue = null;
-    let selectedFlightData = null;
-    let isManualInput = false;
-    let existingMemberData = {};
-
     // Check if data is complete
     function isDataComplete(memberData) {
-      return memberData && memberData.chineseName && memberData.height && memberData.weight;
+      return memberData.chineseName && memberData.height && memberData.weight;
     }
 
-    // Update member dropdown with status
-    function updateMemberDropdown() {
-      const memberSelect = document.getElementById('memberName');
-      memberSelect.innerHTML = '<option value="">請選擇隊員</option>';
-      
-      // Create optgroups
-      const submittedGroup = document.createElement('optgroup');
-      submittedGroup.label = '✓ 已登記 (資料完整)';
-      
-      const incompleteGroup = document.createElement('optgroup');
-      incompleteGroup.label = '⚠ 已登記 (待補資料)';
-      
-      const notSubmittedGroup = document.createElement('optgroup');
-      notSubmittedGroup.label = '✗ 未登記';
-      
-      let completeCount = 0;
-      let incompleteCount = 0;
-      let notSubmittedCount = 0;
-      
-      allMembers.forEach(member => {
-        const option = document.createElement('option');
-        option.value = member;
-        option.textContent = member;
-        
-        if (existingMemberData[member]) {
-          if (isDataComplete(existingMemberData[member])) {
-            option.className = 'submitted';
-            submittedGroup.appendChild(option);
-            completeCount++;
-          } else {
-            option.className = 'incomplete';
-            incompleteGroup.appendChild(option);
-            incompleteCount++;
-          }
-        } else {
-          option.className = 'not-submitted';
-          notSubmittedGroup.appendChild(option);
-          notSubmittedCount++;
-        }
-      });
-      
-      // Add groups to select
-      if (submittedGroup.children.length > 0) {
-        memberSelect.appendChild(submittedGroup);
-      }
-      if (incompleteGroup.children.length > 0) {
-        memberSelect.appendChild(incompleteGroup);
-      }
-      if (notSubmittedGroup.children.length > 0) {
-        memberSelect.appendChild(notSubmittedGroup);
-      }
-      
-      // Update stats
-      document.getElementById('completeCount').textContent = completeCount;
-      document.getElementById('incompleteCount').textContent = incompleteCount;
-      document.getElementById('notSubmittedCount').textContent = notSubmittedCount;
-      document.getElementById('memberStats').style.display = 'flex';
-    }
-
-    // 日期選擇
-    const dateButtons = document.querySelectorAll('.date-btn');
-    dateButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        dateButtons.forEach(btn => btn.classList.remove('selected'));
-        this.classList.add('selected');
-        
-        const dateValue = this.getAttribute('data-date');
-        const otherDateInput = document.getElementById('otherDateInput');
-        
-        if (dateValue === 'other') {
-          otherDateInput.classList.add('show');
-          document.getElementById('customDate').focus();
-          selectedDateValue = null;
-        } else {
-          otherDateInput.classList.remove('show');
-          selectedDateValue = dateValue;
-          document.getElementById('selectedDate').value = dateValue;
-        }
-      });
-    });
-
-    // 自訂日期輸入
-    document.getElementById('customDate').addEventListener('change', function() {
-      if (this.value) {
-        selectedDateValue = this.value;
-        document.getElementById('selectedDate').value = this.value;
-      }
-    });
-
-    // 航班按鈕選擇
-    const flightButtons = document.querySelectorAll('.flight-btn');
-    flightButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        isManualInput = false;
-        document.getElementById('manualInput').classList.remove('show');
-        clearManualInputs();
-
-        flightButtons.forEach(btn => btn.classList.remove('selected'));
-        this.classList.add('selected');
-        
-        const flightId = this.getAttribute('data-flight');
-        selectedFlightData = flightData[flightId];
-        document.getElementById('selectedFlight').value = flightId;
-      });
-    });
-
-    // 手動輸入切換
-    function toggleManualInput() {
-      const manualInput = document.getElementById('manualInput');
-      manualInput.classList.toggle('show');
-      
-      if (manualInput.classList.contains('show')) {
-        isManualInput = true;
-        flightButtons.forEach(btn => btn.classList.remove('selected'));
-        selectedFlightData = null;
-        document.getElementById('selectedFlight').value = 'manual';
-      } else {
-        isManualInput = false;
-        clearManualInputs();
-      }
-    }
-
-    function clearManualInputs() {
-      document.getElementById('customAirline').value = '';
-      document.getElementById('customFlightNo').value = '';
-      document.getElementById('customDeparture').value = '';
-      document.getElementById('customArrival').value = '';
-    }
-
-    // 格式化日期顯示
-    function formatDateDMY(dateString) {
+    // Format date for display
+    function formatDate(dateString) {
       const date = new Date(dateString + 'T00:00:00');
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-      
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
       const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
       const weekday = weekdays[date.getDay()];
-      
-      return `${day}/${month}/${year} (${weekday})`;
+      return `${month}月${day}日 (${weekday})`;
     }
 
-    // Helper function to find matching flight button
-    function findMatchingFlightButton(memberData) {
-      for (const [key, value] of Object.entries(flightData)) {
-        if (value.airline === memberData.airline && 
-            value.departure === memberData.departure &&
-            value.arrival === memberData.arrival) {
-          return key;
-        }
-      }
-      return null;
+    // Format timestamp
+    function formatTimestamp(timestamp) {
+      const date = new Date(timestamp);
+      const year = date.getFullYear();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      return `${year}/${month}/${day} ${hours}:${minutes}`;
     }
 
-    function resetForm() {
-      document.getElementById('chineseName').value = '';
-      document.getElementById('height').value = '';
-      document.getElementById('weight').value = '';
-      
-      dateButtons.forEach(btn => btn.classList.remove('selected'));
-      flightButtons.forEach(btn => btn.classList.remove('selected'));
-      document.getElementById('otherDateInput').classList.remove('show');
-      document.getElementById('manualInput').classList.remove('show');
-      document.getElementById('existingDataNotice').classList.remove('show');
-      clearManualInputs();
-      
-      selectedDateValue = null;
-      selectedFlightData = null;
-      isManualInput = false;
-    }
-
-    // 隊員選擇處理 - 自動填入已儲存的資料
-    document.getElementById('memberName').addEventListener('change', function() {
-      const memberName = this.value;
-      if (!memberName) {
-        resetForm();
-        return;
-      }
-
-      // 檢查是否有已存在的資料
-      if (existingMemberData[memberName]) {
-        const memberData = existingMemberData[memberName];
-        
-        // 顯示提示訊息
-        document.getElementById('existingDataNotice').classList.add('show');
-        
-        // 填入個人資料（如果有）
-        if (memberData.chineseName) {
-          document.getElementById('chineseName').value = memberData.chineseName;
-        }
-        if (memberData.height) {
-          document.getElementById('height').value = memberData.height;
-        }
-        if (memberData.weight) {
-          document.getElementById('weight').value = memberData.weight;
-        }
-        
-        // 自動選擇日期
-        if (memberData.date) {
-          // 檢查是否為預設日期
-          const isDefaultDate = memberData.date === '2025-06-19' || memberData.date === '2025-06-20';
-          
-          dateButtons.forEach(btn => {
-            btn.classList.remove('selected');
-            if (isDefaultDate && btn.getAttribute('data-date') === memberData.date) {
-              btn.classList.add('selected');
-            }
-          });
-          
-          if (!isDefaultDate) {
-            // 選擇"其他日期"並填入日期
-            dateButtons.forEach(btn => {
-              if (btn.getAttribute('data-date') === 'other') {
-                btn.classList.add('selected');
-              }
-            });
-            document.getElementById('otherDateInput').classList.add('show');
-            document.getElementById('customDate').value = memberData.date;
-          }
-          
-          selectedDateValue = memberData.date;
-          document.getElementById('selectedDate').value = memberData.date;
-        }
-        
-        // 自動選擇航班
-        const matchingFlight = findMatchingFlightButton(memberData);
-        if (matchingFlight) {
-          // 找到匹配的預設航班
-          flightButtons.forEach(btn => {
-            btn.classList.remove('selected');
-            if (btn.getAttribute('data-flight') === matchingFlight) {
-              btn.classList.add('selected');
-              selectedFlightData = flightData[matchingFlight];
-              document.getElementById('selectedFlight').value = matchingFlight;
-            }
-          });
-        } else {
-          // 使用手動輸入
-          document.getElementById('manualInput').classList.add('show');
-          document.getElementById('customAirline').value = memberData.airline || '';
-          document.getElementById('customFlightNo').value = memberData.flightNo || '';
-          document.getElementById('customDeparture').value = memberData.departure || '';
-          document.getElementById('customArrival').value = memberData.arrival || '';
-          isManualInput = true;
-          document.getElementById('selectedFlight').value = 'manual';
-        }
-      } else {
-        // 沒有現有資料，重置表單
-        resetForm();
-      }
-    });
-
-    // 表單提交
-    document.getElementById('memberForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      const memberName = document.getElementById('memberName').value;
-      const chineseName = document.getElementById('chineseName').value;
-      const height = document.getElementById('height').value;
-      const weight = document.getElementById('weight').value;
-      
-      if (!memberName || !chineseName || !height || !weight) {
-        alert('請填寫完整的個人資料！');
-        return;
-      }
-
-      if (!selectedDateValue && !document.getElementById('customDate').value) {
-        alert('請選擇出發日期！');
-        return;
-      }
-
-      const flightDate = selectedDateValue || document.getElementById('customDate').value;
-      let flightInfo;
-
-      if (isManualInput) {
-        const airline = document.getElementById('customAirline').value;
-        const flightNo = document.getElementById('customFlightNo').value;
-        const departure = document.getElementById('customDeparture').value;
-        const arrival = document.getElementById('customArrival').value;
-
-        if (!airline || !flightNo || !departure || !arrival) {
-          alert('請填寫完整的航班資訊！');
-          return;
-        }
-
-        flightInfo = {
-          airline: airline,
-          flightNo: flightNo,
-          departure: departure,
-          arrival: arrival,
-          date: flightDate
-        };
-      } else {
-        if (!selectedFlightData) {
-          alert('請選擇航班！');
-          return;
-        }
-        flightInfo = {
-          ...selectedFlightData,
-          date: flightDate
-        };
-      }
-
-      // 儲存到 Firebase - 使用 toyotama-flights 路徑
-      const memberRef = ref(db, `toyotama-flights/${memberName}`);
-      set(memberRef, {
-        chineseName: chineseName,
-        height: parseInt(height),
-        weight: parseInt(weight),
-        ...flightInfo,
-        timestamp: Date.now()
-      }).then(() => {
-        alert(`✅ ${memberName} 的資料已登記成功！`);
-        
-        // 重設表單
-        document.getElementById('memberForm').reset();
-        resetForm();
-      }).catch((error) => {
-        alert('❌ 登記失敗，請重試！');
-        console.error(error);
+    // Load data from Firebase
+    function loadData() {
+      const flightsRef = ref(db, 'toyotama-flights');
+      onValue(flightsRef, (snapshot) => {
+        allData = snapshot.val() || {};
+        updateStatistics();
+        updateAirlineFilter();
+        applyFilters();
       });
-    });
+    }
 
-    // 監聽資料變更
-    const flightsRef = ref(db, 'toyotama-flights');
-    onValue(flightsRef, (snapshot) => {
-      const data = snapshot.val();
+    // Update statistics
+    function updateStatistics() {
+      const members = Object.keys(allData);
+      let completeCount = 0;
+      let incompleteCount = 0;
+      const date19Count = members.filter(m => allData[m].date === '2025-06-19').length;
+      const date20Count = members.filter(m => allData[m].date === '2025-06-20').length;
+      
+      // Count complete/incomplete data
+      members.forEach(member => {
+        if (isDataComplete(allData[member])) {
+          completeCount++;
+        } else {
+          incompleteCount++;
+        }
+      });
+      
+      // Count unique flights
+      const uniqueFlights = new Set();
+      members.forEach(member => {
+        const flight = allData[member];
+        uniqueFlights.add(`${flight.airline}-${flight.departure}`);
+      });
+
+      document.getElementById('totalMembers').textContent = members.length;
+      document.getElementById('completeCount').textContent = completeCount;
+      document.getElementById('incompleteCount').textContent = incompleteCount;
+      document.getElementById('totalFlights').textContent = uniqueFlights.size;
+      document.getElementById('date19Count').textContent = date19Count;
+      document.getElementById('date20Count').textContent = date20Count;
+    }
+
+    // Update airline filter options
+    function updateAirlineFilter() {
+      const airlines = new Set();
+      Object.values(allData).forEach(flight => {
+        airlines.add(flight.airline);
+      });
+
+      const airlineFilter = document.getElementById('airlineFilter');
+      airlineFilter.innerHTML = '<option value="">所有航空公司</option>';
+      
+      Array.from(airlines).sort().forEach(airline => {
+        const option = document.createElement('option');
+        option.value = airline;
+        option.textContent = airline;
+        airlineFilter.appendChild(option);
+      });
+    }
+
+    // Apply filters
+    function applyFilters() {
+      const statusFilter = document.getElementById('statusFilter').value;
+      const dateFilter = document.getElementById('dateFilter').value;
+      const airlineFilter = document.getElementById('airlineFilter').value;
+      const searchFilter = document.getElementById('searchInput').value.toLowerCase();
+
+      filteredData = {};
+      
+      Object.keys(allData).forEach(member => {
+        const flight = allData[member];
+        const isComplete = isDataComplete(flight);
+        
+        if (statusFilter === 'complete' && !isComplete) return;
+        if (statusFilter === 'incomplete' && isComplete) return;
+        if (dateFilter && flight.date !== dateFilter) return;
+        if (airlineFilter && flight.airline !== airlineFilter) return;
+        if (searchFilter && !member.toLowerCase().includes(searchFilter)) return;
+        
+        filteredData[member] = flight;
+      });
+
+      renderTable();
+    }
+
+    // Render table
+    function renderTable() {
       const tableBody = document.getElementById('tableBody');
       const emptyState = document.getElementById('emptyState');
-      const table = document.getElementById('memberTable');
-      const memberCount = document.getElementById('memberCount');
-
+      
       tableBody.innerHTML = '';
-      existingMemberData = data || {};
 
-      // Update member dropdown
-      updateMemberDropdown();
+      const members = Object.keys(filteredData);
 
-      if (!data) {
-        table.style.display = 'none';
+      if (members.length === 0) {
+        document.getElementById('dataTable').style.display = 'none';
         emptyState.style.display = 'block';
-        memberCount.textContent = '已登記: 0 人';
         return;
       }
 
-      table.style.display = 'table';
+      document.getElementById('dataTable').style.display = 'table';
       emptyState.style.display = 'none';
 
-      const members = Object.keys(data);
-      memberCount.textContent = `已登記: ${members.length} 人`;
-
-      // 排序
+      // Sort by date, departure time, and airline
       members.sort((a, b) => {
-        const dataA = data[a];
-        const dataB = data[b];
+        const flightA = filteredData[a];
+        const flightB = filteredData[b];
         
-        if (dataA.date !== dataB.date) {
-          return dataA.date.localeCompare(dataB.date);
+        if (flightA.date !== flightB.date) {
+          return flightA.date.localeCompare(flightB.date);
         }
-        return dataA.departure.localeCompare(dataB.departure);
+        
+        if (flightA.departure !== flightB.departure) {
+          return flightA.departure.localeCompare(flightB.departure);
+        }
+        
+        return flightA.airline.localeCompare(flightB.airline);
       });
 
       members.forEach(member => {
-        const memberData = data[member];
+        const flight = filteredData[member];
+        const isComplete = isDataComplete(flight);
         const row = document.createElement('tr');
-        
-        // 檢查資料是否完整
-        const isComplete = isDataComplete(memberData);
         
         row.innerHTML = `
           <td>
@@ -1559,22 +999,185 @@
               '<span class="status-icon status-incomplete">!</span>'}
           </td>
           <td class="member-name">${member}</td>
-          <td>${memberData.chineseName || '<span class="pending-input">待輸入</span>'}</td>
-          <td>${memberData.height ? memberData.height + ' cm' : '<span class="pending-input">待輸入</span>'}</td>
-          <td>${memberData.weight ? memberData.weight + ' kg' : '<span class="pending-input">待輸入</span>'}</td>
+          <td>${flight.chineseName || '<span class="pending-input">待輸入</span>'}</td>
+          <td>${flight.height ? flight.height + ' cm' : '<span class="pending-input">待輸入</span>'}</td>
+          <td>${flight.weight ? flight.weight + ' kg' : '<span class="pending-input">待輸入</span>'}</td>
+          <td><span class="date-badge">${formatDate(flight.date)}</span></td>
+          <td><span class="airline-badge">${flight.airline}</span></td>
+          <td>${flight.flightNo || '-'}</td>
+          <td><span class="time-badge">${flight.departure}</span></td>
+          <td><span class="time-badge">${flight.arrival}</span></td>
+          <td>${formatTimestamp(flight.timestamp)}</td>
           <td>
-            <span class="date-badge">${formatDateDMY(memberData.date)}</span>
-          </td>
-          <td>
-            <span class="airline-tag">${memberData.airline}</span>
-          </td>
-          <td>
-            <span class="time-badge">${memberData.departure}</span>
+            <div class="action-buttons">
+              <button class="edit-btn" onclick="editFlight('${member}')">編輯</button>
+              <button class="delete-btn" onclick="deleteFlight('${member}')">刪除</button>
+            </div>
           </td>
         `;
         
         tableBody.appendChild(row);
       });
+    }
+
+    // Edit flight
+    function editFlight(member) {
+      const flight = allData[member];
+      
+      document.getElementById('editMemberName').value = member;
+      document.getElementById('editMemberDisplay').value = member;
+      document.getElementById('editChineseName').value = flight.chineseName || '';
+      document.getElementById('editHeight').value = flight.height || '';
+      document.getElementById('editWeight').value = flight.weight || '';
+      document.getElementById('editDate').value = flight.date;
+      document.getElementById('editAirline').value = flight.airline;
+      document.getElementById('editFlightNo').value = flight.flightNo || '';
+      document.getElementById('editDeparture').value = flight.departure;
+      document.getElementById('editArrival').value = flight.arrival;
+      
+      document.getElementById('editModal').classList.add('show');
+    }
+
+    // Close edit modal
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('show');
+      document.getElementById('editForm').reset();
+    }
+
+    // Save edit
+    async function saveEdit() {
+      const member = document.getElementById('editMemberName').value;
+      const chineseName = document.getElementById('editChineseName').value;
+      const height = document.getElementById('editHeight').value;
+      const weight = document.getElementById('editWeight').value;
+      
+      const updatedData = {
+        chineseName: chineseName,
+        height: height ? parseInt(height) : null,
+        weight: weight ? parseInt(weight) : null,
+        date: document.getElementById('editDate').value,
+        airline: document.getElementById('editAirline').value,
+        flightNo: document.getElementById('editFlightNo').value,
+        departure: document.getElementById('editDeparture').value,
+        arrival: document.getElementById('editArrival').value,
+        timestamp: allData[member].timestamp // Keep original timestamp
+      };
+
+      try {
+        const memberRef = ref(db, `toyotama-flights/${member}`);
+        await set(memberRef, updatedData);
+        closeEditModal();
+        alert('更新成功！');
+      } catch (error) {
+        console.error('更新錯誤:', error);
+        alert('更新失敗，請重試');
+      }
+    }
+
+    // Delete flight
+    async function deleteFlight(member) {
+      if (!confirm(`確定要刪除 ${member} 的所有資料嗎？`)) {
+        return;
+      }
+
+      try {
+        const memberRef = ref(db, `toyotama-flights/${member}`);
+        await remove(memberRef);
+        alert('刪除成功！');
+      } catch (error) {
+        console.error('刪除錯誤:', error);
+        alert('刪除失敗，請重試');
+      }
+    }
+
+    // Export to Excel
+    function exportToExcel() {
+      const exportData = [];
+      
+      // Sort members for export
+      const members = Object.keys(allData).sort((a, b) => {
+        const flightA = allData[a];
+        const flightB = allData[b];
+        
+        if (flightA.date !== flightB.date) {
+          return flightA.date.localeCompare(flightB.date);
+        }
+        
+        if (flightA.departure !== flightB.departure) {
+          return flightA.departure.localeCompare(flightB.departure);
+        }
+        
+        return flightA.airline.localeCompare(flightB.airline);
+      });
+
+      // Prepare data for export
+      members.forEach(member => {
+        const flight = allData[member];
+        const isComplete = isDataComplete(flight);
+        
+        exportData.push({
+          '狀態': isComplete ? '完整' : '待補',
+          '隊員姓名': member,
+          '中文姓名': flight.chineseName || '-',
+          '身高(cm)': flight.height || '-',
+          '體重(kg)': flight.weight || '-',
+          '出發日期': formatDate(flight.date),
+          '航空公司': flight.airline,
+          '航班編號': flight.flightNo || '-',
+          '起飛時間': flight.departure,
+          '抵達時間': flight.arrival,
+          '登記時間': formatTimestamp(flight.timestamp)
+        });
+      });
+
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+      
+      // Create summary sheet
+      const completeCount = members.filter(m => isDataComplete(allData[m])).length;
+      const incompleteCount = members.length - completeCount;
+      
+      const summaryData = [
+        ['豐玉籃球隊 - 2025屏東盃 隊員資料報表'],
+        [''],
+        ['匯出日期', new Date().toLocaleString('zh-TW')],
+        ['總登記人數', members.length],
+        ['資料完整人數', completeCount],
+        ['待補資料人數', incompleteCount],
+        [''],
+        ['日期分佈'],
+        ['6月19日', Object.values(allData).filter(f => f.date === '2025-06-19').length + ' 人'],
+        ['6月20日', Object.values(allData).filter(f => f.date === '2025-06-20').length + ' 人'],
+        ['其他日期', Object.values(allData).filter(f => f.date !== '2025-06-19' && f.date !== '2025-06-20').length + ' 人'],
+      ];
+
+      const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(wb, summarySheet, "統計摘要");
+      
+      // Create detail sheet
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      XLSX.utils.book_append_sheet(wb, ws, "隊員資料明細");
+      
+      // Generate filename
+      const date = new Date();
+      const dateStr = `${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}${date.getDate().toString().padStart(2, '0')}`;
+      const filename = `豐玉隊員資料_${dateStr}.xlsx`;
+      
+      // Save file
+      XLSX.writeFile(wb, filename);
+    }
+
+    // Event listeners
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('dateFilter').addEventListener('change', applyFilters);
+    document.getElementById('airlineFilter').addEventListener('change', applyFilters);
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+    // Click outside to close modal
+    document.getElementById('editModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeEditModal();
+      }
     });
   </script>
 </body>
