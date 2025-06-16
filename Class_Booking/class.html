@@ -886,6 +886,26 @@
       border-color: var(--gray-700);
     }
 
+    .form-select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--black);
+      border-radius: 5px;
+      font-size: 16px;
+      background-color: var(--white);
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--gray-700);
+    }
+
+    /* Class Size Input */
+    .size-input {
+      width: 100px;
+    }
+
     /* Class Type Buttons */
     .class-type-container {
       display: grid;
@@ -1201,7 +1221,7 @@
         </div>
         <div class="info-item">
           <div class="info-icon">📊</div>
-          <span>Maximum students: 4 + 4 standby</span>
+          <span>Flexible class size + standby</span>
         </div>
         <div class="info-item">
           <div class="info-icon">⏰</div>
@@ -1286,16 +1306,26 @@
             <div id="selectedDateDisplay" style="margin-top: 10px; font-weight: bold;"></div>
           </div>
 
-          <!-- Time Selection -->
+          <!-- Time Selection with Dropdowns -->
           <div class="time-row">
             <div class="form-group">
               <label class="form-label">Start Time</label>
-              <input type="time" class="form-input" id="classStartTime" required>
+              <select class="form-select" id="classStartTime" required>
+                <option value="">Select time</option>
+              </select>
             </div>
             <div class="form-group">
               <label class="form-label">End Time</label>
-              <input type="time" class="form-input" id="classEndTime" required>
+              <select class="form-select" id="classEndTime" required>
+                <option value="">Select time</option>
+              </select>
             </div>
+          </div>
+
+          <!-- Class Size -->
+          <div class="form-group">
+            <label class="form-label">Class Size (Maximum Students)</label>
+            <input type="number" class="form-input size-input" id="classSize" min="1" max="20" value="4" required>
           </div>
 
           <!-- Class Type -->
@@ -1419,6 +1449,43 @@
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const day = date.getDate().toString().padStart(2, '0');
       return `${year}-${month}-${day}`;
+    }
+
+    // Generate time options for dropdowns
+    function generateTimeOptions() {
+      const startSelect = document.getElementById('classStartTime');
+      const endSelect = document.getElementById('classEndTime');
+      
+      // Clear existing options
+      startSelect.innerHTML = '<option value="">Select time</option>';
+      endSelect.innerHTML = '<option value="">Select time</option>';
+      
+      // Generate time options from 6:00 to 22:00 with 15-minute intervals
+      for (let hour = 6; hour <= 22; hour++) {
+        for (let minute = 0; minute < 60; minute += 15) {
+          const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          const displayTime = formatTimeDisplay(time);
+          
+          const startOption = document.createElement('option');
+          startOption.value = time;
+          startOption.textContent = displayTime;
+          startSelect.appendChild(startOption);
+          
+          const endOption = document.createElement('option');
+          endOption.value = time;
+          endOption.textContent = displayTime;
+          endSelect.appendChild(endOption);
+        }
+      }
+    }
+
+    // Format time for display
+    function formatTimeDisplay(time) {
+      const [hour, minute] = time.split(':');
+      const h = parseInt(hour);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const displayHour = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+      return `${displayHour}:${minute} ${ampm}`;
     }
 
     // Firebase Email Queue Function
@@ -1607,11 +1674,15 @@
       document.getElementById('selectedDateDisplay').textContent = '';
       document.querySelectorAll('.class-type-btn').forEach(btn => btn.classList.remove('selected'));
       
+      // Generate time options
+      generateTimeOptions();
+      
       if (classData) {
         // Pre-fill form with duplicated class data
         setTimeout(() => {
           document.getElementById('classStartTime').value = classData.startTime;
           document.getElementById('classEndTime').value = classData.endTime;
+          document.getElementById('classSize').value = classData.maxStudents || 4;
           
           // Select class type
           document.querySelectorAll('.class-type-btn').forEach(btn => {
@@ -1744,15 +1815,22 @@
         generateCalendar();
       });
       
-      // Start time change handler
+      // Start time change handler - update end time automatically
       document.getElementById('classStartTime').addEventListener('change', function() {
         const startTime = this.value;
         if (startTime) {
           // Calculate end time (1 hour later)
           const [hours, minutes] = startTime.split(':').map(Number);
-          const endHours = (hours + 1) % 24;
-          const endTime = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-          document.getElementById('classEndTime').value = endTime;
+          const totalMinutes = hours * 60 + minutes + 60; // Add 60 minutes
+          const endHours = Math.floor(totalMinutes / 60);
+          const endMinutes = totalMinutes % 60;
+          const endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+          
+          // Only update if end time is not already set or is before start time
+          const currentEndTime = document.getElementById('classEndTime').value;
+          if (!currentEndTime || currentEndTime <= startTime) {
+            document.getElementById('classEndTime').value = endTime;
+          }
         }
         checkAndShowConflicts();
       });
@@ -1888,6 +1966,7 @@
       const startTime = document.getElementById('classStartTime').value;
       const endTime = document.getElementById('classEndTime').value;
       const classType = document.getElementById('classType').value;
+      const maxStudents = parseInt(document.getElementById('classSize').value) || 4;
       const enableRepeat = document.getElementById('enableRepeat').checked;
       
       if (!date || !startTime || !endTime || !classType) {
@@ -1940,6 +2019,7 @@
                   startTime,
                   endTime,
                   classType,
+                  maxStudents,
                   students: [],
                   standby: [],
                   createdAt: Date.now()
@@ -1967,6 +2047,7 @@
           startTime,
           endTime,
           classType,
+          maxStudents,
           students: [],
           standby: [],
           createdAt: Date.now()
@@ -2072,8 +2153,9 @@
     function createClassCard(classId, classData, isPast = false) {
       const students = classData.students || [];
       const standby = classData.standby || [];
-      const isFull = students.length >= 4;
-      const spotsLeft = 4 - students.length;
+      const maxStudents = classData.maxStudents || 4; // Default to 4 if not set
+      const isFull = students.length >= maxStudents;
+      const spotsLeft = maxStudents - students.length;
 
       const card = document.createElement('div');
       card.className = `class-card ${isFull ? 'class-full' : ''} ${isPast ? 'past' : ''}`;
@@ -2095,17 +2177,17 @@
         </div>
         <div class="class-body">
           <div class="spots-indicator">
-            <span class="spots-filled">${students.length}/4 Students</span>
+            <span class="spots-filled">${students.length}/${maxStudents} Students</span>
             <span class="spots-available">${spotsLeft} spots left</span>
           </div>
           
           <div class="list-section">
             <div class="list-title">
               Confirmed Students
-              ${students.length >= 4 ? '<span class="list-badge">FULL</span>' : ''}
+              ${students.length >= maxStudents ? '<span class="list-badge">FULL</span>' : ''}
             </div>
             <div class="students-list" id="students-${classId}">
-              ${renderStudentsList(classId, students, isPast)}
+              ${renderStudentsList(classId, students, maxStudents, isPast)}
             </div>
           </div>
           
@@ -2113,7 +2195,7 @@
             <div class="list-section">
               <div class="list-title">
                 Standby List
-                <span class="list-badge">${standby.length}/4</span>
+                <span class="list-badge">${standby.length}</span>
               </div>
               <div class="students-list" id="standby-${classId}">
                 ${renderStandbyList(classId, standby, isPast)}
@@ -2125,7 +2207,7 @@
             <div class="join-section">
               <div class="join-inputs">
                 <input type="text" class="join-input" id="name-${classId}" placeholder="Enter your name">
-                <input type="email" class="join-input" id="email-${classId}" placeholder="Enter your email">
+                <input type="email" class="join-input" id="email-${classId}" placeholder="Email (optional)">
               </div>
               <div class="join-buttons">
                 ${!isFull ? `
@@ -2176,10 +2258,10 @@
     }
 
     // Render students list
-    function renderStudentsList(classId, students, isPast = false) {
+    function renderStudentsList(classId, students, maxStudents, isPast = false) {
       let html = '';
       
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < maxStudents; i++) {
         if (students[i]) {
           const isLateCancel = students[i].lateCancel === true;
           html += `
@@ -2261,8 +2343,9 @@
 
       const classData = allClasses[classId];
       const students = classData.students || [];
+      const maxStudents = classData.maxStudents || 4;
 
-      if (students.length >= 4) {
+      if (students.length >= maxStudents) {
         showNotification('Class is full! You can join the standby list.', 'error');
         return;
       }
@@ -2302,18 +2385,13 @@
       const name = nameInput.value.trim();
       const email = emailInput.value.trim();
 
-      if (!name || !email) {
-        showNotification('Please enter both name and email for standby list', 'warning');
+      if (!name) {
+        showNotification('Please enter your name', 'warning');
         return;
       }
 
       const classData = allClasses[classId];
       const standby = classData.standby || [];
-
-      if (standby.length >= 4) {
-        showNotification('Standby list is full!', 'error');
-        return;
-      }
 
       const newStandby = {
         name,
@@ -2362,25 +2440,54 @@
       const hoursUntilClass = (classDateTime - now) / (1000 * 60 * 60);
 
       if (hoursUntilClass < 1 && hoursUntilClass > 0) {
-        // Late cancellation
+        // Late cancellation - mark as late cancel and auto-promote standby
         students[index] = {
           ...student,
           lateCancel: true
         };
         
-        try {
-          await set(ref(database, `classes/${classId}/students`), students);
-          showNotification('Late cancellation marked. Please notify the coach!', 'warning');
+        // Auto-promote from standby if available
+        if (standby.length > 0) {
+          const standbyStudent = standby.shift();
+          students.push(standbyStudent);
           
-          await sendEmailNotification('lateCancellation', {
-            studentName: student.name,
-            adminEmail: adminEmail,
-            classDate: classData.date,
-            classTime: classData.startTime,
-            classType: classData.classType
-          });
-        } catch (error) {
-          showNotification('Error updating student: ' + error.message, 'error');
+          try {
+            await update(ref(database, `classes/${classId}`), {
+              students: students,
+              standby: standby
+            });
+            
+            showNotification('Late cancellation marked. A standby student has been automatically promoted!', 'warning');
+            
+            // Send notifications
+            await sendEmailNotification('lateCancellationWithPromotion', {
+              cancelledName: student.name,
+              promotedName: standbyStudent.name,
+              promotedEmail: standbyStudent.email,
+              adminEmail: adminEmail,
+              classDate: classData.date,
+              classTime: classData.startTime,
+              classType: classData.classType
+            });
+          } catch (error) {
+            showNotification('Error updating class: ' + error.message, 'error');
+          }
+        } else {
+          // No standby to promote
+          try {
+            await set(ref(database, `classes/${classId}/students`), students);
+            showNotification('Late cancellation marked. Please notify the coach!', 'warning');
+            
+            await sendEmailNotification('lateCancellation', {
+              studentName: student.name,
+              adminEmail: adminEmail,
+              classDate: classData.date,
+              classTime: classData.startTime,
+              classType: classData.classType
+            });
+          } catch (error) {
+            showNotification('Error updating student: ' + error.message, 'error');
+          }
         }
       } else {
         // Normal removal
