@@ -531,6 +531,15 @@
       background: rgba(255, 255, 255, 0.3);
     }
 
+    .class-action-btn.edit {
+      background: rgba(33, 150, 243, 0.2);
+      border-color: rgba(33, 150, 243, 0.3);
+    }
+
+    .class-action-btn.edit:hover {
+      background: rgba(33, 150, 243, 0.4);
+    }
+
     .class-action-btn.delete {
       background: rgba(220, 53, 69, 0.2);
       border-color: rgba(220, 53, 69, 0.3);
@@ -909,7 +918,7 @@
     /* Class Type Buttons */
     .class-type-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 15px;
       margin-bottom: 20px;
     }
@@ -932,6 +941,20 @@
     .class-type-btn.selected {
       background: var(--black);
       color: var(--white);
+    }
+
+    .custom-type-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid var(--black);
+      border-radius: 5px;
+      font-size: 16px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .custom-type-input.show {
+      display: block;
     }
 
     /* Repeat Options */
@@ -1335,7 +1358,9 @@
               <button type="button" class="class-type-btn" data-type="HS">HS</button>
               <button type="button" class="class-type-btn" data-type="HS+Backbend">HS+Backbend</button>
               <button type="button" class="class-type-btn" data-type="2-hr Intensive HS">2-hr Intensive HS</button>
+              <button type="button" class="class-type-btn" data-type="Other">Other</button>
             </div>
+            <input type="text" class="custom-type-input" id="customClassType" placeholder="Enter custom class type">
             <input type="hidden" id="classType" required>
           </div>
 
@@ -1390,6 +1415,7 @@
     window.removeStandby = function() {};
     window.showNotification = function() {};
     window.duplicateClass = function() {};
+    window.editClass = function() {};
     window.deleteClass = function() {};
   </script>
 
@@ -1460,8 +1486,8 @@
       startSelect.innerHTML = '<option value="">Select time</option>';
       endSelect.innerHTML = '<option value="">Select time</option>';
       
-      // Generate time options from 6:00 to 22:00 with 15-minute intervals
-      for (let hour = 6; hour <= 22; hour++) {
+      // Generate time options from 9:00 to 22:00 with 15-minute intervals
+      for (let hour = 9; hour <= 22; hour++) {
         for (let minute = 0; minute < 60; minute += 15) {
           const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
           const displayTime = formatTimeDisplay(time);
@@ -1619,10 +1645,11 @@
       const date = document.getElementById('classDate').value;
       const startTime = document.getElementById('classStartTime').value;
       const endTime = document.getElementById('classEndTime').value;
+      const editingId = document.getElementById('editingClassId').value;
       
       if (!date || !startTime || !endTime) return;
       
-      const conflicts = checkTimeConflicts(date, startTime, endTime);
+      const conflicts = checkTimeConflicts(date, startTime, endTime, editingId);
       const warningElement = document.getElementById('conflictWarning');
       const conflictListElement = document.getElementById('conflictList');
       
@@ -1661,36 +1688,70 @@
       }
     }
 
-    function showAddClassModal(classData = null) {
+    function showAddClassModal(classData = null, isEdit = false) {
       if (!currentUser) return;
       
-      document.getElementById('addClassTitle').textContent = classData ? 'Duplicate Class' : 'Add New Class';
-      document.getElementById('submitClassBtn').textContent = classData ? 'Create Duplicate' : 'Add Class';
-      document.getElementById('editingClassId').value = '';
+      const title = isEdit ? 'Edit Class' : (classData ? 'Duplicate Class' : 'Add New Class');
+      const buttonText = isEdit ? 'Update Class' : (classData ? 'Create Duplicate' : 'Add Class');
+      
+      document.getElementById('addClassTitle').textContent = title;
+      document.getElementById('submitClassBtn').textContent = buttonText;
+      document.getElementById('editingClassId').value = isEdit && classData ? classData.id : '';
       document.getElementById('conflictWarning').classList.remove('show');
       
       // Reset form
       document.getElementById('addClassForm').reset();
       document.getElementById('selectedDateDisplay').textContent = '';
       document.querySelectorAll('.class-type-btn').forEach(btn => btn.classList.remove('selected'));
+      document.getElementById('customClassType').classList.remove('show');
+      document.getElementById('customClassType').value = '';
+      
+      // Disable repeat options for edit mode
+      if (isEdit) {
+        document.getElementById('enableRepeat').disabled = true;
+        document.getElementById('repeatOptions').classList.remove('show');
+      } else {
+        document.getElementById('enableRepeat').disabled = false;
+      }
       
       // Generate time options
       generateTimeOptions();
       
       if (classData) {
-        // Pre-fill form with duplicated class data
+        // Pre-fill form with class data
         setTimeout(() => {
+          // Set date
+          if (classData.date) {
+            const date = new Date(classData.date + 'T00:00:00');
+            selectedDate = date;
+            document.getElementById('classDate').value = classData.date;
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                             'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('selectedDateDisplay').textContent = 
+              `Selected: ${dayNames[date.getDay()]}, ${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+          }
+          
           document.getElementById('classStartTime').value = classData.startTime;
           document.getElementById('classEndTime').value = classData.endTime;
           document.getElementById('classSize').value = classData.maxStudents || 4;
           
           // Select class type
-          document.querySelectorAll('.class-type-btn').forEach(btn => {
-            if (btn.getAttribute('data-type') === classData.classType) {
-              btn.classList.add('selected');
-              document.getElementById('classType').value = classData.classType;
-            }
-          });
+          const predefinedTypes = ['HS', 'HS+Backbend', '2-hr Intensive HS'];
+          if (predefinedTypes.includes(classData.classType)) {
+            document.querySelectorAll('.class-type-btn').forEach(btn => {
+              if (btn.getAttribute('data-type') === classData.classType) {
+                btn.classList.add('selected');
+                document.getElementById('classType').value = classData.classType;
+              }
+            });
+          } else {
+            // Custom type
+            document.querySelector('[data-type="Other"]').classList.add('selected');
+            document.getElementById('customClassType').classList.add('show');
+            document.getElementById('customClassType').value = classData.classType;
+            document.getElementById('classType').value = classData.classType;
+          }
         }, 100);
       }
       
@@ -1732,7 +1793,15 @@
       const classData = allClasses[classId];
       if (!classData) return;
       
-      showAddClassModal(classData);
+      showAddClassModal(classData, false);
+    }
+
+    // Edit class function
+    function editClass(classId) {
+      const classData = allClasses[classId];
+      if (!classData) return;
+      
+      showAddClassModal({...classData, id: classId}, true);
     }
 
     // Delete class function
@@ -1782,6 +1851,7 @@
     window.closeModal = closeModal;
     window.showNotification = showNotification;
     window.duplicateClass = duplicateClass;
+    window.editClass = editClass;
     window.deleteClass = deleteClass;
 
     // Event listeners using addEventListener instead of onclick
@@ -1843,8 +1913,22 @@
         btn.addEventListener('click', function() {
           document.querySelectorAll('.class-type-btn').forEach(b => b.classList.remove('selected'));
           this.classList.add('selected');
-          document.getElementById('classType').value = this.getAttribute('data-type');
+          
+          const type = this.getAttribute('data-type');
+          if (type === 'Other') {
+            document.getElementById('customClassType').classList.add('show');
+            document.getElementById('customClassType').focus();
+          } else {
+            document.getElementById('customClassType').classList.remove('show');
+            document.getElementById('customClassType').value = '';
+            document.getElementById('classType').value = type;
+          }
         });
+      });
+      
+      // Custom class type input
+      document.getElementById('customClassType').addEventListener('input', function() {
+        document.getElementById('classType').value = this.value;
       });
       
       // Enable repeat checkbox
@@ -1968,6 +2052,7 @@
       const classType = document.getElementById('classType').value;
       const maxStudents = parseInt(document.getElementById('classSize').value) || 4;
       const enableRepeat = document.getElementById('enableRepeat').checked;
+      const editingId = document.getElementById('editingClassId').value;
       
       if (!date || !startTime || !endTime || !classType) {
         showNotification('Please fill in all fields', 'error');
@@ -1977,108 +2062,140 @@
       const dayNames = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
       const baseDate = new Date(date + 'T00:00:00'); // Ensure local time
       
-      const classesToAdd = [];
-
-      if (enableRepeat) {
-        // Get selected weekdays
-        const selectedDays = [];
-        document.querySelectorAll('.weekday-btn.selected').forEach(btn => {
-          selectedDays.push(btn.getAttribute('data-day'));
-        });
-        
-        if (selectedDays.length === 0) {
-          showNotification('Please select at least one weekday for recurring classes', 'error');
-          return;
-        }
-        
-        const repeatWeeks = parseInt(document.getElementById('repeatWeeks').value) || 4;
-        
-        // Generate classes for each selected weekday
-        for (let week = 0; week < repeatWeeks; week++) {
-          selectedDays.forEach(dayCode => {
-            // Find the next occurrence of this weekday
-            const dayIndex = dayNames.indexOf(dayCode);
-            let targetDate = new Date(baseDate);
-            targetDate.setDate(targetDate.getDate() + (week * 7));
-            
-            // Adjust to the correct weekday
-            while (targetDate.getDay() !== dayIndex) {
-              targetDate.setDate(targetDate.getDate() + 1);
-            }
-            
-            // Only add if the date is in the future
-            if (targetDate >= baseDate) {
-              const targetDateStr = formatDateToLocal(targetDate);
-              
-              // Check for conflicts
-              const conflicts = checkTimeConflicts(targetDateStr, startTime, endTime);
-              if (conflicts.length === 0) {
-                classesToAdd.push({
-                  date: targetDateStr,
-                  dayOfWeek: dayCode,
-                  startTime,
-                  endTime,
-                  classType,
-                  maxStudents,
-                  students: [],
-                  standby: [],
-                  createdAt: Date.now()
-                });
-              }
-            }
-          });
-        }
-        
-        if (classesToAdd.length === 0) {
-          showNotification('All selected time slots have conflicts!', 'error');
-          return;
-        }
-      } else {
-        // Single class - check for conflicts
-        const conflicts = checkTimeConflicts(date, startTime, endTime);
-        if (conflicts.length > 0) {
-          showNotification('Cannot create class due to time conflict!', 'error');
-          return;
-        }
-        
-        classesToAdd.push({
+      if (editingId) {
+        // Edit existing class
+        const updatedClass = {
           date,
           dayOfWeek: dayNames[baseDate.getDay()],
           startTime,
           endTime,
           classType,
           maxStudents,
-          students: [],
-          standby: [],
-          createdAt: Date.now()
-        });
-      }
+          students: allClasses[editingId].students || [],
+          standby: allClasses[editingId].standby || [],
+          createdAt: allClasses[editingId].createdAt || Date.now(),
+          updatedAt: Date.now()
+        };
 
-      try {
-        // Add all classes
-        for (const newClass of classesToAdd) {
-          await push(ref(database, 'classes'), newClass);
+        try {
+          await set(ref(database, `classes/${editingId}`), updatedClass);
+          closeModal('addClassModal');
+          showNotification('Class updated successfully!', 'success');
+          
+          // Send admin notification
+          await sendEmailNotification('classUpdated', {
+            adminEmail: adminEmail,
+            classId: editingId,
+            updatedClass: updatedClass
+          });
+        } catch (error) {
+          showNotification('Error updating class: ' + error.message, 'error');
         }
-        
-        closeModal('addClassModal');
-        document.getElementById('addClassForm').reset();
-        document.getElementById('selectedDateDisplay').textContent = '';
-        document.querySelectorAll('.class-type-btn').forEach(btn => btn.classList.remove('selected'));
-        document.querySelectorAll('.weekday-btn').forEach(btn => btn.classList.remove('selected'));
-        
-        const message = classesToAdd.length > 1 
-          ? `Successfully added ${classesToAdd.length} classes!` 
-          : 'Class added successfully!';
-        showNotification(message, 'success');
-        
-        // Send admin notification
-        await sendEmailNotification('newClasses', {
-          adminEmail: adminEmail,
-          count: classesToAdd.length,
-          classes: classesToAdd
-        });
-      } catch (error) {
-        showNotification('Error adding class: ' + error.message, 'error');
+      } else {
+        // Add new class(es)
+        const classesToAdd = [];
+
+        if (enableRepeat) {
+          // Get selected weekdays
+          const selectedDays = [];
+          document.querySelectorAll('.weekday-btn.selected').forEach(btn => {
+            selectedDays.push(btn.getAttribute('data-day'));
+          });
+          
+          if (selectedDays.length === 0) {
+            showNotification('Please select at least one weekday for recurring classes', 'error');
+            return;
+          }
+          
+          const repeatWeeks = parseInt(document.getElementById('repeatWeeks').value) || 4;
+          
+          // Generate classes for each selected weekday
+          for (let week = 0; week < repeatWeeks; week++) {
+            selectedDays.forEach(dayCode => {
+              // Find the next occurrence of this weekday
+              const dayIndex = dayNames.indexOf(dayCode);
+              let targetDate = new Date(baseDate);
+              targetDate.setDate(targetDate.getDate() + (week * 7));
+              
+              // Adjust to the correct weekday
+              while (targetDate.getDay() !== dayIndex) {
+                targetDate.setDate(targetDate.getDate() + 1);
+              }
+              
+              // Only add if the date is in the future
+              if (targetDate >= baseDate) {
+                const targetDateStr = formatDateToLocal(targetDate);
+                
+                // Check for conflicts
+                const conflicts = checkTimeConflicts(targetDateStr, startTime, endTime);
+                if (conflicts.length === 0) {
+                  classesToAdd.push({
+                    date: targetDateStr,
+                    dayOfWeek: dayCode,
+                    startTime,
+                    endTime,
+                    classType,
+                    maxStudents,
+                    students: [],
+                    standby: [],
+                    createdAt: Date.now()
+                  });
+                }
+              }
+            });
+          }
+          
+          if (classesToAdd.length === 0) {
+            showNotification('All selected time slots have conflicts!', 'error');
+            return;
+          }
+        } else {
+          // Single class - check for conflicts
+          const conflicts = checkTimeConflicts(date, startTime, endTime);
+          if (conflicts.length > 0) {
+            showNotification('Cannot create class due to time conflict!', 'error');
+            return;
+          }
+          
+          classesToAdd.push({
+            date,
+            dayOfWeek: dayNames[baseDate.getDay()],
+            startTime,
+            endTime,
+            classType,
+            maxStudents,
+            students: [],
+            standby: [],
+            createdAt: Date.now()
+          });
+        }
+
+        try {
+          // Add all classes
+          for (const newClass of classesToAdd) {
+            await push(ref(database, 'classes'), newClass);
+          }
+          
+          closeModal('addClassModal');
+          document.getElementById('addClassForm').reset();
+          document.getElementById('selectedDateDisplay').textContent = '';
+          document.querySelectorAll('.class-type-btn').forEach(btn => btn.classList.remove('selected'));
+          document.querySelectorAll('.weekday-btn').forEach(btn => btn.classList.remove('selected'));
+          
+          const message = classesToAdd.length > 1 
+            ? `Successfully added ${classesToAdd.length} classes!` 
+            : 'Class added successfully!';
+          showNotification(message, 'success');
+          
+          // Send admin notification
+          await sendEmailNotification('newClasses', {
+            adminEmail: adminEmail,
+            count: classesToAdd.length,
+            classes: classesToAdd
+          });
+        } catch (error) {
+          showNotification('Error adding class: ' + error.message, 'error');
+        }
       }
     });
 
@@ -2170,7 +2287,10 @@
           <div class="class-type">${classData.classType}</div>
           ${currentUser ? `
             <div class="class-actions">
-              ${!isPast ? `<button class="class-action-btn" id="duplicate-${classId}">Duplicate</button>` : ''}
+              ${!isPast ? `
+                <button class="class-action-btn edit" id="edit-${classId}">Edit</button>
+                <button class="class-action-btn" id="duplicate-${classId}">Duplicate</button>
+              ` : ''}
               <button class="class-action-btn delete" id="delete-${classId}">Delete</button>
             </div>
           ` : ''}
@@ -2226,6 +2346,11 @@
         // Admin action buttons
         if (currentUser) {
           if (!isPast) {
+            const editBtn = document.getElementById(`edit-${classId}`);
+            if (editBtn) {
+              editBtn.addEventListener('click', () => editClass(classId));
+            }
+            
             const duplicateBtn = document.getElementById(`duplicate-${classId}`);
             if (duplicateBtn) {
               duplicateBtn.addEventListener('click', () => duplicateClass(classId));
@@ -2260,25 +2385,43 @@
     // Render students list
     function renderStudentsList(classId, students, maxStudents, isPast = false) {
       let html = '';
+      const activeStudents = students.filter(s => !s.lateCancel);
+      const lateCancelStudents = students.filter(s => s.lateCancel);
       
+      // Show active students first
       for (let i = 0; i < maxStudents; i++) {
-        if (students[i]) {
-          const isLateCancel = students[i].lateCancel === true;
+        if (activeStudents[i]) {
+          const studentIndex = students.indexOf(activeStudents[i]);
           html += `
             <div class="student-item">
               <div>
                 <span class="student-number">${i + 1}.</span>
-                <span class="student-name">${students[i].name}</span>
-                ${students[i].email ? `<span class="student-email">(${students[i].email})</span>` : ''}
-                ${isLateCancel ? '<span class="late-cancel-badge">Late Cancel</span>' : ''}
+                <span class="student-name">${activeStudents[i].name}</span>
+                ${activeStudents[i].email ? `<span class="student-email">(${activeStudents[i].email})</span>` : ''}
               </div>
-              ${!isPast ? `<button class="remove-btn" id="remove-${classId}-${i}">Remove</button>` : ''}
+              ${!isPast ? `<button class="remove-btn" id="remove-${classId}-${studentIndex}">Remove</button>` : ''}
             </div>
           `;
         } else {
           html += `<div class="empty-slot">${i + 1}. Empty</div>`;
         }
       }
+      
+      // Show late cancel students at the end
+      lateCancelStudents.forEach((student) => {
+        const studentIndex = students.indexOf(student);
+        html += `
+          <div class="student-item">
+            <div>
+              <span class="student-number">-</span>
+              <span class="student-name">${student.name}</span>
+              ${student.email ? `<span class="student-email">(${student.email})</span>` : ''}
+              <span class="late-cancel-badge">Late Cancel</span>
+            </div>
+            ${!isPast ? `<button class="remove-btn" id="remove-${classId}-${studentIndex}">Remove</button>` : ''}
+          </div>
+        `;
+      });
       
       // Add event listeners for remove buttons
       if (!isPast) {
@@ -2428,9 +2571,10 @@
       }
       
       const classData = allClasses[classId];
-      const students = classData.students || [];
-      const standby = classData.standby || [];
+      const students = [...(classData.students || [])];
+      const standby = [...(classData.standby || [])];
       const student = students[index];
+      const maxStudents = classData.maxStudents || 4;
 
       if (!student) return;
 
@@ -2441,13 +2585,22 @@
 
       if (hoursUntilClass < 1 && hoursUntilClass > 0) {
         // Late cancellation - mark as late cancel and auto-promote standby
-        students[index] = {
-          ...student,
-          lateCancel: true
-        };
+        if (student.lateCancel) {
+          // Already marked as late cancel, remove completely
+          students.splice(index, 1);
+        } else {
+          // Mark as late cancel
+          students[index] = {
+            ...student,
+            lateCancel: true
+          };
+        }
         
-        // Auto-promote from standby if available
-        if (standby.length > 0) {
+        // Count active students
+        const activeStudentCount = students.filter(s => !s.lateCancel).length;
+        
+        // Auto-promote from standby if there's space
+        if (activeStudentCount < maxStudents && standby.length > 0) {
           const standbyStudent = standby.shift();
           students.push(standbyStudent);
           
