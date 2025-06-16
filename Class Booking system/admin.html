@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Group Class Booking</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --gray-100: #f8f9fa;
+      --gray-200: #e9ecef;
+      --gray-300: #dee2e6;
+      --gray-400: #ced4da;
+      --gray-500: #adb5bd;
+      --gray-600: #6c757d;
+      --gray-700: #495057;
+      --gray-800: #343a40;
+      --gray-900: #212529;
+      --danger: #dc3545;
+      --warning: #ffc107;
+      --success: #28a745;
+      --info: #17a2b8;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--gray-100);
+      color: var(--black);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 260px;
+      height: 100vh;
+      background-color: var(--black);
+      color: var(--white);
+      overflow-y: auto;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 20px;
+      border-bottom: 1px solid var(--gray-800);
+    }
+
+    .sidebar-logo {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-user {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .sidebar-nav {
+      padding: 20px 0;
+    }
+
+    .nav-item {
+      display: block;
+      padding: 15px 20px;
+      color: var(--white);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover {
+      background-color: var(--gray-900);
+      border-left-color: var(--white);
+    }
+
+    .nav-item.active {
+      background-color: var(--gray-900);
+      border-left-color: var(--white);
+    }
+
+    .nav-icon {
+      margin-right: 10px;
+      width: 20px;
+      display: inline-block;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 260px;
+      min-height: 100vh;
+      background-color: var(--gray-100);
+    }
+
+    .topbar {
+      background-color: var(--white);
+      padding: 20px 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--black);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--gray-800);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: var(--white);
+      color: var(--black);
+      border: 2px solid var(--black);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--gray-100);
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: var(--white);
+    }
+
+    .btn-danger:hover {
+      background-color: #c82333;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+
+    /* Content Container */
+    .content {
+      padding: 30px;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background-color: var(--white);
+      border: 2px solid var(--black);
+      border-radius: 10px;
+      padding: 25px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      background-color: var(--black);
+      color: var(--white);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: var(--gray-600);
+      font-size: 14px;
+    }
+
+    /* Data Table */
+    .table-container {
+      background-color: var(--white);
+      border: 2px solid var(--black);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+
+    .table-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--gray-300);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-box {
+      padding: 8px 15px;
+      border: 2px solid var(--gray-300);
+      border-radius: 5px;
+      font-size: 14px;
+      width: 250px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: var(--black);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background-color: var(--gray-100);
+    }
+
+    th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--gray-700);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--gray-200);
+      transition: all 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background-color: var(--gray-50);
+    }
+
+    td {
+      padding: 15px;
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background-color: var(--success);
+      color: var(--white);
+    }
+
+    .badge-warning {
+      background-color: var(--warning);
+      color: var(--black);
+    }
+
+    .badge-danger {
+      background-color: var(--danger);
+      color: var(--white);
+    }
+
+    .badge-info {
+      background-color: var(--info);
+      color: var(--white);
+    }
+
+    /* Action buttons in table */
+    .table-actions-cell {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--white);
+      border-radius: 10px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      padding: 25px;
+      border-bottom: 1px solid var(--gray-300);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: var(--gray-600);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+      background-color: var(--gray-100);
+      color: var(--black);
+    }
+
+    .modal-body {
+      padding: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 10px 15px;
+      border: 2px solid var(--gray-300);
+      border-radius: 5px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--black);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .modal-footer {
+      padding: 20px 25px;
+      border-top: 1px solid var(--gray-300);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Student Details */
+    .student-list {
+      margin-top: 15px;
+    }
+
+    .student-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background-color: var(--gray-100);
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .student-number {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .student-meta {
+      font-size: 12px;
+      color: var(--gray-600);
+    }
+
+    /* Charts */
+    .chart-container {
+      background-color: var(--white);
+      border: 2px solid var(--black);
+      border-radius: 10px;
+      padding: 25px;
+      margin-bottom: 30px;
+      height: 400px;
+    }
+
+    /* Mobile Menu Toggle */
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1100;
+      background-color: var(--black);
+      color: var(--white);
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--gray-600);
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--gray-600);
+    }
+
+    .spinner {
+      border: 3px solid var(--gray-300);
+      border-top: 3px solid var(--black);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .mobile-toggle {
+        display: block;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        padding-left: 70px;
+      }
+
+      .search-box {
+        width: 150px;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      table {
+        min-width: 600px;
+      }
+    }
+
+    /* Print Styles */
+    @media print {
+      .sidebar, .topbar-actions, .btn, .table-actions-cell {
+        display: none !important;
+      }
+
+      .main-content {
+        margin-left: 0 !important;
+      }
+
+      .table-container {
+        border: 1px solid var(--black) !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">Admin Dashboard</div>
+      <div class="sidebar-user" id="adminEmail">admin@example.com</div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" onclick="showSection('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a href="#" class="nav-item" onclick="showSection('classes')">
+        <span class="nav-icon">📅</span> Classes
+      </a>
+      <a href="#" class="nav-item" onclick="showSection('students')">
+        <span class="nav-icon">👥</span> Students
+      </a>
+      <a href="#" class="nav-item" onclick="showSection('reports')">
+        <span class="nav-icon">📈</span> Reports
+      </a>
+      <a href="#" class="nav-item" onclick="showSection('settings')">
+        <span class="nav-icon">⚙️</span> Settings
+      </a>
+      <a href="#" class="nav-item" onclick="logout()">
+        <span class="nav-icon">🚪</span> Logout
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Topbar -->
+    <div class="topbar">
+      <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      <div class="topbar-actions">
+        <button class="btn btn-secondary" onclick="exportData()">
+          <span>📥</span> Export Data
+        </button>
+        <button class="btn btn-primary" onclick="showAddClassModal()">
+          <span>➕</span> Add Class
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="content">
+      <!-- Dashboard Section -->
+      <div id="dashboardSection" class="section">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-value" id="totalClasses">0</div>
+            <div class="stat-label">Total Classes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value" id="totalStudents">0</div>
+            <div class="stat-label">Total Bookings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value" id="avgAttendance">0%</div>
+            <div class="stat-label">Average Attendance</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-value" id="lateCancels">0</div>
+            <div class="stat-label">Late Cancellations</div>
+          </div>
+        </div>
+
+        <!-- Upcoming Classes -->
+        <div class="table-container">
+          <div class="table-header">
+            <h2 class="table-title">Upcoming Classes</h2>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Students</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="upcomingClassesTable">
+              <tr>
+                <td colspan="6" class="loading">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="table-container">
+          <div class="table-header">
+            <h2 class="table-title">Recent Activity</h2>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Action</th>
+                <th>Student</th>
+                <th>Class</th>
+              </tr>
+            </thead>
+            <tbody id="activityTable">
+              <tr>
+                <td colspan="4" class="loading">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Classes Section -->
+      <div id="classesSection" class="section" style="display: none;">
+        <div class="table-container">
+          <div class="table-header">
+            <h2 class="table-title">All Classes</h2>
+            <div class="table-actions">
+              <input type="text" class="search-box" placeholder="Search classes..." onkeyup="searchClasses(this.value)">
+              <button class="btn btn-primary btn-sm" onclick="showAddClassModal()">Add Class</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Students</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="allClassesTable">
+              <tr>
+                <td colspan="7" class="loading">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Students Section -->
+      <div id="studentsSection" class="section" style="display: none;">
+        <div class="table-container">
+          <div class="table-header">
+            <h2 class="table-title">All Students</h2>
+            <div class="table-actions">
+              <input type="text" class="search-box" placeholder="Search students..." onkeyup="searchStudents(this.value)">
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Classes Attended</th>
+                <th>Late Cancellations</th>
+                <th>Last Booking</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTable">
+              <tr>
+                <td colspan="5" class="loading">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Reports Section -->
+      <div id="reportsSection" class="section" style="display: none;">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-value" id="monthlyClasses">0</div>
+            <div class="stat-label">Classes This Month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-value" id="fillRate">0%</div>
+            <div class="stat-label">Average Fill Rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🌟</div>
+            <div class="stat-value" id="popularDay">-</div>
+            <div class="stat-label">Most Popular Day</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-value" id="popularTime">-</div>
+            <div class="stat-label">Most Popular Time</div>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <h3>Weekly Class Distribution</h3>
+          <canvas id="weeklyChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <h3>Monthly Attendance Trend</h3>
+          <canvas id="monthlyChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Settings Section -->
+      <div id="settingsSection" class="section" style="display: none;">
+        <div class="table-container">
+          <div class="table-header">
+            <h2 class="table-title">System Settings</h2>
+          </div>
+          <div style="padding: 30px;">
+            <form id="settingsForm">
+              <div class="form-group">
+                <label class="form-label">Minimum Students per Class</label>
+                <input type="number" class="form-input" id="minStudents" value="2" min="1" max="10">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Maximum Students per Class</label>
+                <input type="number" class="form-input" id="maxStudents" value="4" min="1" max="20">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Late Cancellation Window (hours)</label>
+                <input type="number" class="form-input" id="lateCancelWindow" value="1" min="0" max="24">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Default Class Duration (minutes)</label>
+                <input type="number" class="form-input" id="classDuration" value="90" min="30" max="240" step="30">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Studio Address</label>
+                <textarea class="form-textarea" id="studioAddress">Flat C, 11th floor, Po Hon Building, 24-30 Percival St, Causeway Bay</textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Class Modal -->
+  <div class="modal" id="classModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="classModalTitle">Add New Class</h3>
+        <button class="modal-close" onclick="closeModal('classModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="classForm">
+          <input type="hidden" id="classId">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="classDate" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Day of Week</label>
+            <select class="form-select" id="classDayOfWeek" required>
+              <option value="MON">Monday (MON)</option>
+              <option value="TUE">Tuesday (TUE)</option>
+              <option value="WED">Wednesday (WED)</option>
+              <option value="THU">Thursday (THU)</option>
+              <option value="FRI">Friday (FRI)</option>
+              <option value="SAT">Saturday (SAT)</option>
+              <option value="SUN">Sunday (SUN)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Start Time</label>
+            <input type="time" class="form-input" id="classStartTime" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Time</label>
+            <input type="time" class="form-input" id="classEndTime" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Class Type</label>
+            <input type="text" class="form-input" id="classType" placeholder="e.g., HS+back bend, 2 hours intensive" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('classModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClass()">Save Class</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Class Details Modal -->
+  <div class="modal" id="classDetailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Class Details</h3>
+        <button class="modal-close" onclick="closeModal('classDetailsModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="classDetailsContent">
+          <!-- Dynamic content -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('classDetailsModal')">Close</button>
+        <button class="btn btn-primary" onclick="printClassDetails()">Print</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notifications -->
+  <div id="notificationContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 3000;"></div>
+
+  <!-- Firebase & Scripts -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { 
+      getDatabase, 
+      ref, 
+      push, 
+      onValue, 
+      remove,
+      set,
+      update,
+      get
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged,
+      signOut
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+    // Firebase configuration - Replace with your config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    const auth = getAuth(app);
+
+    // Global variables
+    let currentUser = null;
+    let allClasses = {};
+    let allActivities = [];
+
+    // Check auth on load
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('adminEmail').textContent = user.email;
+        loadDashboard();
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+
+    // Make functions available globally
+    window.toggleSidebar = toggleSidebar;
+    window.showSection = showSection;
+    window.logout = logout;
+    window.showAddClassModal = showAddClassModal;
+    window.showEditClassModal = showEditClassModal;
+    window.viewClassDetails = viewClassDetails;
+    window.deleteClass = deleteClass;
+    window.removeStudentFromClass = removeStudentFromClass;
+    window.closeModal = closeModal;
+    window.saveClass = saveClass;
+    window.searchClasses = searchClasses;
+    window.searchStudents = searchStudents;
+    window.exportData = exportData;
+    window.printClassDetails = printClassDetails;
+
+    // Toggle sidebar for mobile
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // Show section
+    function showSection(section) {
+      // Update nav active state
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.target.closest('.nav-item').classList.add('active');
+
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(sec => {
+        sec.style.display = 'none';
+      });
+
+      // Show selected section
+      document.getElementById(section + 'Section').style.display = 'block';
+
+      // Update page title
+      const titles = {
+        dashboard: 'Dashboard',
+        classes: 'Classes Management',
+        students: 'Students',
+        reports: 'Reports & Analytics',
+        settings: 'Settings'
+      };
+      document.getElementById('pageTitle').textContent = titles[section];
+
+      // Load section data
+      switch(section) {
+        case 'dashboard':
+          loadDashboard();
+          break;
+        case 'classes':
+          loadClasses();
+          break;
+        case 'students':
+          loadStudents();
+          break;
+        case 'reports':
+          loadReports();
+          break;
+      }
+
+      // Close mobile sidebar
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('active');
+      }
+    }
+
+    // Logout
+    async function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        try {
+          await signOut(auth);
+          window.location.href = 'index.html';
+        } catch (error) {
+          showNotification('Logout failed: ' + error.message, 'error');
+        }
+      }
+    }
+
+    // Load dashboard data
+    function loadDashboard() {
+      // Listen to classes
+      onValue(ref(database, 'classes'), (snapshot) => {
+        const data = snapshot.val() || {};
+        allClasses = data;
+        updateDashboardStats();
+        renderUpcomingClasses();
+      });
+
+      // Listen to activities
+      onValue(ref(database, 'activities'), (snapshot) => {
+        const data = snapshot.val() || {};
+        allActivities = Object.entries(data).map(([id, activity]) => ({
+          id,
+          ...activity
+        })).sort((a, b) => b.timestamp - a.timestamp);
+        renderRecentActivity();
+      });
+    }
+
+    // Update dashboard stats
+    function updateDashboardStats() {
+      const classes = Object.values(allClasses);
+      let totalStudents = 0;
+      let totalCapacity = 0;
+      let lateCancels = 0;
+
+      classes.forEach(cls => {
+        const students = cls.students || [];
+        totalStudents += students.filter(s => s && !s.lateCancel).length;
+        totalCapacity += 4;
+        lateCancels += students.filter(s => s && s.lateCancel).length;
+      });
+
+      const avgAttendance = totalCapacity > 0 ? Math.round((totalStudents / totalCapacity) * 100) : 0;
+
+      document.getElementById('totalClasses').textContent = classes.length;
+      document.getElementById('totalStudents').textContent = totalStudents;
+      document.getElementById('avgAttendance').textContent = avgAttendance + '%';
+      document.getElementById('lateCancels').textContent = lateCancels;
+    }
+
+    // Render upcoming classes
+    function renderUpcomingClasses() {
+      const tbody = document.getElementById('upcomingClassesTable');
+      const now = new Date();
+      
+      const upcomingClasses = Object.entries(allClasses)
+        .filter(([id, cls]) => new Date(`${cls.date} ${cls.startTime}`) > now)
+        .sort((a, b) => new Date(`${a[1].date} ${a[1].startTime}`) - new Date(`${b[1].date} ${b[1].startTime}`))
+        .slice(0, 5);
+
+      if (upcomingClasses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No upcoming classes</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = upcomingClasses.map(([id, cls]) => {
+        const students = cls.students || [];
+        const activeStudents = students.filter(s => s && !s.lateCancel).length;
+        const isFull = activeStudents >= 4;
+        const status = activeStudents >= 2 ? 'Confirmed' : 'Needs Students';
+
+        return `
+          <tr>
+            <td>${formatDate(cls.date)}</td>
+            <td>${cls.startTime} - ${cls.endTime}</td>
+            <td>${cls.classType}</td>
+            <td>${activeStudents}/4</td>
+            <td>
+              <span class="badge badge-${status === 'Confirmed' ? 'success' : 'warning'}">
+                ${status}
+              </span>
+            </td>
+            <td class="table-actions-cell">
+              <button class="btn btn-sm btn-secondary" onclick="viewClassDetails('${id}')">View</button>
+              <button class="btn btn-sm btn-primary" onclick="showEditClassModal('${id}')">Edit</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render recent activity
+    function renderRecentActivity() {
+      const tbody = document.getElementById('activityTable');
+      const recentActivities = allActivities.slice(0, 10);
+
+      if (recentActivities.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No recent activity</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = recentActivities.map(activity => {
+        return `
+          <tr>
+            <td>${formatTime(activity.timestamp)}</td>
+            <td>${activity.action}</td>
+            <td>${activity.studentName || '-'}</td>
+            <td>${activity.classInfo || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Load all classes
+    function loadClasses() {
+      const tbody = document.getElementById('allClassesTable');
+      const classes = Object.entries(allClasses).sort((a, b) => 
+        new Date(a[1].date) - new Date(b[1].date)
+      );
+
+      if (classes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No classes found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = classes.map(([id, cls]) => {
+        const students = cls.students || [];
+        const activeStudents = students.filter(s => s && !s.lateCancel).length;
+        const isPast = new Date(`${cls.date} ${cls.endTime}`) < new Date();
+        const status = isPast ? 'Completed' : (activeStudents >= 2 ? 'Confirmed' : 'Pending');
+
+        return `
+          <tr>
+            <td>${formatDate(cls.date)}</td>
+            <td>${cls.dayOfWeek}</td>
+            <td>${cls.startTime} - ${cls.endTime}</td>
+            <td>${cls.classType}</td>
+            <td>${activeStudents}/4</td>
+            <td>
+              <span class="badge badge-${
+                status === 'Completed' ? 'info' : 
+                status === 'Confirmed' ? 'success' : 'warning'
+              }">
+                ${status}
+              </span>
+            </td>
+            <td class="table-actions-cell">
+              <button class="btn btn-sm btn-secondary" onclick="viewClassDetails('${id}')">View</button>
+              <button class="btn btn-sm btn-primary" onclick="showEditClassModal('${id}')">Edit</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteClass('${id}')">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Load students
+    function loadStudents() {
+      const tbody = document.getElementById('studentsTable');
+      const studentMap = new Map();
+
+      // Aggregate student data from all classes
+      Object.values(allClasses).forEach(cls => {
+        const students = cls.students || [];
+        students.forEach(student => {
+          if (student && student.name) {
+            const key = student.name.toLowerCase();
+            if (!studentMap.has(key)) {
+              studentMap.set(key, {
+                name: student.name,
+                classCount: 0,
+                lateCancel: 0,
+                lastBooking: 0
+              });
+            }
+            const data = studentMap.get(key);
+            data.classCount++;
+            if (student.lateCancel) data.lateCancel++;
+            if (student.joinedAt > data.lastBooking) {
+              data.lastBooking = student.joinedAt;
+            }
+          }
+        });
+      });
+
+      const students = Array.from(studentMap.values()).sort((a, b) => 
+        b.classCount - a.classCount
+      );
+
+      if (students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No students found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = students.map(student => {
+        const status = student.lateCancel > 2 ? 'Warning' : 'Active';
+        return `
+          <tr>
+            <td>${student.name}</td>
+            <td>${student.classCount}</td>
+            <td>${student.lateCancel}</td>
+            <td>${student.lastBooking ? formatDate(new Date(student.lastBooking)) : '-'}</td>
+            <td>
+              <span class="badge badge-${status === 'Active' ? 'success' : 'warning'}">
+                ${status}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Load reports
+    function loadReports() {
+      const classes = Object.values(allClasses);
+      const thisMonth = new Date().getMonth();
+      const thisYear = new Date().getFullYear();
+
+      // Calculate monthly stats
+      const monthlyClasses = classes.filter(cls => {
+        const date = new Date(cls.date);
+        return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
+      });
+
+      let totalStudents = 0;
+      let totalCapacity = 0;
+      const dayCount = {};
+      const timeCount = {};
+
+      monthlyClasses.forEach(cls => {
+        const students = cls.students || [];
+        totalStudents += students.filter(s => s && !s.lateCancel).length;
+        totalCapacity += 4;
+
+        dayCount[cls.dayOfWeek] = (dayCount[cls.dayOfWeek] || 0) + 1;
+        const hour = parseInt(cls.startTime.split(':')[0]);
+        const timeSlot = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
+        timeCount[timeSlot] = (timeCount[timeSlot] || 0) + 1;
+      });
+
+      const fillRate = totalCapacity > 0 ? Math.round((totalStudents / totalCapacity) * 100) : 0;
+      const popularDay = Object.entries(dayCount).sort((a, b) => b[1] - a[1])[0];
+      const popularTime = Object.entries(timeCount).sort((a, b) => b[1] - a[1])[0];
+
+      document.getElementById('monthlyClasses').textContent = monthlyClasses.length;
+      document.getElementById('fillRate').textContent = fillRate + '%';
+      document.getElementById('popularDay').textContent = popularDay ? popularDay[0] : '-';
+      document.getElementById('popularTime').textContent = popularTime ? popularTime[0] : '-';
+    }
+
+    // Show add class modal
+    function showAddClassModal() {
+      document.getElementById('classModalTitle').textContent = 'Add New Class';
+      document.getElementById('classForm').reset();
+      document.getElementById('classId').value = '';
+      
+      // Set default date to today
+      document.getElementById('classDate').valueAsDate = new Date();
+      
+      showModal('classModal');
+    }
+
+    // Show edit class modal
+    function showEditClassModal(classId) {
+      const cls = allClasses[classId];
+      if (!cls) return;
+
+      document.getElementById('classModalTitle').textContent = 'Edit Class';
+      document.getElementById('classId').value = classId;
+      document.getElementById('classDate').value = cls.date;
+      document.getElementById('classDayOfWeek').value = cls.dayOfWeek;
+      document.getElementById('classStartTime').value = cls.startTime;
+      document.getElementById('classEndTime').value = cls.endTime;
+      document.getElementById('classType').value = cls.classType;
+
+      showModal('classModal');
+    }
+
+    // Save class
+    async function saveClass() {
+      const classId = document.getElementById('classId').value;
+      const classData = {
+        date: document.getElementById('classDate').value,
+        dayOfWeek: document.getElementById('classDayOfWeek').value,
+        startTime: document.getElementById('classStartTime').value,
+        endTime: document.getElementById('classEndTime').value,
+        classType: document.getElementById('classType').value,
+        updatedAt: Date.now()
+      };
+
+      try {
+        if (classId) {
+          // Update existing class
+          await update(ref(database, `classes/${classId}`), classData);
+          logActivity('Class Updated', null, `${classData.date} ${classData.startTime}`);
+          showNotification('Class updated successfully', 'success');
+        } else {
+          // Add new class
+          classData.createdAt = Date.now();
+          classData.students = [];
+          await push(ref(database, 'classes'), classData);
+          logActivity('Class Added', null, `${classData.date} ${classData.startTime}`);
+          showNotification('Class added successfully', 'success');
+        }
+        closeModal('classModal');
+      } catch (error) {
+        showNotification('Error saving class: ' + error.message, 'error');
+      }
+    }
+
+    // Delete class
+    async function deleteClass(classId) {
+      if (!confirm('Are you sure you want to delete this class?')) return;
+
+      try {
+        await remove(ref(database, `classes/${classId}`));
+        logActivity('Class Deleted', null, 'Class ID: ' + classId);
+        showNotification('Class deleted successfully', 'success');
+      } catch (error) {
+        showNotification('Error deleting class: ' + error.message, 'error');
+      }
+    }
+
+    // View class details
+    function viewClassDetails(classId) {
+      const cls = allClasses[classId];
+      if (!cls) return;
+
+      const students = cls.students || [];
+      const content = document.getElementById('classDetailsContent');
+
+      content.innerHTML = `
+        <div class="form-group">
+          <label class="form-label">Date & Time</label>
+          <p>${formatDate(cls.date)} (${cls.dayOfWeek}) | ${cls.startTime} - ${cls.endTime}</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Class Type</label>
+          <p>${cls.classType}</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Students (${students.filter(s => s && !s.lateCancel).length}/4)</label>
+          <div class="student-list">
+            ${students.map((student, index) => {
+              if (!student) return '';
+              return `
+                <div class="student-item">
+                  <div class="student-info">
+                    <span class="student-number">${index + 1}.</span>
+                    <div>
+                      <div>${student.name} ${student.lateCancel ? '<span class="badge badge-warning">Late Cancel</span>' : ''}</div>
+                      <div class="student-meta">Joined: ${formatTime(student.joinedAt)}</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-sm btn-danger" onclick="removeStudentFromClass('${classId}', ${index})">Remove</button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      showModal('classDetailsModal');
+    }
+
+    // Remove student from class
+    async function removeStudentFromClass(classId, studentIndex) {
+      if (!confirm('Are you sure you want to remove this student?')) return;
+
+      try {
+        const cls = allClasses[classId];
+        const students = cls.students || [];
+        const studentName = students[studentIndex]?.name || 'Unknown';
+        
+        students.splice(studentIndex, 1);
+        await set(ref(database, `classes/${classId}/students`), students);
+        
+        logActivity('Student Removed', studentName, `${cls.date} ${cls.startTime}`);
+        showNotification('Student removed successfully', 'success');
+        closeModal('classDetailsModal');
+      } catch (error) {
+        showNotification('Error removing student: ' + error.message, 'error');
+      }
+    }
+
+    // Search classes
+    function searchClasses(query) {
+      const rows = document.querySelectorAll('#allClassesTable tr');
+      const lowerQuery = query.toLowerCase();
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(lowerQuery) ? '' : 'none';
+      });
+    }
+
+    // Search students
+    function searchStudents(query) {
+      const rows = document.querySelectorAll('#studentsTable tr');
+      const lowerQuery = query.toLowerCase();
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(lowerQuery) ? '' : 'none';
+      });
+    }
+
+    // Export data
+    function exportData() {
+      const data = {
+        exportDate: new Date().toISOString(),
+        classes: allClasses,
+        activities: allActivities
+      };
+
+      const jsonStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `class-booking-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showNotification('Data exported successfully', 'success');
+    }
+
+    // Print class details
+    function printClassDetails() {
+      window.print();
+    }
+
+    // Log activity
+    async function logActivity(action, studentName, classInfo) {
+      const activity = {
+        action,
+        studentName,
+        classInfo,
+        timestamp: Date.now(),
+        admin: currentUser.email
+      };
+
+      try {
+        await push(ref(database, 'activities'), activity);
+      } catch (error) {
+        console.error('Error logging activity:', error);
+      }
+    }
+
+    // Show modal
+    function showModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    // Close modal
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+      const container = document.getElementById('notificationContainer');
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        background: ${type === 'error' ? 'var(--danger)' : type === 'success' ? 'var(--success)' : 'var(--black)'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease;
+      `;
+      notification.textContent = message;
+
+      container.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 5000);
+    }
+
+    // Utility functions
+    function formatDate(date) {
+      if (typeof date === 'string') date = new Date(date);
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+    }
+
+    function formatTime(timestamp) {
+      return new Date(timestamp).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Settings form handler
+    document.getElementById('settingsForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const settings = {
+        minStudents: document.getElementById('minStudents').value,
+        maxStudents: document.getElementById('maxStudents').value,
+        lateCancelWindow: document.getElementById('lateCancelWindow').value,
+        classDuration: document.getElementById('classDuration').value,
+        studioAddress: document.getElementById('studioAddress').value
+      };
+
+      try {
+        await set(ref(database, 'settings'), settings);
+        showNotification('Settings saved successfully', 'success');
+      } catch (error) {
+        showNotification('Error saving settings: ' + error.message, 'error');
+      }
+    });
+
+    // Initialize
+    loadDashboard();
+  </script>
+
+  <!-- Animation styles -->
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+  </style>
+</body>
+</html>
