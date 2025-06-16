@@ -19,6 +19,235 @@
       position: relative;
     }
 
+    /* Admin link styled */
+    .admin-link {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+    }
+
+    .admin-link > a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 14px;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+      cursor: pointer;
+    }
+
+    .admin-link > a:hover {
+      opacity: 1;
+    }
+
+    .admin-logged-in {
+      display: none;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px 20px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .admin-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: white;
+      font-size: 14px;
+    }
+
+    .admin-email {
+      font-weight: 500;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .admin-btn {
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+
+    .admin-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Admin Login Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-modal {
+      background: white;
+      border-radius: 20px;
+      padding: 0;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: modalAppear 0.3s ease forwards;
+    }
+
+    @keyframes modalAppear {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      padding: 30px;
+      text-align: center;
+      color: white;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #344054;
+    }
+
+    .login-input {
+      padding: 14px 18px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+
+    .login-input:focus {
+      outline: none;
+      border-color: #1565C0;
+      background-color: white;
+      box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.1);
+    }
+
+    .login-error {
+      color: #dc3545;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+      background: #fee;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #fcc;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    .login-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .login-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn.primary {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
+    }
+
+    .login-btn.primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(21, 101, 192, 0.4);
+    }
+
+    .login-btn.primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .login-btn.secondary {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 2px solid #e9ecef;
+    }
+
+    .login-btn.secondary:hover {
+      background: #e9ecef;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     .container {
       max-width: 1200px;
       margin: 0 auto;
@@ -41,16 +270,6 @@
       font-size: 20px;
       opacity: 0.95;
       font-weight: 500;
-    }
-
-    .alert {
-      background: rgba(255, 255, 255, 0.1);
-      color: #ffcccb;
-      padding: 15px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      text-align: center;
-      border: 1px solid rgba(255, 204, 203, 0.3);
     }
 
     .form-card {
@@ -376,6 +595,18 @@
     }
 
     @media (max-width: 768px) {
+      .admin-logged-in {
+        position: static;
+        margin-bottom: 20px;
+        border-radius: 16px;
+      }
+
+      .admin-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
       .flight-options {
         grid-template-columns: 1fr;
       }
@@ -399,14 +630,64 @@
   </style>
 </head>
 <body>
+  <!-- Admin link -->
+  <div class="admin-link">
+    <a onclick="showAdminLogin()" id="adminLoginLink">管理員登入</a>
+    <div class="admin-logged-in" id="adminLoggedIn">
+      <div class="admin-info">
+        <span class="admin-email" id="adminEmail"></span>
+        <div class="admin-actions">
+          <a href="toyotama-tw-flight-admin.html" class="admin-btn" target="_blank">管理面板</a>
+          <button class="admin-btn" onclick="logout()">登出</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="login-modal">
+      <div class="modal-header">
+        <h3>管理員登入</h3>
+      </div>
+      <div class="modal-body">
+        <form class="login-form" id="adminLoginForm">
+          <div class="form-field">
+            <label class="form-label">Email</label>
+            <input 
+              type="email" 
+              class="login-input" 
+              id="adminEmailInput"
+              placeholder="admin@example.com"
+              required
+            />
+          </div>
+          <div class="form-field">
+            <label class="form-label">密碼</label>
+            <input 
+              type="password" 
+              class="login-input" 
+              id="adminPasswordInput"
+              placeholder="請輸入密碼"
+              required
+            />
+          </div>
+          <div class="login-error" id="loginError">登入失敗：<span id="errorMessage"></span></div>
+          <div class="login-buttons">
+            <button type="submit" class="login-btn primary" id="loginSubmitBtn">
+              <span id="loginBtnText">登入</span>
+            </button>
+            <button type="button" class="login-btn secondary" onclick="closeAdminLogin()">取消</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
     <div class="header">
       <h1>🏀 豐玉籃球隊 - 2025屏東盃</h1>
       <p>隊員資訊登記系統</p>
-    </div>
-
-    <div class="alert">
-      ⚠️ 資料庫連線問題，目前使用本地儲存模式。資料將儲存在您的瀏覽器中。
     </div>
 
     <div class="form-card">
@@ -626,10 +907,146 @@
     </div>
   </div>
 
-  <script>
-    // 使用 localStorage 作為備用儲存方案
-    const STORAGE_KEY = 'toyotama-member-data';
-    
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGCaWivohAhxZDkKp7YGNp9deNetR3K4Y",
+      authDomain: "jersey-app-bcefa.firebaseapp.com",
+      databaseURL: "https://jersey-app-bcefa-default-rtdb.firebaseio.com",
+      projectId: "jersey-app-bcefa",
+      storageBucket: "jersey-app-bcefa.appspot.com",
+      messagingSenderId: "778327507472",
+      appId: "1:778327507472:web:057e3db1b767f0b137c095"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    // Make functions available globally
+    window.showAdminLogin = showAdminLogin;
+    window.closeAdminLogin = closeAdminLogin;
+    window.logout = logout;
+    window.toggleManualInput = toggleManualInput;
+
+    // Auth state observer
+    onAuthStateChanged(auth, (user) => {
+      const adminLoginLink = document.getElementById('adminLoginLink');
+      const adminLoggedIn = document.getElementById('adminLoggedIn');
+      const adminEmailSpan = document.getElementById('adminEmail');
+      
+      if (user) {
+        // User is signed in
+        adminLoginLink.style.display = 'none';
+        adminLoggedIn.style.display = 'block';
+        adminEmailSpan.textContent = user.email;
+      } else {
+        // User is signed out
+        adminLoginLink.style.display = 'block';
+        adminLoggedIn.style.display = 'none';
+      }
+    });
+
+    // Admin login functions
+    function showAdminLogin() {
+      document.getElementById('adminModal').classList.add('show');
+      document.getElementById('adminEmailInput').focus();
+    }
+
+    function closeAdminLogin() {
+      document.getElementById('adminModal').classList.remove('show');
+      document.getElementById('adminLoginForm').reset();
+      document.getElementById('loginError').classList.remove('show');
+      // Clear input fields
+      document.getElementById('adminEmailInput').value = '';
+      document.getElementById('adminPasswordInput').value = '';
+    }
+
+    async function logout() {
+      try {
+        await signOut(auth);
+        alert('已成功登出');
+      } catch (error) {
+        console.error('登出錯誤:', error);
+        alert('登出失敗，請重試');
+      }
+    }
+
+    // Admin login form handler
+    document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('adminEmailInput').value;
+      const password = document.getElementById('adminPasswordInput').value;
+      const loginBtn = document.getElementById('loginSubmitBtn');
+      const loginBtnText = document.getElementById('loginBtnText');
+      const loginError = document.getElementById('loginError');
+      const errorMessage = document.getElementById('errorMessage');
+      
+      // Show loading state
+      loginBtn.disabled = true;
+      loginBtnText.innerHTML = '<span class="loading-spinner"></span>登入中...';
+      loginError.classList.remove('show');
+      
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        closeAdminLogin();
+      } catch (error) {
+        let errorText = '登入失敗';
+        
+        switch (error.code) {
+          case 'auth/invalid-email':
+            errorText = 'Email 格式錯誤';
+            break;
+          case 'auth/user-disabled':
+            errorText = '此帳號已被停用';
+            break;
+          case 'auth/user-not-found':
+            errorText = '找不到此使用者';
+            break;
+          case 'auth/wrong-password':
+            errorText = '密碼錯誤';
+            break;
+          case 'auth/invalid-credential':
+            errorText = 'Email 或密碼錯誤';
+            break;
+          case 'auth/too-many-requests':
+            errorText = '登入嘗試次數過多，請稍後再試';
+            break;
+          case 'auth/missing-email':
+            errorText = '請輸入 Email';
+            break;
+          default:
+            errorText = error.message;
+        }
+        
+        errorMessage.textContent = errorText;
+        loginError.classList.add('show');
+      } finally {
+        // Reset button state
+        loginBtn.disabled = false;
+        loginBtnText.textContent = '登入';
+      }
+    });
+
+    // Click outside to close modal
+    document.getElementById('adminModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeAdminLogin();
+      }
+    });
+
     // 航班資料
     const flightData = {
       'HX234-0800': { airline: 'HK Express 香港快運', flightNo: 'HX234', departure: '08:00', arrival: '09:30' },
@@ -645,16 +1062,6 @@
     let selectedDateValue = null;
     let selectedFlightData = null;
     let isManualInput = false;
-
-    // 本地儲存函數
-    function saveToLocalStorage(data) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    }
-
-    function loadFromLocalStorage() {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : {};
-    }
 
     // 日期選擇
     const dateButtons = document.querySelectorAll('.date-btn');
@@ -739,30 +1146,31 @@
       return `${day}/${month}/${year} (${weekday})`;
     }
 
-    // 隊員選擇處理
-    document.getElementById('memberName').addEventListener('change', function() {
+    // 隊員選擇處理 - 自動填入已儲存的資料
+    document.getElementById('memberName').addEventListener('change', async function() {
       const memberName = this.value;
       if (!memberName) {
         resetForm();
         return;
       }
 
-      // 檢查本地儲存中是否有該隊員的資料
-      const savedData = loadFromLocalStorage();
-      if (savedData[memberName]) {
-        const memberData = savedData[memberName];
-        
-        // 填入個人資料
-        if (memberData.chineseName) {
-          document.getElementById('chineseName').value = memberData.chineseName;
+      // 檢查 Firebase 中是否有該隊員的資料
+      const memberRef = ref(db, `toyotama-members/${memberName}`);
+      onValue(memberRef, (snapshot) => {
+        const memberData = snapshot.val();
+        if (memberData) {
+          // 填入個人資料
+          if (memberData.chineseName) {
+            document.getElementById('chineseName').value = memberData.chineseName;
+          }
+          if (memberData.height) {
+            document.getElementById('height').value = memberData.height;
+          }
+          if (memberData.weight) {
+            document.getElementById('weight').value = memberData.weight;
+          }
         }
-        if (memberData.height) {
-          document.getElementById('height').value = memberData.height;
-        }
-        if (memberData.weight) {
-          document.getElementById('weight').value = memberData.weight;
-        }
-      }
+      }, { onlyOnce: true });
     });
 
     function resetForm() {
@@ -832,30 +1240,30 @@
         };
       }
 
-      // 儲存到本地儲存
-      const savedData = loadFromLocalStorage();
-      savedData[memberName] = {
+      // 儲存到 Firebase - 使用隊員姓名作為 key
+      const memberRef = ref(db, `toyotama-members/${memberName}`);
+      set(memberRef, {
         chineseName: chineseName,
         height: parseInt(height),
         weight: parseInt(weight),
         ...flightInfo,
         timestamp: Date.now()
-      };
-      
-      saveToLocalStorage(savedData);
-      
-      alert(`✅ ${memberName} 的資料已登記成功！`);
-      
-      // 重設表單
-      document.getElementById('memberForm').reset();
-      resetForm();
-      
-      // 更新表格
-      updateTable();
+      }).then(() => {
+        alert(`✅ ${memberName} 的資料已登記成功！`);
+        
+        // 重設表單
+        document.getElementById('memberForm').reset();
+        resetForm();
+      }).catch((error) => {
+        alert('❌ 登記失敗，請重試！');
+        console.error(error);
+      });
     });
 
-    // 更新表格
-    function updateTable() {
+    // 監聽資料變更
+    const membersRef = ref(db, 'toyotama-members');
+    onValue(membersRef, (snapshot) => {
+      const data = snapshot.val();
       const tableBody = document.getElementById('tableBody');
       const emptyState = document.getElementById('emptyState');
       const table = document.getElementById('memberTable');
@@ -863,10 +1271,7 @@
 
       tableBody.innerHTML = '';
 
-      const savedData = loadFromLocalStorage();
-      const members = Object.keys(savedData);
-
-      if (members.length === 0) {
+      if (!data) {
         table.style.display = 'none';
         emptyState.style.display = 'block';
         memberCount.textContent = '已登記: 0 人';
@@ -875,12 +1280,14 @@
 
       table.style.display = 'table';
       emptyState.style.display = 'none';
+
+      const members = Object.keys(data);
       memberCount.textContent = `已登記: ${members.length} 人`;
 
       // 排序
       members.sort((a, b) => {
-        const dataA = savedData[a];
-        const dataB = savedData[b];
+        const dataA = data[a];
+        const dataB = data[b];
         
         if (dataA.date !== dataB.date) {
           return dataA.date.localeCompare(dataB.date);
@@ -889,7 +1296,7 @@
       });
 
       members.forEach(member => {
-        const memberData = savedData[member];
+        const memberData = data[member];
         const row = document.createElement('tr');
         
         row.innerHTML = `
@@ -910,10 +1317,7 @@
         
         tableBody.appendChild(row);
       });
-    }
-
-    // 頁面載入時更新表格
-    updateTable();
+    });
   </script>
 </body>
 </html>

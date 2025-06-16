@@ -41,8 +41,8 @@
     .header {
       background-color: var(--black);
       color: var(--white);
-      padding: 20px 0;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 25px 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
       position: sticky;
       top: 0;
       z-index: 1000;
@@ -58,9 +58,10 @@
     }
 
     .logo {
-      font-size: 24px;
-      font-weight: bold;
-      letter-spacing: -1px;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      text-transform: uppercase;
     }
 
     /* Admin section */
@@ -73,60 +74,65 @@
       text-decoration: none;
       font-size: 14px;
       opacity: 0.8;
-      transition: opacity 0.3s ease;
+      transition: all 0.3s ease;
       cursor: pointer;
       background-color: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 8px 20px;
-      border-radius: 25px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      padding: 10px 24px;
+      border-radius: 30px;
+      font-weight: 500;
     }
 
     .admin-link > a:hover {
       opacity: 1;
-      background-color: rgba(255, 255, 255, 0.1);
+      background-color: var(--white);
+      color: var(--black);
+      transform: translateY(-2px);
     }
 
     .admin-logged-in {
       display: none;
       background: var(--white);
       color: var(--black);
-      padding: 10px 20px;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      padding: 12px 24px;
+      border-radius: 30px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     }
 
     .admin-info {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 20px;
       font-size: 14px;
     }
 
     .admin-email {
-      font-weight: 500;
+      font-weight: 600;
     }
 
     .admin-actions {
       display: flex;
-      gap: 10px;
+      gap: 12px;
     }
 
     .admin-btn {
-      padding: 6px 14px;
+      padding: 8px 20px;
       background: var(--black);
       color: var(--white);
-      border: 1px solid var(--black);
-      border-radius: 8px;
+      border: 2px solid var(--black);
+      border-radius: 25px;
       font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
       text-decoration: none;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
       display: inline-block;
     }
 
     .admin-btn:hover {
-      background: var(--gray-800);
-      transform: translateY(-1px);
+      background: var(--white);
+      color: var(--black);
+      transform: translateY(-2px);
     }
 
     /* Admin Login Modal */
@@ -137,9 +143,9 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.8);
       z-index: 1000;
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(10px);
     }
 
     .modal-overlay.show {
@@ -150,11 +156,11 @@
 
     .login-modal {
       background: white;
-      border-radius: 20px;
+      border-radius: 30px;
       padding: 0;
       width: 90%;
-      max-width: 400px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 420px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
       overflow: hidden;
       transform: translateY(20px);
       opacity: 0;
@@ -170,63 +176,63 @@
 
     .modal-header {
       background: var(--black);
-      padding: 30px;
+      padding: 40px;
       text-align: center;
       color: white;
     }
 
     .modal-header h3 {
       margin: 0;
-      font-size: 24px;
-      font-weight: bold;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
     }
 
     .modal-body {
-      padding: 30px;
+      padding: 40px;
     }
 
     .login-form {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
     .form-field {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .form-label {
       font-size: 14px;
-      font-weight: 500;
-      color: #344054;
+      font-weight: 600;
+      color: var(--black);
     }
 
     .login-input {
-      padding: 14px 18px;
-      border: 2px solid #e9ecef;
-      border-radius: 12px;
+      padding: 16px 20px;
+      border: 2px solid var(--gray-300);
+      border-radius: 15px;
       font-size: 16px;
       transition: all 0.3s ease;
-      background-color: #f8f9fa;
+      background-color: var(--white);
     }
 
     .login-input:focus {
       outline: none;
       border-color: var(--black);
-      background-color: white;
       box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
     }
 
     .login-error {
-      color: #dc3545;
+      color: var(--danger);
       font-size: 14px;
       text-align: center;
       display: none;
       background: #fee;
-      padding: 10px;
-      border-radius: 8px;
+      padding: 12px;
+      border-radius: 10px;
       border: 1px solid #fcc;
     }
 
@@ -242,9 +248,9 @@
 
     .login-btn {
       flex: 1;
-      padding: 14px;
+      padding: 16px;
       border: none;
-      border-radius: 12px;
+      border-radius: 15px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
@@ -254,12 +260,12 @@
     .login-btn.primary {
       background: var(--black);
       color: white;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     }
 
     .login-btn.primary:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
     }
 
     .login-btn.primary:disabled {
@@ -268,13 +274,14 @@
     }
 
     .login-btn.secondary {
-      background: #f8f9fa;
-      color: #6c757d;
-      border: 2px solid #e9ecef;
+      background: var(--gray-100);
+      color: var(--black);
+      border: 2px solid var(--gray-300);
     }
 
     .login-btn.secondary:hover {
-      background: #e9ecef;
+      background: var(--gray-200);
+      border-color: var(--black);
     }
 
     .loading-spinner {
@@ -297,466 +304,109 @@
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: 50px 20px;
     }
 
     /* Info Section */
     .info-section {
-      background-color: var(--gray-100);
-      border: 2px solid var(--black);
-      border-radius: 10px;
-      padding: 30px;
-      margin-bottom: 40px;
+      background-color: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 50px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+      position: relative;
     }
 
     .info-title {
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 20px;
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 30px;
       text-align: center;
+      text-transform: uppercase;
+      letter-spacing: -1px;
     }
 
     .info-content {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-bottom: 20px;
+      gap: 24px;
+      margin-bottom: 30px;
     }
 
     .info-item {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 15px;
+      padding: 15px;
+      background: var(--gray-100);
+      border-radius: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .info-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
 
     .info-icon {
-      width: 24px;
-      height: 24px;
+      width: 40px;
+      height: 40px;
       background-color: var(--black);
       color: var(--white);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 18px;
       font-weight: bold;
+      flex-shrink: 0;
     }
 
     .address-box {
-      background-color: var(--white);
-      border: 1px solid var(--black);
-      border-radius: 5px;
-      padding: 15px;
-      margin-top: 20px;
+      background-color: var(--black);
+      color: var(--white);
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 30px;
       text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .address-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
     .address-label {
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-
-    /* Admin Panel */
-    .admin-panel {
-      background-color: var(--gray-100);
-      border: 2px solid var(--black);
-      border-radius: 10px;
-      padding: 30px;
-      margin-bottom: 40px;
-      display: none;
-    }
-
-    .admin-panel.active {
-      display: block;
-    }
-
-    .admin-panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .admin-panel-title {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    .admin-panel-btn {
-      background-color: var(--black);
-      color: var(--white);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .admin-panel-btn:hover {
-      background-color: var(--gray-800);
-      transform: translateY(-2px);
-    }
-
-    /* Past Classes Toggle */
-    .past-classes-toggle {
-      background-color: var(--gray-100);
-      border: 2px solid var(--black);
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 30px;
-      display: none;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .past-classes-toggle.show {
-      display: flex;
-    }
-
-    .toggle-container {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .toggle-switch {
-      position: relative;
-      width: 60px;
-      height: 30px;
-      background-color: var(--gray-400);
-      border-radius: 30px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    .toggle-switch.active {
-      background-color: var(--black);
-    }
-
-    .toggle-slider {
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 24px;
-      height: 24px;
-      background-color: var(--white);
-      border-radius: 50%;
-      transition: transform 0.3s;
-    }
-
-    .toggle-switch.active .toggle-slider {
-      transform: translateX(30px);
-    }
-
-    .toggle-label {
-      font-weight: 600;
-    }
-
-    /* Classes Grid */
-    .classes-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 25px;
-      margin-bottom: 40px;
-    }
-
-    .class-card {
-      background-color: var(--white);
-      border: 2px solid var(--black);
-      border-radius: 10px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .class-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    }
-
-    .class-card.past {
-      opacity: 0.7;
-      border-color: var(--gray-400);
-    }
-
-    .class-header {
-      background-color: var(--black);
-      color: var(--white);
-      padding: 20px;
-      position: relative;
-    }
-
-    .class-card.past .class-header {
-      background-color: var(--gray-600);
-    }
-
-    .class-date {
+      font-weight: 700;
+      margin-bottom: 10px;
       font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 5px;
     }
 
-    .class-time {
-      font-size: 14px;
-      opacity: 0.9;
-      margin-bottom: 5px;
-    }
-
-    .class-type {
-      font-size: 14px;
-      opacity: 0.8;
-    }
-
-    .class-actions {
+    /* Edit Info Button */
+    .edit-info-btn {
       position: absolute;
-      top: 15px;
-      right: 15px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: flex-end;
-    }
-
-    .class-action-btn {
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      color: var(--white);
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-
-    .class-action-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .class-action-btn.edit {
-      background: rgba(33, 150, 243, 0.2);
-      border-color: rgba(33, 150, 243, 0.3);
-    }
-
-    .class-action-btn.edit:hover {
-      background: rgba(33, 150, 243, 0.4);
-    }
-
-    .class-action-btn.delete {
-      background: rgba(220, 53, 69, 0.2);
-      border-color: rgba(220, 53, 69, 0.3);
-    }
-
-    .class-action-btn.delete:hover {
-      background: rgba(220, 53, 69, 0.4);
-    }
-
-    .class-body {
-      padding: 20px;
-    }
-
-    .spots-indicator {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid var(--gray-300);
-    }
-
-    .spots-filled {
-      font-weight: bold;
-    }
-
-    .spots-available {
-      font-size: 14px;
-      color: var(--gray-600);
-    }
-
-    .students-list {
-      margin-bottom: 20px;
-    }
-
-    .list-section {
-      margin-bottom: 20px;
-    }
-
-    .list-title {
-      font-weight: bold;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .list-badge {
-      background: var(--info);
-      color: var(--white);
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-size: 12px;
-    }
-
-    .student-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      margin-bottom: 10px;
-      background-color: var(--gray-100);
-      border-radius: 5px;
-    }
-
-    .standby-item {
-      border: 1px dashed var(--gray-400);
-      background-color: var(--white);
-    }
-
-    .student-number {
-      font-weight: bold;
-      margin-right: 10px;
-    }
-
-    .student-name {
-      flex: 1;
-    }
-
-    .student-email {
-      font-size: 12px;
-      color: var(--gray-600);
-      margin-left: 10px;
-    }
-
-    .late-cancel-badge {
-      background-color: var(--warning);
-      color: var(--black);
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-size: 12px;
-      font-weight: bold;
-      margin-left: 10px;
-    }
-
-    .late-cancel-separator {
-      border-top: 2px dashed var(--gray-400);
-      margin: 20px 0;
-      padding-top: 15px;
-    }
-
-    .remove-btn {
-      background-color: transparent;
-      border: 1px solid var(--danger);
-      color: var(--danger);
-      padding: 4px 8px;
-      border-radius: 3px;
-      cursor: pointer;
-      font-size: 12px;
-      opacity: 0;
-      transition: all 0.3s ease;
-    }
-
-    .student-item:hover .remove-btn,
-    .standby-item:hover .remove-btn {
-      opacity: 1;
-    }
-
-    .remove-btn:hover {
-      background-color: var(--danger);
-      color: var(--white);
-    }
-
-    .empty-slot {
-      padding: 12px;
-      margin-bottom: 10px;
-      border: 1px dashed var(--gray-400);
-      border-radius: 5px;
-      text-align: center;
-      color: var(--gray-500);
-    }
-
-    .join-section {
-      margin-top: 20px;
-    }
-
-    .join-inputs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .join-input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid var(--black);
-      border-radius: 5px;
-      font-size: 16px;
-    }
-
-    .join-input:focus {
-      outline: none;
-      border-color: var(--gray-700);
-    }
-
-    .join-buttons {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-
-    .join-btn {
-      width: 100%;
-      background-color: var(--black);
+      top: 20px;
+      right: 20px;
+      background: var(--black);
       color: var(--white);
       border: none;
-      padding: 12px;
-      border-radius: 5px;
+      padding: 8px 16px;
+      border-radius: 20px;
       cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 13px;
+      font-weight: 600;
       transition: all 0.3s ease;
     }
 
-    .join-btn:hover:not(:disabled) {
-      background-color: var(--gray-800);
+    .edit-info-btn:hover {
+      background: var(--gray-800);
       transform: translateY(-2px);
     }
 
-    .join-btn:disabled {
-      background-color: var(--gray-400);
-      cursor: not-allowed;
-    }
-
-    .join-btn.standby {
-      background-color: var(--info);
-    }
-
-    .join-btn.standby:hover:not(:disabled) {
-      background-color: #138496;
-    }
-
-    .class-full {
-      background-color: var(--gray-100);
-      border-color: var(--gray-400);
-    }
-
-    .class-full .class-header {
-      background-color: var(--gray-600);
-    }
-
-    .class-expired-notice {
-      background-color: var(--gray-100);
-      border: 1px solid var(--gray-400);
-      border-radius: 5px;
-      padding: 15px;
-      text-align: center;
-      color: var(--gray-600);
-      font-style: italic;
-    }
-
-    /* Add Class Modal Styles */
-    .modal {
+    /* Edit Info Modal */
+    .edit-info-modal {
       display: none;
       position: fixed;
       top: 0;
@@ -769,80 +419,670 @@
       justify-content: center;
     }
 
+    .edit-info-modal.active {
+      display: flex;
+    }
+
+    .edit-info-content {
+      background-color: var(--white);
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .edit-info-header {
+      background: var(--black);
+      color: white;
+      padding: 30px;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .edit-info-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .edit-info-body {
+      padding: 30px;
+    }
+
+    .edit-info-group {
+      margin-bottom: 20px;
+    }
+
+    .edit-info-label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .edit-info-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--gray-300);
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    .edit-info-input:focus {
+      outline: none;
+      border-color: var(--black);
+    }
+
+    .edit-info-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--gray-300);
+      border-radius: 10px;
+      font-size: 16px;
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .edit-info-textarea:focus {
+      outline: none;
+      border-color: var(--black);
+    }
+
+    .edit-info-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .edit-info-save,
+    .edit-info-cancel {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .edit-info-save {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .edit-info-save:hover {
+      background: var(--gray-800);
+      transform: translateY(-2px);
+    }
+
+    .edit-info-cancel {
+      background: var(--gray-100);
+      color: var(--black);
+      border: 2px solid var(--gray-300);
+    }
+
+    .edit-info-cancel:hover {
+      background: var(--gray-200);
+      border-color: var(--black);
+    }
+
+    /* Admin Panel */
+    .admin-panel {
+      background-color: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 50px;
+      display: none;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    }
+
+    .admin-panel.active {
+      display: block;
+    }
+
+    .admin-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .admin-panel-title {
+      font-size: 28px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .admin-panel-btn {
+      background-color: var(--black);
+      color: var(--white);
+      border: none;
+      padding: 14px 28px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+    }
+
+    .admin-panel-btn:hover {
+      background-color: var(--white);
+      color: var(--black);
+      border: 2px solid var(--black);
+      transform: translateY(-2px);
+    }
+
+    /* Past Classes Toggle */
+    .past-classes-toggle {
+      background-color: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 20px;
+      padding: 25px 30px;
+      margin-bottom: 40px;
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+
+    .past-classes-toggle.show {
+      display: flex;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 70px;
+      height: 35px;
+      background-color: var(--gray-300);
+      border-radius: 35px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      border: 2px solid var(--black);
+    }
+
+    .toggle-switch.active {
+      background-color: var(--black);
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      width: 25px;
+      height: 25px;
+      background-color: var(--white);
+      border-radius: 50%;
+      transition: transform 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(35px);
+    }
+
+    .toggle-label {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    /* Classes Grid */
+    .classes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .class-card {
+      background-color: var(--white);
+      border: 3px solid var(--black);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+
+    .class-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+    }
+
+    .class-card.past {
+      opacity: 0.7;
+      border-color: var(--gray-400);
+    }
+
+    .class-header {
+      background-color: var(--black);
+      color: var(--white);
+      padding: 25px;
+      position: relative;
+    }
+
+    .class-card.past .class-header {
+      background-color: var(--gray-600);
+    }
+
+    .class-date {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .class-time {
+      font-size: 16px;
+      opacity: 0.9;
+      margin-bottom: 6px;
+    }
+
+    .class-type {
+      font-size: 15px;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .class-actions {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+
+    .class-action-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: var(--white);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .class-action-btn:hover {
+      background: var(--white);
+      color: var(--black);
+      border-color: var(--white);
+    }
+
+    .class-action-btn.edit {
+      background: rgba(33, 150, 243, 0.2);
+      border-color: rgba(33, 150, 243, 0.3);
+    }
+
+    .class-action-btn.edit:hover {
+      background: #2196F3;
+      color: var(--white);
+      border-color: #2196F3;
+    }
+
+    .class-action-btn.delete {
+      background: rgba(220, 53, 69, 0.2);
+      border-color: rgba(220, 53, 69, 0.3);
+    }
+
+    .class-action-btn.delete:hover {
+      background: var(--danger);
+      color: var(--white);
+      border-color: var(--danger);
+    }
+
+    .class-body {
+      padding: 25px;
+    }
+
+    .spots-indicator {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    .spots-filled {
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .spots-available {
+      font-size: 15px;
+      color: var(--gray-600);
+      font-weight: 600;
+    }
+
+    .students-list {
+      margin-bottom: 25px;
+    }
+
+    .list-section {
+      margin-bottom: 25px;
+    }
+
+    .list-title {
+      font-weight: 800;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .list-badge {
+      background: var(--black);
+      color: var(--white);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .student-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      margin-bottom: 12px;
+      background-color: var(--gray-100);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .student-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .standby-item {
+      border: 2px dashed var(--gray-400);
+      background-color: var(--white);
+    }
+
+    .student-number {
+      font-weight: 800;
+      margin-right: 12px;
+      font-size: 16px;
+    }
+
+    .student-name {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    .student-email {
+      font-size: 13px;
+      color: var(--gray-600);
+      margin-left: 12px;
+    }
+
+    .late-cancel-badge {
+      background-color: var(--warning);
+      color: var(--black);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-left: 12px;
+    }
+
+    .late-cancel-separator {
+      border-top: 3px dashed var(--gray-400);
+      margin: 25px 0;
+      padding-top: 20px;
+    }
+
+    .remove-btn {
+      background-color: transparent;
+      border: 2px solid var(--danger);
+      color: var(--danger);
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .student-item:hover .remove-btn,
+    .standby-item:hover .remove-btn {
+      opacity: 1;
+    }
+
+    .remove-btn:hover {
+      background-color: var(--danger);
+      color: var(--white);
+      transform: scale(1.05);
+    }
+
+    .empty-slot {
+      padding: 15px;
+      margin-bottom: 12px;
+      border: 2px dashed var(--gray-300);
+      border-radius: 12px;
+      text-align: center;
+      color: var(--gray-500);
+      font-weight: 500;
+    }
+
+    .join-section {
+      margin-top: 30px;
+      padding-top: 25px;
+      border-top: 2px solid var(--gray-200);
+    }
+
+    .join-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .join-input {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid var(--black);
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .join-input:focus {
+      outline: none;
+      border-color: var(--gray-700);
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.1);
+    }
+
+    .join-buttons {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .join-btn {
+      width: 100%;
+      background-color: var(--black);
+      color: var(--white);
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .join-btn:hover:not(:disabled) {
+      background-color: var(--gray-800);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .join-btn:disabled {
+      background-color: var(--gray-400);
+      cursor: not-allowed;
+    }
+
+    .join-btn.standby {
+      background-color: var(--gray-700);
+    }
+
+    .join-btn.standby:hover:not(:disabled) {
+      background-color: var(--black);
+    }
+
+    .class-full {
+      background-color: var(--gray-100);
+    }
+
+    .class-full .class-header {
+      background-color: var(--gray-700);
+    }
+
+    .class-expired-notice {
+      background-color: var(--gray-100);
+      border: 2px solid var(--gray-400);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      color: var(--gray-600);
+      font-style: italic;
+      font-weight: 500;
+    }
+
+    /* Add Class Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.85);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+    }
+
     .modal.active {
       display: flex;
     }
 
     .modal-content {
       background-color: var(--white);
-      border-radius: 10px;
-      max-width: 800px;
+      border-radius: 25px;
+      max-width: 850px;
       width: 90%;
       max-height: 90vh;
       overflow-y: auto;
       position: relative;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.3);
     }
 
     .modal-close {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      background: none;
-      border: none;
-      color: var(--white);
+      top: 25px;
+      right: 25px;
+      background: var(--white);
+      border: 2px solid var(--black);
+      color: var(--black);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
       font-size: 24px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .modal-close:hover {
+      background: var(--black);
+      color: var(--white);
+      transform: rotate(90deg);
     }
 
     .modal-title {
-      font-size: 20px;
-      font-weight: bold;
+      font-size: 24px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
     }
 
     /* Compact Calendar Styles */
     .calendar-container {
-      margin-bottom: 20px;
-      max-width: 350px;
+      margin-bottom: 25px;
+      max-width: 380px;
+      background: var(--gray-100);
+      padding: 20px;
+      border-radius: 15px;
     }
 
     .calendar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
     }
 
     .calendar-nav {
       display: flex;
-      gap: 5px;
+      gap: 8px;
     }
 
     .calendar-nav-btn {
       background: var(--black);
       color: var(--white);
       border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
+      padding: 8px 14px;
+      border-radius: 20px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
     }
 
     .calendar-nav-btn:hover {
       background: var(--gray-800);
+      transform: scale(1.1);
     }
 
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 2px;
+      gap: 3px;
     }
 
     .calendar-day-header {
       text-align: center;
-      font-weight: bold;
-      padding: 8px 0;
-      background: var(--gray-100);
-      border-radius: 3px;
+      font-weight: 700;
+      padding: 10px 0;
+      background: var(--black);
+      color: var(--white);
+      border-radius: 8px;
       font-size: 12px;
     }
 
@@ -851,18 +1091,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid var(--gray-300);
-      border-radius: 4px;
+      border: 2px solid var(--gray-300);
+      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s;
-      font-weight: 500;
-      font-size: 13px;
-      padding: 8px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      font-size: 14px;
+      background: var(--white);
     }
 
     .calendar-day:hover {
       border-color: var(--black);
       background: var(--gray-100);
+      transform: scale(1.1);
     }
 
     .calendar-day.selected {
@@ -873,13 +1114,27 @@
 
     .calendar-day.other-month {
       color: var(--gray-400);
+      background: var(--gray-100);
     }
 
     .calendar-day.today {
-      border-color: var(--warning);
-      background: var(--warning);
+      border-color: var(--black);
+      background: var(--white);
       color: var(--black);
-      font-weight: 600;
+      font-weight: 800;
+      position: relative;
+    }
+
+    .calendar-day.today::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: var(--black);
+      border-radius: 50%;
     }
 
     /* Time Selection */
@@ -887,74 +1142,83 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
 
     .form-label {
       display: block;
-      font-weight: 600;
-      margin-bottom: 8px;
-      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .form-input {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       border: 2px solid var(--black);
-      border-radius: 5px;
+      border-radius: 12px;
       font-size: 16px;
+      transition: all 0.3s ease;
     }
 
     .form-input:focus {
       outline: none;
       border-color: var(--gray-700);
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.1);
     }
 
     .form-select {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       border: 2px solid var(--black);
-      border-radius: 5px;
+      border-radius: 12px;
       font-size: 16px;
       background-color: var(--white);
       cursor: pointer;
+      transition: all 0.3s ease;
     }
 
     .form-select:focus {
       outline: none;
       border-color: var(--gray-700);
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.1);
     }
 
     /* Class Size Input */
     .size-input {
-      width: 100px;
+      width: 120px;
     }
 
     /* Class Type Buttons */
     .class-type-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 15px;
       margin-bottom: 20px;
     }
 
     .class-type-btn {
-      padding: 15px 20px;
-      border: 2px solid var(--black);
+      padding: 18px 24px;
+      border: 3px solid var(--black);
       background: var(--white);
-      border-radius: 8px;
+      border-radius: 15px;
       cursor: pointer;
       transition: all 0.3s ease;
       text-align: center;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 15px;
     }
 
     .class-type-btn:hover {
       background: var(--gray-100);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
 
     .class-type-btn.selected {
@@ -964,42 +1228,50 @@
 
     .custom-type-input {
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       border: 2px solid var(--black);
-      border-radius: 5px;
+      border-radius: 12px;
       font-size: 16px;
-      margin-top: 10px;
+      margin-top: 12px;
       display: none;
+      transition: all 0.3s ease;
     }
 
     .custom-type-input.show {
       display: block;
     }
 
+    .custom-type-input:focus {
+      outline: none;
+      border-color: var(--gray-700);
+      box-shadow: 0 0 0 4px rgba(0,0,0,0.1);
+    }
+
     /* Repeat Options */
     .repeat-section {
       background: var(--gray-100);
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 25px;
     }
 
     .repeat-checkbox {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     .repeat-checkbox input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       cursor: pointer;
+      accent-color: var(--black);
     }
 
     .repeat-options {
       display: none;
-      margin-top: 15px;
+      margin-top: 20px;
     }
 
     .repeat-options.show {
@@ -1008,22 +1280,24 @@
 
     .weekday-selection {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     .weekday-btn {
-      padding: 8px 15px;
+      padding: 10px 18px;
       border: 2px solid var(--gray-400);
       background: var(--white);
-      border-radius: 5px;
+      border-radius: 25px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
+      font-weight: 600;
     }
 
     .weekday-btn:hover {
       border-color: var(--black);
+      transform: translateY(-2px);
     }
 
     .weekday-btn.selected {
@@ -1037,27 +1311,32 @@
       background-color: var(--black);
       color: var(--white);
       border: none;
-      padding: 12px;
-      border-radius: 5px;
+      padding: 18px;
+      border-radius: 15px;
       cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 18px;
+      font-weight: 800;
       transition: all 0.3s ease;
-      margin-top: 10px;
+      margin-top: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .form-btn:hover {
       background-color: var(--gray-800);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
 
     /* Time Conflict Warning */
     .conflict-warning {
       background-color: var(--danger);
       color: var(--white);
-      padding: 15px;
-      border-radius: 5px;
-      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
       display: none;
+      font-weight: 600;
     }
 
     .conflict-warning.show {
@@ -1065,23 +1344,23 @@
     }
 
     .conflict-list {
-      margin-top: 10px;
-      font-size: 14px;
+      margin-top: 12px;
+      font-size: 15px;
     }
 
     /* Notifications */
     .notification {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 30px;
+      right: 30px;
       background-color: var(--black);
       color: var(--white);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      padding: 20px 25px;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
       transform: translateX(400px);
       transition: transform 0.3s ease;
-      max-width: 350px;
+      max-width: 380px;
       z-index: 3000;
     }
 
@@ -1090,12 +1369,15 @@
     }
 
     .notification-title {
-      font-weight: bold;
-      margin-bottom: 5px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      font-size: 16px;
+      text-transform: uppercase;
     }
 
     .notification-message {
-      font-size: 14px;
+      font-size: 15px;
+      line-height: 1.5;
     }
 
     .notification.warning {
@@ -1116,8 +1398,10 @@
     /* Loading */
     .loading {
       text-align: center;
-      padding: 40px;
+      padding: 60px;
       color: var(--gray-600);
+      font-size: 18px;
+      font-weight: 600;
     }
 
     .loading::after {
@@ -1134,11 +1418,13 @@
 
     /* Section Headers */
     .section-header {
-      font-size: 20px;
-      font-weight: bold;
-      margin: 30px 0 20px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--black);
+      font-size: 24px;
+      font-weight: 800;
+      margin: 40px 0 30px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid var(--black);
+      text-transform: uppercase;
+      letter-spacing: -0.5px;
     }
 
     /* Responsive */
@@ -1153,12 +1439,12 @@
 
       .header-content {
         flex-direction: column;
-        gap: 15px;
+        gap: 20px;
       }
 
       .admin-logged-in {
         position: static;
-        margin-top: 10px;
+        margin-top: 15px;
       }
 
       .class-type-container {
@@ -1179,7 +1465,7 @@
 
       .past-classes-toggle {
         flex-direction: column;
-        gap: 15px;
+        gap: 20px;
       }
 
       .past-classes-toggle.show {
@@ -1254,25 +1540,73 @@
   <!-- Main Container -->
   <div class="container">
     <!-- Info Section -->
-    <div class="info-section">
+    <div class="info-section" id="infoSection">
       <h1 class="info-title">Group Class Schedule</h1>
-      <div class="info-content">
+      <button class="edit-info-btn" id="editInfoBtn" style="display: none;">✏️ Edit Info</button>
+      <div class="info-content" id="infoContent">
         <div class="info-item">
           <div class="info-icon">👥</div>
-          <span>Minimum students: 2</span>
+          <span id="infoItem1">Minimum students: 2</span>
         </div>
         <div class="info-item">
           <div class="info-icon">📊</div>
-          <span>Flexible class size + standby</span>
+          <span id="infoItem2">Flexible class size + standby</span>
         </div>
         <div class="info-item">
           <div class="info-icon">⏰</div>
-          <span>Late cancellation: Contact coach if within 1 hour</span>
+          <span id="infoItem3">Late cancellation: Contact coach if within 1 hour</span>
         </div>
       </div>
       <div class="address-box">
-        <div class="address-label">📍 Address</div>
-        <div>Flat C, 11th floor, Po Hon Building, 24-30 Percival St, Causeway Bay</div>
+        <div class="address-label" id="addressLabel">📍 Address</div>
+        <div id="addressText">Flat C, 11th floor, Po Hon Building, 24-30 Percival St, Causeway Bay</div>
+      </div>
+    </div>
+
+    <!-- Edit Info Modal -->
+    <div class="edit-info-modal" id="editInfoModal">
+      <div class="edit-info-content">
+        <div class="edit-info-header">
+          <h3 class="edit-info-title">Edit Information</h3>
+        </div>
+        <div class="edit-info-body">
+          <div class="edit-info-group">
+            <label class="edit-info-label">Info Item 1 Icon</label>
+            <input type="text" class="edit-info-input" id="editInfoIcon1" value="👥">
+          </div>
+          <div class="edit-info-group">
+            <label class="edit-info-label">Info Item 1 Text</label>
+            <input type="text" class="edit-info-input" id="editInfoText1" value="Minimum students: 2">
+          </div>
+          <div class="edit-info-group">
+            <label class="edit-info-label">Info Item 2 Icon</label>
+            <input type="text" class="edit-info-input" id="editInfoIcon2" value="📊">
+          </div>
+          <div class="edit-info-group">
+            <label class="edit-info-label">Info Item 2 Text</label>
+            <input type="text" class="edit-info-input" id="editInfoText2" value="Flexible class size + standby">
+          </div>
+          <div class="edit-info-group">
+            <label class="edit-info-label">Info Item 3 Icon</label>
+            <input type="text" class="edit-info-input" id="editInfoIcon3" value="⏰">
+          </div>
+          <div class="edit-info-group">
+            <label class="edit-info-label">Info Item 3 Text</label>
+            <input type="text" class="edit-info-input" id="editInfoText3" value="Late cancellation: Contact coach if within 1 hour">
+          </div>
+          <div class="edit-info-group">
+            <label class="edit-info-label">Address Label</label>
+            <input type="text" class="edit-info-input" id="editAddressLabel" value="📍 Address">
+          </div>
+          <div class="edit-info-group">
+            <label class="edit-info-label">Address Text</label>
+            <textarea class="edit-info-textarea" id="editAddressText">Flat C, 11th floor, Po Hon Building, 24-30 Percival St, Causeway Bay</textarea>
+          </div>
+          <div class="edit-info-buttons">
+            <button class="edit-info-save" id="saveInfoBtn">Save Changes</button>
+            <button class="edit-info-cancel" id="cancelInfoBtn">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1292,7 +1626,7 @@
           <div class="toggle-slider"></div>
         </div>
       </div>
-      <div id="classesCount" style="font-size: 14px; color: var(--gray-600);"></div>
+      <div id="classesCount" style="font-size: 16px; color: var(--gray-700); font-weight: 600;"></div>
     </div>
 
     <!-- Upcoming Classes Section -->
@@ -1315,11 +1649,11 @@
   <!-- Add Class Modal -->
   <div class="modal" id="addClassModal">
     <div class="modal-content">
-      <div class="modal-header" style="background: var(--black); color: white; padding: 20px;">
+      <div class="modal-header" style="background: var(--black); color: white; padding: 30px;">
         <h3 class="modal-title" id="addClassTitle">Add New Class</h3>
         <button class="modal-close" id="closeAddClassModal">&times;</button>
       </div>
-      <div class="modal-body" style="padding: 30px;">
+      <div class="modal-body" style="padding: 40px;">
         <form id="addClassForm">
           <input type="hidden" id="editingClassId">
           
@@ -1345,7 +1679,7 @@
               </div>
             </div>
             <input type="hidden" id="classDate" required>
-            <div id="selectedDateDisplay" style="margin-top: 10px; font-weight: bold;"></div>
+            <div id="selectedDateDisplay" style="margin-top: 15px; font-weight: 700; font-size: 16px;"></div>
           </div>
 
           <!-- Time Selection with Dropdowns -->
@@ -1387,7 +1721,7 @@
           <div class="repeat-section">
             <div class="repeat-checkbox">
               <input type="checkbox" id="enableRepeat">
-              <label for="enableRepeat" style="margin: 0; font-weight: 600;">Create weekly recurring classes</label>
+              <label for="enableRepeat" style="margin: 0; font-weight: 700;">Create weekly recurring classes</label>
             </div>
             
             <div class="repeat-options" id="repeatOptions">
@@ -1436,6 +1770,9 @@
     window.duplicateClass = function() {};
     window.editClass = function() {};
     window.deleteClass = function() {};
+    window.showEditInfo = function() {};
+    window.closeEditInfo = function() {};
+    window.saveInfo = function() {};
   </script>
 
   <!-- Firebase -->
@@ -1503,14 +1840,42 @@
       return classDateTime < now;
     }
 
+    // Find the closest time to current time
+    function findClosestTime() {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentTotalMinutes = currentHour * 60 + currentMinute;
+      
+      let closestTime = '09:00'; // Default to 9:00 AM
+      let closestDiff = Math.abs(9 * 60 - currentTotalMinutes);
+      
+      // Check all available times
+      for (let hour = 9; hour <= 22; hour++) {
+        for (let minute = 0; minute < 60; minute += 15) {
+          const totalMinutes = hour * 60 + minute;
+          const diff = Math.abs(totalMinutes - currentTotalMinutes);
+          
+          if (diff < closestDiff) {
+            closestDiff = diff;
+            closestTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          }
+        }
+      }
+      
+      return closestTime;
+    }
+
     // Generate time options for dropdowns
-    function generateTimeOptions() {
+    function generateTimeOptions(shouldSelectClosest = false) {
       const startSelect = document.getElementById('classStartTime');
       const endSelect = document.getElementById('classEndTime');
       
       // Clear existing options
       startSelect.innerHTML = '<option value="">Select time</option>';
       endSelect.innerHTML = '<option value="">Select time</option>';
+      
+      const closestTime = shouldSelectClosest ? findClosestTime() : null;
       
       // Generate time options from 9:00 to 22:00 with 15-minute intervals
       for (let hour = 9; hour <= 22; hour++) {
@@ -1521,12 +1886,28 @@
           const startOption = document.createElement('option');
           startOption.value = time;
           startOption.textContent = displayTime;
+          if (shouldSelectClosest && time === closestTime) {
+            startOption.selected = true;
+          }
           startSelect.appendChild(startOption);
           
           const endOption = document.createElement('option');
           endOption.value = time;
           endOption.textContent = displayTime;
           endSelect.appendChild(endOption);
+        }
+      }
+      
+      // If closest time was selected, auto-select end time (1 hour later)
+      if (shouldSelectClosest && closestTime) {
+        const [hours, minutes] = closestTime.split(':').map(Number);
+        const totalMinutes = hours * 60 + minutes + 60;
+        const endHours = Math.floor(totalMinutes / 60);
+        const endMinutes = totalMinutes % 60;
+        const endTime = `${endHours.toString().padStart(2, '0')}:${endMinutes.toString().padStart(2, '0')}`;
+        
+        if (endHours <= 22) {
+          document.getElementById('classEndTime').value = endTime;
         }
       }
     }
@@ -1538,6 +1919,75 @@
       const ampm = h >= 12 ? 'PM' : 'AM';
       const displayHour = h > 12 ? h - 12 : (h === 0 ? 12 : h);
       return `${displayHour}:${minute} ${ampm}`;
+    }
+
+    // Load info content from Firebase
+    async function loadInfoContent() {
+      try {
+        const snapshot = await get(ref(database, 'siteInfo'));
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          document.getElementById('infoItem1').textContent = data.item1Text || 'Minimum students: 2';
+          document.getElementById('infoItem2').textContent = data.item2Text || 'Flexible class size + standby';
+          document.getElementById('infoItem3').textContent = data.item3Text || 'Late cancellation: Contact coach if within 1 hour';
+          document.getElementById('addressLabel').textContent = data.addressLabel || '📍 Address';
+          document.getElementById('addressText').textContent = data.addressText || 'Flat C, 11th floor, Po Hon Building, 24-30 Percival St, Causeway Bay';
+          
+          // Update icons
+          document.querySelector('#infoContent .info-item:nth-child(1) .info-icon').textContent = data.item1Icon || '👥';
+          document.querySelector('#infoContent .info-item:nth-child(2) .info-icon').textContent = data.item2Icon || '📊';
+          document.querySelector('#infoContent .info-item:nth-child(3) .info-icon').textContent = data.item3Icon || '⏰';
+        }
+      } catch (error) {
+        console.error('Error loading info content:', error);
+      }
+    }
+
+    // Show edit info modal
+    function showEditInfo() {
+      if (!currentUser) return;
+      
+      // Populate current values
+      document.getElementById('editInfoIcon1').value = document.querySelector('#infoContent .info-item:nth-child(1) .info-icon').textContent;
+      document.getElementById('editInfoText1').value = document.getElementById('infoItem1').textContent;
+      document.getElementById('editInfoIcon2').value = document.querySelector('#infoContent .info-item:nth-child(2) .info-icon').textContent;
+      document.getElementById('editInfoText2').value = document.getElementById('infoItem2').textContent;
+      document.getElementById('editInfoIcon3').value = document.querySelector('#infoContent .info-item:nth-child(3) .info-icon').textContent;
+      document.getElementById('editInfoText3').value = document.getElementById('infoItem3').textContent;
+      document.getElementById('editAddressLabel').value = document.getElementById('addressLabel').textContent;
+      document.getElementById('editAddressText').value = document.getElementById('addressText').textContent;
+      
+      document.getElementById('editInfoModal').classList.add('active');
+    }
+
+    // Close edit info modal
+    function closeEditInfo() {
+      document.getElementById('editInfoModal').classList.remove('active');
+    }
+
+    // Save info content
+    async function saveInfo() {
+      const infoData = {
+        item1Icon: document.getElementById('editInfoIcon1').value,
+        item1Text: document.getElementById('editInfoText1').value,
+        item2Icon: document.getElementById('editInfoIcon2').value,
+        item2Text: document.getElementById('editInfoText2').value,
+        item3Icon: document.getElementById('editInfoIcon3').value,
+        item3Text: document.getElementById('editInfoText3').value,
+        addressLabel: document.getElementById('editAddressLabel').value,
+        addressText: document.getElementById('editAddressText').value,
+        updatedAt: Date.now()
+      };
+      
+      try {
+        await set(ref(database, 'siteInfo'), infoData);
+        closeEditInfo();
+        loadInfoContent(); // Reload the content
+        showNotification('Information updated successfully!', 'success');
+      } catch (error) {
+        console.error('Error saving info:', error);
+        showNotification('Error updating information', 'error');
+      }
     }
 
     // Firebase Email Queue Function
@@ -1748,8 +2198,8 @@
         document.getElementById('enableRepeat').disabled = false;
       }
       
-      // Generate time options
-      generateTimeOptions();
+      // Generate time options (select closest time only for new classes)
+      generateTimeOptions(!classData && !isEdit);
       
       if (classData) {
         // Pre-fill form with class data
@@ -1888,9 +2338,15 @@
     window.duplicateClass = duplicateClass;
     window.editClass = editClass;
     window.deleteClass = deleteClass;
+    window.showEditInfo = showEditInfo;
+    window.closeEditInfo = closeEditInfo;
+    window.saveInfo = saveInfo;
 
     // Event listeners using addEventListener instead of onclick
     document.addEventListener('DOMContentLoaded', function() {
+      // Load info content
+      loadInfoContent();
+      
       // Admin login link
       document.getElementById('adminLoginLink').addEventListener('click', showAdminLogin);
       
@@ -1908,6 +2364,15 @@
       
       // Past classes toggle
       document.getElementById('pastClassesSwitch').addEventListener('click', togglePastClasses);
+      
+      // Edit info button
+      document.getElementById('editInfoBtn').addEventListener('click', showEditInfo);
+      
+      // Save info button
+      document.getElementById('saveInfoBtn').addEventListener('click', saveInfo);
+      
+      // Cancel info button
+      document.getElementById('cancelInfoBtn').addEventListener('click', closeEditInfo);
       
       // Calendar navigation
       document.getElementById('prevMonth').addEventListener('click', () => {
@@ -1984,6 +2449,13 @@
           closeAdminLogin();
         }
       });
+      
+      // Click outside to close edit info modal
+      document.getElementById('editInfoModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeEditInfo();
+        }
+      });
     });
 
     // Auth state observer
@@ -1993,6 +2465,7 @@
       const adminEmailSpan = document.getElementById('adminEmail');
       const adminPanel = document.getElementById('adminPanel');
       const pastClassesToggle = document.getElementById('pastClassesToggle');
+      const editInfoBtn = document.getElementById('editInfoBtn');
       
       if (user) {
         currentUser = user;
@@ -2002,12 +2475,14 @@
         adminEmail = user.email; // Update admin email
         adminPanel.classList.add('active');
         pastClassesToggle.classList.add('show');
+        editInfoBtn.style.display = 'block';
       } else {
         currentUser = null;
         adminLoginLink.style.display = 'block';
         adminLoggedIn.style.display = 'none';
         adminPanel.classList.remove('active');
         pastClassesToggle.classList.remove('show');
+        editInfoBtn.style.display = 'none';
         // Reset past classes view
         showPastClasses = false;
         document.getElementById('pastClassesSwitch').classList.remove('active');
