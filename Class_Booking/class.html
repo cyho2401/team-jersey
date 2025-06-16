@@ -62,27 +62,234 @@
       letter-spacing: -1px;
     }
 
-    .admin-section {
+    /* Admin section - 與 fungbird 相同的樣式 */
+    .admin-link {
+      position: relative;
+    }
+
+    .admin-link > a {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+      cursor: pointer;
+      background-color: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 8px 20px;
+      border-radius: 25px;
+    }
+
+    .admin-link > a:hover {
+      opacity: 1;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .admin-logged-in {
+      display: none;
+      background: var(--white);
+      color: var(--black);
+      padding: 10px 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .admin-info {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 15px;
+      font-size: 14px;
+    }
+
+    .admin-email {
+      font-weight: 500;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 10px;
     }
 
     .admin-btn {
-      background-color: var(--white);
-      color: var(--black);
-      border: none;
-      padding: 8px 20px;
-      border-radius: 25px;
+      padding: 6px 14px;
+      background: var(--black);
+      color: var(--white);
+      border: 1px solid var(--black);
+      border-radius: 8px;
+      font-size: 13px;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.3s ease;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-block;
     }
 
     .admin-btn:hover {
+      background: var(--gray-800);
+      transform: translateY(-1px);
+    }
+
+    /* Admin Login Modal - 與 fungbird 相同的樣式 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-modal {
+      background: white;
+      border-radius: 20px;
+      padding: 0;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: modalAppear 0.3s ease forwards;
+    }
+
+    @keyframes modalAppear {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      background: var(--black);
+      padding: 30px;
+      text-align: center;
+      color: white;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #344054;
+    }
+
+    .login-input {
+      padding: 14px 18px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+
+    .login-input:focus {
+      outline: none;
+      border-color: var(--black);
+      background-color: white;
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-error {
+      color: #dc3545;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+      background: #fee;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #fcc;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    .login-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .login-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn.primary {
+      background: var(--black);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-btn.primary:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(255,255,255,0.2);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .login-btn.primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .login-btn.secondary {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 2px solid #e9ecef;
+    }
+
+    .login-btn.secondary:hover {
+      background: #e9ecef;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     /* Container */
@@ -148,6 +355,49 @@
       margin-bottom: 5px;
     }
 
+    /* Admin Panel */
+    .admin-panel {
+      background-color: var(--gray-100);
+      border: 2px solid var(--black);
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 40px;
+      display: none;
+    }
+
+    .admin-panel.active {
+      display: block;
+    }
+
+    .admin-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .admin-panel-title {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .admin-panel-btn {
+      background-color: var(--black);
+      color: var(--white);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .admin-panel-btn:hover {
+      background-color: var(--gray-800);
+      transform: translateY(-2px);
+    }
+
     /* Classes Grid */
     .classes-grid {
       display: grid;
@@ -162,7 +412,6 @@
       border-radius: 10px;
       overflow: hidden;
       transition: all 0.3s ease;
-      position: relative;
     }
 
     .class-card:hover {
@@ -227,7 +476,6 @@
       margin-bottom: 10px;
       background-color: var(--gray-100);
       border-radius: 5px;
-      position: relative;
     }
 
     .student-number {
@@ -357,18 +605,6 @@
       position: relative;
     }
 
-    .modal-header {
-      background-color: var(--black);
-      color: var(--white);
-      padding: 20px;
-      border-radius: 10px 10px 0 0;
-    }
-
-    .modal-title {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
     .modal-close {
       position: absolute;
       top: 20px;
@@ -380,18 +616,13 @@
       cursor: pointer;
     }
 
-    .modal-body {
-      padding: 30px;
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
     }
 
     .form-group {
       margin-bottom: 20px;
-    }
-
-    .form-label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 8px;
     }
 
     .form-input, .form-select {
@@ -423,16 +654,6 @@
 
     .form-btn:hover {
       background-color: var(--gray-800);
-    }
-
-    .form-btn.secondary {
-      background-color: var(--white);
-      color: var(--black);
-      border: 2px solid var(--black);
-    }
-
-    .form-btn.secondary:hover {
-      background-color: var(--gray-100);
     }
 
     /* Notifications */
@@ -469,48 +690,6 @@
       color: var(--black);
     }
 
-    /* Admin Panel */
-    .admin-panel {
-      background-color: var(--gray-100);
-      border: 2px solid var(--black);
-      border-radius: 10px;
-      padding: 30px;
-      margin-bottom: 40px;
-      display: none;
-    }
-
-    .admin-panel.active {
-      display: block;
-    }
-
-    .admin-panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .admin-panel-title {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .info-content {
-        grid-template-columns: 1fr;
-      }
-
-      .classes-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .header-content {
-        flex-direction: column;
-        gap: 15px;
-      }
-    }
-
     /* Loading */
     .loading {
       text-align: center;
@@ -529,6 +708,27 @@
       60% { content: '...'; }
       80%, 100% { content: ''; }
     }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .info-content {
+        grid-template-columns: 1fr;
+      }
+
+      .classes-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header-content {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .admin-logged-in {
+        position: static;
+        margin-top: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -536,12 +736,60 @@
   <header class="header">
     <div class="header-content">
       <div class="logo">Group Class Booking</div>
-      <div class="admin-section">
-        <span id="adminStatus"></span>
-        <button class="admin-btn" id="adminLoginBtn" onclick="toggleAdminLogin()">Admin Login</button>
+      <div class="admin-link">
+        <a onclick="showAdminLogin()" id="adminLoginLink">Admin Login</a>
+        <div class="admin-logged-in" id="adminLoggedIn">
+          <div class="admin-info">
+            <span class="admin-email" id="adminEmail"></span>
+            <div class="admin-actions">
+              <a href="admin.html" class="admin-btn" target="_blank">Admin Panel</a>
+              <button class="admin-btn" onclick="logout()">Logout</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </header>
+
+  <!-- Admin Login Modal -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="login-modal">
+      <div class="modal-header">
+        <h3>Admin Login</h3>
+      </div>
+      <div class="modal-body">
+        <form class="login-form" id="adminLoginForm">
+          <div class="form-field">
+            <label class="form-label">Email</label>
+            <input 
+              type="email" 
+              class="login-input" 
+              id="adminEmailInput"
+              placeholder="admin@example.com"
+              required
+            />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Password</label>
+            <input 
+              type="password" 
+              class="login-input" 
+              id="adminPasswordInput"
+              placeholder="Enter password"
+              required
+            />
+          </div>
+          <div class="login-error" id="loginError">Login failed: <span id="errorMessage"></span></div>
+          <div class="login-buttons">
+            <button type="submit" class="login-btn primary" id="loginSubmitBtn">
+              <span id="loginBtnText">Login</span>
+            </button>
+            <button type="button" class="login-btn secondary" onclick="closeAdminLogin()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <!-- Main Container -->
   <div class="container">
@@ -572,9 +820,8 @@
     <div class="admin-panel" id="adminPanel">
       <div class="admin-panel-header">
         <h2 class="admin-panel-title">Admin Dashboard</h2>
-        <button class="admin-btn" onclick="showAddClassModal()">+ Add New Class</button>
+        <button class="admin-panel-btn" onclick="showAddClassModal()">+ Add New Class</button>
       </div>
-      <button class="form-btn secondary" onclick="logout()">Logout</button>
     </div>
 
     <!-- Classes Grid -->
@@ -583,37 +830,14 @@
     </div>
   </div>
 
-  <!-- Admin Login Modal -->
-  <div class="modal" id="adminLoginModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Admin Login</h3>
-        <button class="modal-close" onclick="closeModal('adminLoginModal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form id="adminLoginForm">
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-input" id="adminEmail" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <input type="password" class="form-input" id="adminPassword" required>
-          </div>
-          <button type="submit" class="form-btn">Login</button>
-        </form>
-      </div>
-    </div>
-  </div>
-
   <!-- Add Class Modal -->
   <div class="modal" id="addClassModal">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header" style="background: var(--black); color: white; padding: 20px;">
         <h3 class="modal-title">Add New Class</h3>
         <button class="modal-close" onclick="closeModal('addClassModal')">&times;</button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="padding: 30px;">
         <form id="addClassForm">
           <div class="form-group">
             <label class="form-label">Date</label>
@@ -672,7 +896,7 @@
       signOut
     } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-    // Firebase configuration - Replace with your config
+    // Firebase configuration - 使用您的配置
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_AUTH_DOMAIN",
@@ -692,79 +916,136 @@
     let currentUser = null;
     let classes = {};
 
-    // Auth state observer
+    // Make functions available globally
+    window.showAdminLogin = showAdminLogin;
+    window.closeAdminLogin = closeAdminLogin;
+    window.logout = logout;
+    window.showAddClassModal = showAddClassModal;
+    window.closeModal = closeModal;
+    window.joinClass = joinClass;
+    window.removeStudent = removeStudent;
+    window.showNotification = showNotification;
+
+    // Auth state observer - 與 fungbird 相同
     onAuthStateChanged(auth, (user) => {
-      currentUser = user;
-      updateAdminUI();
+      const adminLoginLink = document.getElementById('adminLoginLink');
+      const adminLoggedIn = document.getElementById('adminLoggedIn');
+      const adminEmailSpan = document.getElementById('adminEmail');
+      const adminPanel = document.getElementById('adminPanel');
+      
+      if (user) {
+        // User is signed in
+        adminLoginLink.style.display = 'none';
+        adminLoggedIn.style.display = 'block';
+        adminEmailSpan.textContent = user.email;
+        adminPanel.classList.add('active');
+      } else {
+        // User is signed out
+        adminLoginLink.style.display = 'block';
+        adminLoggedIn.style.display = 'none';
+        adminPanel.classList.remove('active');
+      }
     });
 
-    // Update admin UI based on auth state
-    function updateAdminUI() {
-      const adminPanel = document.getElementById('adminPanel');
-      const adminLoginBtn = document.getElementById('adminLoginBtn');
-      const adminStatus = document.getElementById('adminStatus');
+    // Admin login functions - 與 fungbird 相同
+    function showAdminLogin() {
+      document.getElementById('adminModal').classList.add('show');
+      document.getElementById('adminEmailInput').focus();
+    }
 
-      if (currentUser) {
-        adminPanel.classList.add('active');
-        adminLoginBtn.textContent = 'Logout';
-        adminLoginBtn.onclick = logout;
-        adminStatus.textContent = `Admin: ${currentUser.email}`;
-      } else {
-        adminPanel.classList.remove('active');
-        adminLoginBtn.textContent = 'Admin Login';
-        adminLoginBtn.onclick = () => showModal('adminLoginModal');
-        adminStatus.textContent = '';
+    function closeAdminLogin() {
+      document.getElementById('adminModal').classList.remove('show');
+      document.getElementById('adminLoginForm').reset();
+      document.getElementById('loginError').classList.remove('show');
+      // Clear input fields
+      document.getElementById('adminEmailInput').value = '';
+      document.getElementById('adminPasswordInput').value = '';
+    }
+
+    async function logout() {
+      try {
+        await signOut(auth);
+        alert('Successfully logged out');
+      } catch (error) {
+        console.error('Logout error:', error);
+        alert('Logout failed, please try again');
       }
     }
 
+    // Admin login form handler - 與 fungbird 相同
+    document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('adminEmailInput').value;
+      const password = document.getElementById('adminPasswordInput').value;
+      const loginBtn = document.getElementById('loginSubmitBtn');
+      const loginBtnText = document.getElementById('loginBtnText');
+      const loginError = document.getElementById('loginError');
+      const errorMessage = document.getElementById('errorMessage');
+      
+      // Show loading state
+      loginBtn.disabled = true;
+      loginBtnText.innerHTML = '<span class="loading-spinner"></span>Logging in...';
+      loginError.classList.remove('show');
+      
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        closeAdminLogin();
+        showNotification('Login successful!', 'success');
+      } catch (error) {
+        let errorText = 'Login failed';
+        
+        switch (error.code) {
+          case 'auth/invalid-email':
+            errorText = 'Invalid email format';
+            break;
+          case 'auth/user-disabled':
+            errorText = 'This account has been disabled';
+            break;
+          case 'auth/user-not-found':
+            errorText = 'User not found';
+            break;
+          case 'auth/wrong-password':
+            errorText = 'Incorrect password';
+            break;
+          case 'auth/invalid-credential':
+            errorText = 'Invalid email or password';
+            break;
+          case 'auth/too-many-requests':
+            errorText = 'Too many login attempts, please try again later';
+            break;
+          case 'auth/missing-email':
+            errorText = 'Please enter email';
+            break;
+          default:
+            errorText = error.message;
+        }
+        
+        errorMessage.textContent = errorText;
+        loginError.classList.add('show');
+      } finally {
+        // Reset button state
+        loginBtn.disabled = false;
+        loginBtnText.textContent = 'Login';
+      }
+    });
+
+    // Click outside to close modal
+    document.getElementById('adminModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeAdminLogin();
+      }
+    });
+
     // Show modal
-    window.showModal = function(modalId) {
-      document.getElementById(modalId).classList.add('active');
+    function showAddClassModal() {
+      if (!currentUser) return;
+      document.getElementById('addClassModal').classList.add('active');
     }
 
     // Close modal
-    window.closeModal = function(modalId) {
+    function closeModal(modalId) {
       document.getElementById(modalId).classList.remove('active');
-    }
-
-    // Show add class modal
-    window.showAddClassModal = function() {
-      if (!currentUser) return;
-      showModal('addClassModal');
-    }
-
-    // Toggle admin login
-    window.toggleAdminLogin = function() {
-      if (currentUser) {
-        logout();
-      } else {
-        showModal('adminLoginModal');
-      }
-    }
-
-    // Admin login
-    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('adminEmail').value;
-      const password = document.getElementById('adminPassword').value;
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        closeModal('adminLoginModal');
-        showNotification('Login successful!', 'success');
-      } catch (error) {
-        showNotification('Login failed: ' + error.message, 'error');
-      }
-    });
-
-    // Logout
-    window.logout = async function() {
-      try {
-        await signOut(auth);
-        showNotification('Logged out successfully', 'success');
-      } catch (error) {
-        showNotification('Logout failed: ' + error.message, 'error');
-      }
     }
 
     // Add class
@@ -888,7 +1169,7 @@
     }
 
     // Join class
-    window.joinClass = async function(classId) {
+    async function joinClass(classId) {
       const nameInput = document.getElementById(`name-${classId}`);
       const name = nameInput.value.trim();
 
@@ -925,7 +1206,7 @@
     }
 
     // Remove student
-    window.removeStudent = async function(classId, index) {
+    async function removeStudent(classId, index) {
       const classData = classes[classId];
       const students = classData.students || [];
       const student = students[index];
@@ -958,7 +1239,7 @@
     }
 
     // Show notification
-    window.showNotification = function(message, type = 'info') {
+    function showNotification(message, type = 'info') {
       const container = document.getElementById('notificationContainer');
       const notification = document.createElement('div');
       notification.className = `notification ${type}`;
