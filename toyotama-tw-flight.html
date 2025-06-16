@@ -594,6 +594,49 @@
       opacity: 0.5;
     }
 
+    /* New styles for incomplete data */
+    .pending-input {
+      color: #ff9800;
+      font-style: italic;
+      font-size: 13px;
+    }
+
+    .status-icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 12px;
+      line-height: 20px;
+      text-align: center;
+      margin-right: 5px;
+    }
+
+    .status-complete {
+      background: #4caf50;
+      color: white;
+    }
+
+    .status-incomplete {
+      background: #ff9800;
+      color: white;
+    }
+
+    .existing-data-notice {
+      background: #e3f2fd;
+      border: 1px solid #1565C0;
+      color: #0D47A1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .existing-data-notice.show {
+      display: block;
+    }
+
     @media (max-width: 768px) {
       .admin-logged-in {
         position: static;
@@ -695,6 +738,10 @@
         <span>📝</span>
         <span>隊員資訊登記</span>
       </h2>
+
+      <div class="existing-data-notice" id="existingDataNotice">
+        ℹ️ 此隊員已有航班登記資料，航班資訊已自動填入。請補充個人資料。
+      </div>
 
       <form id="memberForm">
         <div class="form-group">
@@ -886,6 +933,7 @@
         <table id="memberTable">
           <thead>
             <tr>
+              <th>狀態</th>
               <th>隊員姓名</th>
               <th>中文姓名</th>
               <th>身高</th>
@@ -1062,6 +1110,7 @@
     let selectedDateValue = null;
     let selectedFlightData = null;
     let isManualInput = false;
+    let existingMemberData = {};
 
     // 日期選擇
     const dateButtons = document.querySelectorAll('.date-btn');
@@ -1146,6 +1195,18 @@
       return `${day}/${month}/${year} (${weekday})`;
     }
 
+    // Helper function to find matching flight button
+    function findMatchingFlightButton(memberData) {
+      for (const [key, value] of Object.entries(flightData)) {
+        if (value.airline === memberData.airline && 
+            value.departure === memberData.departure &&
+            value.arrival === memberData.arrival) {
+          return key;
+        }
+      }
+      return null;
+    }
+
     function resetForm() {
       document.getElementById('chineseName').value = '';
       document.getElementById('height').value = '';
@@ -1155,12 +1216,94 @@
       flightButtons.forEach(btn => btn.classList.remove('selected'));
       document.getElementById('otherDateInput').classList.remove('show');
       document.getElementById('manualInput').classList.remove('show');
+      document.getElementById('existingDataNotice').classList.remove('show');
       clearManualInputs();
       
       selectedDateValue = null;
       selectedFlightData = null;
       isManualInput = false;
     }
+
+    // 隊員選擇處理 - 自動填入已儲存的資料
+    document.getElementById('memberName').addEventListener('change', function() {
+      const memberName = this.value;
+      if (!memberName) {
+        resetForm();
+        return;
+      }
+
+      // 檢查是否有已存在的資料
+      if (existingMemberData[memberName]) {
+        const memberData = existingMemberData[memberName];
+        
+        // 顯示提示訊息
+        document.getElementById('existingDataNotice').classList.add('show');
+        
+        // 填入個人資料（如果有）
+        if (memberData.chineseName) {
+          document.getElementById('chineseName').value = memberData.chineseName;
+        }
+        if (memberData.height) {
+          document.getElementById('height').value = memberData.height;
+        }
+        if (memberData.weight) {
+          document.getElementById('weight').value = memberData.weight;
+        }
+        
+        // 自動選擇日期
+        if (memberData.date) {
+          // 檢查是否為預設日期
+          const isDefaultDate = memberData.date === '2025-06-19' || memberData.date === '2025-06-20';
+          
+          dateButtons.forEach(btn => {
+            btn.classList.remove('selected');
+            if (isDefaultDate && btn.getAttribute('data-date') === memberData.date) {
+              btn.classList.add('selected');
+            }
+          });
+          
+          if (!isDefaultDate) {
+            // 選擇"其他日期"並填入日期
+            dateButtons.forEach(btn => {
+              if (btn.getAttribute('data-date') === 'other') {
+                btn.classList.add('selected');
+              }
+            });
+            document.getElementById('otherDateInput').classList.add('show');
+            document.getElementById('customDate').value = memberData.date;
+          }
+          
+          selectedDateValue = memberData.date;
+          document.getElementById('selectedDate').value = memberData.date;
+        }
+        
+        // 自動選擇航班
+        const matchingFlight = findMatchingFlightButton(memberData);
+        if (matchingFlight) {
+          // 找到匹配的預設航班
+          flightButtons.forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.getAttribute('data-flight') === matchingFlight) {
+              btn.classList.add('selected');
+              selectedFlightData = flightData[matchingFlight];
+              document.getElementById('selectedFlight').value = matchingFlight;
+            }
+          });
+        } else {
+          // 使用手動輸入
+          document.getElementById('manualInput').classList.add('show');
+          document.getElementById('customAirline').value = memberData.airline || '';
+          document.getElementById('customFlightNo').value = memberData.flightNo || '';
+          document.getElementById('customDeparture').value = memberData.departure || '';
+          document.getElementById('customArrival').value = memberData.arrival || '';
+          isManualInput = true;
+          document.getElementById('selectedFlight').value = 'manual';
+        }
+      } else {
+        // 沒有現有資料，重置表單
+        resetForm();
+      }
+    });
 
     // 表單提交
     document.getElementById('memberForm').addEventListener('submit', function(e) {
@@ -1243,6 +1386,7 @@
       const memberCount = document.getElementById('memberCount');
 
       tableBody.innerHTML = '';
+      existingMemberData = data || {};
 
       if (!data) {
         table.style.display = 'none';
@@ -1272,11 +1416,19 @@
         const memberData = data[member];
         const row = document.createElement('tr');
         
+        // 檢查資料是否完整
+        const isComplete = memberData.chineseName && memberData.height && memberData.weight;
+        
         row.innerHTML = `
+          <td>
+            ${isComplete ? 
+              '<span class="status-icon status-complete">✓</span>' : 
+              '<span class="status-icon status-incomplete">!</span>'}
+          </td>
           <td class="member-name">${member}</td>
-          <td>${memberData.chineseName || '-'}</td>
-          <td>${memberData.height ? memberData.height + ' cm' : '-'}</td>
-          <td>${memberData.weight ? memberData.weight + ' kg' : '-'}</td>
+          <td>${memberData.chineseName || '<span class="pending-input">待輸入</span>'}</td>
+          <td>${memberData.height ? memberData.height + ' cm' : '<span class="pending-input">待輸入</span>'}</td>
+          <td>${memberData.weight ? memberData.weight + ' kg' : '<span class="pending-input">待輸入</span>'}</td>
           <td>
             <span class="date-badge">${formatDateDMY(memberData.date)}</span>
           </td>
