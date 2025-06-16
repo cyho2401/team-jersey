@@ -325,6 +325,70 @@
       box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
     }
 
+    /* Custom styles for member select dropdown */
+    #memberName optgroup {
+      font-weight: bold;
+      font-style: normal;
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    #memberName option {
+      padding: 8px 16px;
+      font-size: 16px;
+    }
+
+    #memberName option.submitted {
+      color: #2e7d32;
+      font-weight: 600;
+    }
+
+    #memberName option.submitted:before {
+      content: "✓ ";
+    }
+
+    #memberName option.incomplete {
+      color: #ff9800;
+      font-weight: 600;
+    }
+
+    #memberName option.incomplete:before {
+      content: "⚠ ";
+    }
+
+    #memberName option.not-submitted {
+      color: #dc3545;
+    }
+
+    #memberName option.not-submitted:before {
+      content: "✗ ";
+    }
+
+    .member-stats {
+      background: #e3f2fd;
+      border: 1px solid #1565C0;
+      color: #0D47A1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .stat-number {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
     .date-options {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -669,6 +733,11 @@
       .date-options {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .member-stats {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
@@ -739,6 +808,24 @@
         <span>隊員資訊登記</span>
       </h2>
 
+      <div class="member-stats" id="memberStats" style="display: none;">
+        <div class="stat-item">
+          <span>✓ 資料完整：</span>
+          <span class="stat-number" id="completeCount">0</span>
+          <span>人</span>
+        </div>
+        <div class="stat-item">
+          <span>⚠ 待補資料：</span>
+          <span class="stat-number" id="incompleteCount">0</span>
+          <span>人</span>
+        </div>
+        <div class="stat-item">
+          <span>✗ 未登記：</span>
+          <span class="stat-number" id="notSubmittedCount">0</span>
+          <span>人</span>
+        </div>
+      </div>
+
       <div class="existing-data-notice" id="existingDataNotice">
         ℹ️ 此隊員已有航班登記資料，航班資訊已自動填入。請補充個人資料。
       </div>
@@ -748,36 +835,7 @@
           <label for="memberName">隊員姓名</label>
           <select id="memberName" required>
             <option value="">請選擇隊員</option>
-            <option value="趙教">趙教</option>
-            <option value="布">布</option>
-            <option value="adain">adain</option>
-            <option value="Alvin">Alvin</option>
-            <option value="Earnest">Earnest</option>
-            <option value="James">James</option>
-            <option value="Jason">Jason</option>
-            <option value="Martin">Martin</option>
-            <option value="Pine">Pine</option>
-            <option value="Rex">Rex</option>
-            <option value="Tak">Tak</option>
-            <option value="Tf">Tf</option>
-            <option value="tsan">tsan</option>
-            <option value="wingsun">wingsun</option>
-            <option value="Yee">Yee</option>
-            <option value="大師兄">大師兄</option>
-            <option value="仁">仁</option>
-            <option value="光">光</option>
-            <option value="天">天</option>
-            <option value="奶">奶</option>
-            <option value="宏">宏</option>
-            <option value="巨峰">巨峰</option>
-            <option value="文威">文威</option>
-            <option value="杰">杰</option>
-            <option value="毛">毛</option>
-            <option value="洲">洲</option>
-            <option value="皮">皮</option>
-            <option value="表">表</option>
-            <option value="達">達</option>
-            <option value="銘">銘</option>
+            <!-- Options will be dynamically populated -->
           </select>
         </div>
 
@@ -988,6 +1046,14 @@
     window.logout = logout;
     window.toggleManualInput = toggleManualInput;
 
+    // 所有隊員名單
+    const allMembers = [
+      "趙教", "布", "adain", "Alvin", "Earnest", "James", "Jason", "Martin", 
+      "Pine", "Rex", "Tak", "Tf", "tsan", "wingsun", "Yee", "大師兄", 
+      "仁", "光", "天", "奶", "宏", "巨峰", "文威", "杰", "毛", "洲", 
+      "皮", "表", "達", "銘"
+    ];
+
     // Auth state observer
     onAuthStateChanged(auth, (user) => {
       const adminLoginLink = document.getElementById('adminLoginLink');
@@ -1111,6 +1177,70 @@
     let selectedFlightData = null;
     let isManualInput = false;
     let existingMemberData = {};
+
+    // Check if data is complete
+    function isDataComplete(memberData) {
+      return memberData && memberData.chineseName && memberData.height && memberData.weight;
+    }
+
+    // Update member dropdown with status
+    function updateMemberDropdown() {
+      const memberSelect = document.getElementById('memberName');
+      memberSelect.innerHTML = '<option value="">請選擇隊員</option>';
+      
+      // Create optgroups
+      const submittedGroup = document.createElement('optgroup');
+      submittedGroup.label = '✓ 已登記 (資料完整)';
+      
+      const incompleteGroup = document.createElement('optgroup');
+      incompleteGroup.label = '⚠ 已登記 (待補資料)';
+      
+      const notSubmittedGroup = document.createElement('optgroup');
+      notSubmittedGroup.label = '✗ 未登記';
+      
+      let completeCount = 0;
+      let incompleteCount = 0;
+      let notSubmittedCount = 0;
+      
+      allMembers.forEach(member => {
+        const option = document.createElement('option');
+        option.value = member;
+        option.textContent = member;
+        
+        if (existingMemberData[member]) {
+          if (isDataComplete(existingMemberData[member])) {
+            option.className = 'submitted';
+            submittedGroup.appendChild(option);
+            completeCount++;
+          } else {
+            option.className = 'incomplete';
+            incompleteGroup.appendChild(option);
+            incompleteCount++;
+          }
+        } else {
+          option.className = 'not-submitted';
+          notSubmittedGroup.appendChild(option);
+          notSubmittedCount++;
+        }
+      });
+      
+      // Add groups to select
+      if (submittedGroup.children.length > 0) {
+        memberSelect.appendChild(submittedGroup);
+      }
+      if (incompleteGroup.children.length > 0) {
+        memberSelect.appendChild(incompleteGroup);
+      }
+      if (notSubmittedGroup.children.length > 0) {
+        memberSelect.appendChild(notSubmittedGroup);
+      }
+      
+      // Update stats
+      document.getElementById('completeCount').textContent = completeCount;
+      document.getElementById('incompleteCount').textContent = incompleteCount;
+      document.getElementById('notSubmittedCount').textContent = notSubmittedCount;
+      document.getElementById('memberStats').style.display = 'flex';
+    }
 
     // 日期選擇
     const dateButtons = document.querySelectorAll('.date-btn');
@@ -1388,6 +1518,9 @@
       tableBody.innerHTML = '';
       existingMemberData = data || {};
 
+      // Update member dropdown
+      updateMemberDropdown();
+
       if (!data) {
         table.style.display = 'none';
         emptyState.style.display = 'block';
@@ -1417,7 +1550,7 @@
         const row = document.createElement('tr');
         
         // 檢查資料是否完整
-        const isComplete = memberData.chineseName && memberData.height && memberData.weight;
+        const isComplete = isDataComplete(memberData);
         
         row.innerHTML = `
           <td>
