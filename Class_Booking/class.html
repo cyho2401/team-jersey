@@ -737,13 +737,13 @@
     <div class="header-content">
       <div class="logo">Group Class Booking</div>
       <div class="admin-link">
-        <a onclick="showAdminLogin()" id="adminLoginLink">Admin Login</a>
+        <a id="adminLoginLink">Admin Login</a>
         <div class="admin-logged-in" id="adminLoggedIn">
           <div class="admin-info">
             <span class="admin-email" id="adminEmail"></span>
             <div class="admin-actions">
               <a href="admin.html" class="admin-btn" target="_blank">Admin Panel</a>
-              <button class="admin-btn" onclick="logout()">Logout</button>
+              <button class="admin-btn" id="logoutBtn">Logout</button>
             </div>
           </div>
         </div>
@@ -784,7 +784,7 @@
             <button type="submit" class="login-btn primary" id="loginSubmitBtn">
               <span id="loginBtnText">Login</span>
             </button>
-            <button type="button" class="login-btn secondary" onclick="closeAdminLogin()">Cancel</button>
+            <button type="button" class="login-btn secondary" id="cancelBtn">Cancel</button>
           </div>
         </form>
       </div>
@@ -820,7 +820,7 @@
     <div class="admin-panel" id="adminPanel">
       <div class="admin-panel-header">
         <h2 class="admin-panel-title">Admin Dashboard</h2>
-        <button class="admin-panel-btn" onclick="showAddClassModal()">+ Add New Class</button>
+        <button class="admin-panel-btn" id="addClassBtn">+ Add New Class</button>
       </div>
     </div>
 
@@ -835,7 +835,7 @@
     <div class="modal-content">
       <div class="modal-header" style="background: var(--black); color: white; padding: 20px;">
         <h3 class="modal-title">Add New Class</h3>
-        <button class="modal-close" onclick="closeModal('addClassModal')">&times;</button>
+        <button class="modal-close" id="closeAddClassModal">&times;</button>
       </div>
       <div class="modal-body" style="padding: 30px;">
         <form id="addClassForm">
@@ -876,6 +876,19 @@
   <!-- Notifications Container -->
   <div id="notificationContainer"></div>
 
+  <!-- Define global functions first -->
+  <script>
+    // Global functions that will be assigned later
+    window.showAdminLogin = function() {};
+    window.closeAdminLogin = function() {};
+    window.logout = function() {};
+    window.showAddClassModal = function() {};
+    window.closeModal = function() {};
+    window.joinClass = function() {};
+    window.removeStudent = function() {};
+    window.showNotification = function() {};
+  </script>
+
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -896,15 +909,15 @@
       signOut
     } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-    // Firebase configuration - 使用您的配置
+    // Firebase configuration - 請替換為您的配置
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      databaseURL: "YOUR_DATABASE_URL",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyCGCaWivohAhxZDkKp7YGNp9deNetR3K4Y",
+      authDomain: "jersey-app-bcefa.firebaseapp.com", 
+      databaseURL: "https://jersey-app-bcefa-default-rtdb.firebaseio.com",
+      projectId: "jersey-app-bcefa",
+      storageBucket: "jersey-app-bcefa.appspot.com",
+      messagingSenderId: "778327507472",
+      appId: "1:778327507472:web:057e3db1b767f0b137c095"
     };
 
     // Initialize Firebase
@@ -916,39 +929,9 @@
     let currentUser = null;
     let classes = {};
 
-    // Make functions available globally
-    window.showAdminLogin = showAdminLogin;
-    window.closeAdminLogin = closeAdminLogin;
-    window.logout = logout;
-    window.showAddClassModal = showAddClassModal;
-    window.closeModal = closeModal;
-    window.joinClass = joinClass;
-    window.removeStudent = removeStudent;
-    window.showNotification = showNotification;
-
-    // Auth state observer - 與 fungbird 相同
-    onAuthStateChanged(auth, (user) => {
-      const adminLoginLink = document.getElementById('adminLoginLink');
-      const adminLoggedIn = document.getElementById('adminLoggedIn');
-      const adminEmailSpan = document.getElementById('adminEmail');
-      const adminPanel = document.getElementById('adminPanel');
-      
-      if (user) {
-        // User is signed in
-        adminLoginLink.style.display = 'none';
-        adminLoggedIn.style.display = 'block';
-        adminEmailSpan.textContent = user.email;
-        adminPanel.classList.add('active');
-      } else {
-        // User is signed out
-        adminLoginLink.style.display = 'block';
-        adminLoggedIn.style.display = 'none';
-        adminPanel.classList.remove('active');
-      }
-    });
-
-    // Admin login functions - 與 fungbird 相同
+    // Admin login functions
     function showAdminLogin() {
+      console.log('Showing admin login modal');
       document.getElementById('adminModal').classList.add('show');
       document.getElementById('adminEmailInput').focus();
     }
@@ -957,7 +940,6 @@
       document.getElementById('adminModal').classList.remove('show');
       document.getElementById('adminLoginForm').reset();
       document.getElementById('loginError').classList.remove('show');
-      // Clear input fields
       document.getElementById('adminEmailInput').value = '';
       document.getElementById('adminPasswordInput').value = '';
     }
@@ -972,7 +954,95 @@
       }
     }
 
-    // Admin login form handler - 與 fungbird 相同
+    function showAddClassModal() {
+      if (!currentUser) return;
+      document.getElementById('addClassModal').classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+      const container = document.getElementById('notificationContainer');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      
+      notification.innerHTML = `
+        <div class="notification-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+        <div class="notification-message">${message}</div>
+      `;
+
+      container.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.add('show');
+      }, 100);
+
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 5000);
+    }
+
+    // Assign global functions
+    window.showAdminLogin = showAdminLogin;
+    window.closeAdminLogin = closeAdminLogin;
+    window.logout = logout;
+    window.showAddClassModal = showAddClassModal;
+    window.closeModal = closeModal;
+    window.showNotification = showNotification;
+
+    // Event listeners using addEventListener instead of onclick
+    document.addEventListener('DOMContentLoaded', function() {
+      // Admin login link
+      document.getElementById('adminLoginLink').addEventListener('click', showAdminLogin);
+      
+      // Logout button
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      
+      // Cancel button
+      document.getElementById('cancelBtn').addEventListener('click', closeAdminLogin);
+      
+      // Add class button
+      document.getElementById('addClassBtn').addEventListener('click', showAddClassModal);
+      
+      // Close add class modal
+      document.getElementById('closeAddClassModal').addEventListener('click', () => closeModal('addClassModal'));
+      
+      // Click outside to close modal
+      document.getElementById('adminModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeAdminLogin();
+        }
+      });
+    });
+
+    // Auth state observer
+    onAuthStateChanged(auth, (user) => {
+      const adminLoginLink = document.getElementById('adminLoginLink');
+      const adminLoggedIn = document.getElementById('adminLoggedIn');
+      const adminEmailSpan = document.getElementById('adminEmail');
+      const adminPanel = document.getElementById('adminPanel');
+      
+      if (user) {
+        currentUser = user;
+        adminLoginLink.style.display = 'none';
+        adminLoggedIn.style.display = 'block';
+        adminEmailSpan.textContent = user.email;
+        adminPanel.classList.add('active');
+      } else {
+        currentUser = null;
+        adminLoginLink.style.display = 'block';
+        adminLoggedIn.style.display = 'none';
+        adminPanel.classList.remove('active');
+      }
+    });
+
+    // Admin login form handler
     document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -990,9 +1060,11 @@
       
       try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        console.log('Login successful:', userCredential.user.email);
         closeAdminLogin();
         showNotification('Login successful!', 'success');
       } catch (error) {
+        console.error('Login error:', error);
         let errorText = 'Login failed';
         
         switch (error.code) {
@@ -1030,25 +1102,7 @@
       }
     });
 
-    // Click outside to close modal
-    document.getElementById('adminModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeAdminLogin();
-      }
-    });
-
-    // Show modal
-    function showAddClassModal() {
-      if (!currentUser) return;
-      document.getElementById('addClassModal').classList.add('active');
-    }
-
-    // Close modal
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
-
-    // Add class
+    // Add class form handler
     document.getElementById('addClassForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -1134,11 +1188,21 @@
           ${!isFull ? `
             <div class="join-section">
               <input type="text" class="join-input" id="name-${classId}" placeholder="Enter your name">
-              <button class="join-btn" onclick="joinClass('${classId}')">Join Class</button>
+              <button class="join-btn" id="join-${classId}">Join Class</button>
             </div>
           ` : ''}
         </div>
       `;
+
+      // Add event listener for join button after creating the card
+      if (!isFull) {
+        setTimeout(() => {
+          const joinBtn = document.getElementById(`join-${classId}`);
+          if (joinBtn) {
+            joinBtn.addEventListener('click', () => joinClass(classId));
+          }
+        }, 0);
+      }
 
       return card;
     }
@@ -1157,13 +1221,25 @@
                 <span class="student-name">${students[i].name}</span>
                 ${isLateCancel ? '<span class="late-cancel-badge">Late Cancel</span>' : ''}
               </div>
-              <button class="remove-btn" onclick="removeStudent('${classId}', ${i})">Remove</button>
+              <button class="remove-btn" id="remove-${classId}-${i}">Remove</button>
             </div>
           `;
         } else {
           html += `<div class="empty-slot">${i + 1}. Empty</div>`;
         }
       }
+      
+      // Add event listeners for remove buttons after a short delay
+      setTimeout(() => {
+        for (let i = 0; i < students.length; i++) {
+          if (students[i]) {
+            const removeBtn = document.getElementById(`remove-${classId}-${i}`);
+            if (removeBtn) {
+              removeBtn.addEventListener('click', () => removeStudent(classId, i));
+            }
+          }
+        }
+      }, 0);
       
       return html;
     }
@@ -1238,30 +1314,9 @@
       }
     }
 
-    // Show notification
-    function showNotification(message, type = 'info') {
-      const container = document.getElementById('notificationContainer');
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      
-      notification.innerHTML = `
-        <div class="notification-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
-        <div class="notification-message">${message}</div>
-      `;
-
-      container.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.classList.add('show');
-      }, 100);
-
-      setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-          notification.remove();
-        }, 300);
-      }, 5000);
-    }
+    // Make functions available globally
+    window.joinClass = joinClass;
+    window.removeStudent = removeStudent;
   </script>
 </body>
 </html>
