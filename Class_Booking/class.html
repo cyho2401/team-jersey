@@ -26,6 +26,7 @@
       --danger: #dc3545;
       --warning: #ffc107;
       --success: #28a745;
+      --info: #17a2b8;
     }
 
     body {
@@ -423,6 +424,7 @@
       background-color: var(--black);
       color: var(--white);
       padding: 20px;
+      position: relative;
     }
 
     .class-date {
@@ -440,6 +442,24 @@
     .class-type {
       font-size: 14px;
       opacity: 0.8;
+    }
+
+    .duplicate-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: var(--white);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .duplicate-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
     }
 
     .class-body {
@@ -468,6 +488,26 @@
       margin-bottom: 20px;
     }
 
+    .list-section {
+      margin-bottom: 20px;
+    }
+
+    .list-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .list-badge {
+      background: var(--info);
+      color: var(--white);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+
     .student-item {
       display: flex;
       justify-content: space-between;
@@ -478,6 +518,11 @@
       border-radius: 5px;
     }
 
+    .standby-item {
+      border: 1px dashed var(--gray-400);
+      background-color: var(--white);
+    }
+
     .student-number {
       font-weight: bold;
       margin-right: 10px;
@@ -485,6 +530,12 @@
 
     .student-name {
       flex: 1;
+    }
+
+    .student-email {
+      font-size: 12px;
+      color: var(--gray-600);
+      margin-left: 10px;
     }
 
     .late-cancel-badge {
@@ -509,7 +560,8 @@
       transition: all 0.3s ease;
     }
 
-    .student-item:hover .remove-btn {
+    .student-item:hover .remove-btn,
+    .standby-item:hover .remove-btn {
       opacity: 1;
     }
 
@@ -531,18 +583,30 @@
       margin-top: 20px;
     }
 
+    .join-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
     .join-input {
       width: 100%;
       padding: 12px;
       border: 2px solid var(--black);
       border-radius: 5px;
       font-size: 16px;
-      margin-bottom: 10px;
     }
 
     .join-input:focus {
       outline: none;
       border-color: var(--gray-700);
+    }
+
+    .join-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
 
     .join-btn {
@@ -566,6 +630,14 @@
     .join-btn:disabled {
       background-color: var(--gray-400);
       cursor: not-allowed;
+    }
+
+    .join-btn.standby {
+      background-color: var(--info);
+    }
+
+    .join-btn.standby:hover:not(:disabled) {
+      background-color: #138496;
     }
 
     .class-full {
@@ -867,6 +939,16 @@
       color: var(--black);
     }
 
+    .notification.error {
+      background-color: var(--danger);
+      color: var(--white);
+    }
+
+    .notification.success {
+      background-color: var(--success);
+      color: var(--white);
+    }
+
     /* Loading */
     .loading {
       text-align: center;
@@ -913,6 +995,14 @@
       .time-row {
         grid-template-columns: 1fr;
       }
+
+      .join-inputs {
+        grid-template-columns: 1fr;
+      }
+
+      .join-buttons {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -927,7 +1017,6 @@
           <div class="admin-info">
             <span class="admin-email" id="adminEmail"></span>
             <div class="admin-actions">
-              <a href="admin.html" class="admin-btn" target="_blank">Admin Panel</a>
               <button class="admin-btn" id="logoutBtn">Logout</button>
             </div>
           </div>
@@ -988,7 +1077,7 @@
         </div>
         <div class="info-item">
           <div class="info-icon">📊</div>
-          <span>Maximum students: 4</span>
+          <span>Maximum students: 4 + 4 standby</span>
         </div>
         <div class="info-item">
           <div class="info-icon">⏰</div>
@@ -1019,11 +1108,13 @@
   <div class="modal" id="addClassModal">
     <div class="modal-content">
       <div class="modal-header" style="background: var(--black); color: white; padding: 20px;">
-        <h3 class="modal-title">Add New Class</h3>
+        <h3 class="modal-title" id="addClassTitle">Add New Class</h3>
         <button class="modal-close" id="closeAddClassModal">&times;</button>
       </div>
       <div class="modal-body" style="padding: 30px;">
         <form id="addClassForm">
+          <input type="hidden" id="editingClassId">
+          
           <!-- Calendar -->
           <div class="form-group">
             <label class="form-label">Select Date</label>
@@ -1094,7 +1185,7 @@
             </div>
           </div>
 
-          <button type="submit" class="form-btn">Add Class</button>
+          <button type="submit" class="form-btn" id="submitClassBtn">Add Class</button>
         </form>
       </div>
     </div>
@@ -1112,8 +1203,19 @@
     window.showAddClassModal = function() {};
     window.closeModal = function() {};
     window.joinClass = function() {};
+    window.joinStandby = function() {};
     window.removeStudent = function() {};
+    window.removeStandby = function() {};
     window.showNotification = function() {};
+    window.duplicateClass = function() {};
+  </script>
+
+  <!-- EmailJS SDK -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function(){
+      emailjs.init("YOUR_EMAILJS_USER_ID"); // Replace with your EmailJS User ID
+    })();
   </script>
 
   <!-- Firebase -->
@@ -1127,7 +1229,8 @@
       remove,
       set,
       get,
-      child
+      child,
+      update
     } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
     import { 
       getAuth, 
@@ -1157,6 +1260,24 @@
     let classes = {};
     let selectedDate = null;
     let currentMonth = new Date();
+    let adminEmail = 'admin@example.com'; // Replace with actual admin email
+
+    // Email notification function
+    function sendEmailNotification(to, subject, message) {
+      // Using EmailJS to send emails
+      const templateParams = {
+        to_email: to,
+        subject: subject,
+        message: message
+      };
+
+      emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
+        .then(function(response) {
+          console.log('Email sent successfully', response);
+        }, function(error) {
+          console.error('Failed to send email', error);
+        });
+    }
 
     // Calendar functions
     function generateCalendar() {
@@ -1263,8 +1384,30 @@
       }
     }
 
-    function showAddClassModal() {
+    function showAddClassModal(classData = null) {
       if (!currentUser) return;
+      
+      document.getElementById('addClassTitle').textContent = classData ? 'Duplicate Class' : 'Add New Class';
+      document.getElementById('submitClassBtn').textContent = classData ? 'Create Duplicate' : 'Add Class';
+      document.getElementById('editingClassId').value = '';
+      
+      if (classData) {
+        // Pre-fill form with duplicated class data
+        setTimeout(() => {
+          document.getElementById('classStartTime').value = classData.startTime;
+          document.getElementById('classEndTime').value = classData.endTime;
+          
+          // Select class type
+          document.querySelectorAll('.class-type-btn').forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.getAttribute('data-type') === classData.classType) {
+              btn.classList.add('selected');
+            }
+          });
+          document.getElementById('classType').value = classData.classType;
+        }, 100);
+      }
+      
       document.getElementById('addClassModal').classList.add('active');
       generateCalendar();
     }
@@ -1298,6 +1441,14 @@
       }, 5000);
     }
 
+    // Duplicate class function
+    function duplicateClass(classId) {
+      const classData = classes[classId];
+      if (!classData) return;
+      
+      showAddClassModal(classData);
+    }
+
     // Assign global functions
     window.showAdminLogin = showAdminLogin;
     window.closeAdminLogin = closeAdminLogin;
@@ -1305,6 +1456,7 @@
     window.showAddClassModal = showAddClassModal;
     window.closeModal = closeModal;
     window.showNotification = showNotification;
+    window.duplicateClass = duplicateClass;
 
     // Event listeners using addEventListener instead of onclick
     document.addEventListener('DOMContentLoaded', function() {
@@ -1318,7 +1470,7 @@
       document.getElementById('cancelBtn').addEventListener('click', closeAdminLogin);
       
       // Add class button
-      document.getElementById('addClassBtn').addEventListener('click', showAddClassModal);
+      document.getElementById('addClassBtn').addEventListener('click', () => showAddClassModal());
       
       // Close add class modal
       document.getElementById('closeAddClassModal').addEventListener('click', () => closeModal('addClassModal'));
@@ -1387,6 +1539,7 @@
         adminLoginLink.style.display = 'none';
         adminLoggedIn.style.display = 'block';
         adminEmailSpan.textContent = user.email;
+        adminEmail = user.email; // Update admin email
         adminPanel.classList.add('active');
       } else {
         currentUser = null;
@@ -1512,6 +1665,7 @@
                 endTime,
                 classType,
                 students: [],
+                standby: [],
                 createdAt: Date.now()
               });
             }
@@ -1526,6 +1680,7 @@
           endTime,
           classType,
           students: [],
+          standby: [],
           createdAt: Date.now()
         });
       }
@@ -1546,6 +1701,10 @@
           ? `Successfully added ${classesToAdd.length} classes!` 
           : 'Class added successfully!';
         showNotification(message, 'success');
+        
+        // Send admin notification
+        sendEmailNotification(adminEmail, 'New Classes Added', 
+          `${classesToAdd.length} new class(es) have been added to the schedule.`);
       } catch (error) {
         showNotification('Error adding class: ' + error.message, 'error');
       }
@@ -1563,12 +1722,16 @@
       const grid = document.getElementById('classesGrid');
       grid.innerHTML = '';
 
-      const sortedClasses = Object.entries(classes).sort((a, b) => {
-        return new Date(a[1].date) - new Date(b[1].date);
-      });
+      // Filter out past classes
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const sortedClasses = Object.entries(classes)
+        .filter(([id, cls]) => new Date(cls.date) >= today)
+        .sort((a, b) => new Date(a[1].date) - new Date(b[1].date));
 
       if (sortedClasses.length === 0) {
-        grid.innerHTML = '<div class="loading">No classes scheduled yet</div>';
+        grid.innerHTML = '<div class="loading">No upcoming classes scheduled</div>';
         return;
       }
 
@@ -1581,6 +1744,7 @@
     // Create class card
     function createClassCard(classId, classData) {
       const students = classData.students || [];
+      const standby = classData.standby || [];
       const isFull = students.length >= 4;
       const spotsLeft = 4 - students.length;
 
@@ -1595,33 +1759,72 @@
           <div class="class-date">${formattedDate} (${classData.dayOfWeek})</div>
           <div class="class-time">${classData.startTime} - ${classData.endTime}</div>
           <div class="class-type">${classData.classType}</div>
+          ${currentUser ? `<button class="duplicate-btn" id="duplicate-${classId}">Duplicate</button>` : ''}
         </div>
         <div class="class-body">
           <div class="spots-indicator">
             <span class="spots-filled">${students.length}/4 Students</span>
             <span class="spots-available">${spotsLeft} spots left</span>
           </div>
-          <div class="students-list" id="students-${classId}">
-            ${renderStudentsList(classId, students)}
+          
+          <div class="list-section">
+            <div class="list-title">
+              Confirmed Students
+              ${students.length >= 4 ? '<span class="list-badge">FULL</span>' : ''}
+            </div>
+            <div class="students-list" id="students-${classId}">
+              ${renderStudentsList(classId, students)}
+            </div>
           </div>
-          ${!isFull ? `
-            <div class="join-section">
-              <input type="text" class="join-input" id="name-${classId}" placeholder="Enter your name">
-              <button class="join-btn" id="join-${classId}">Join Class</button>
+          
+          ${standby.length > 0 || (isFull && standby.length < 4) ? `
+            <div class="list-section">
+              <div class="list-title">
+                Standby List
+                <span class="list-badge">${standby.length}/4</span>
+              </div>
+              <div class="students-list" id="standby-${classId}">
+                ${renderStandbyList(classId, standby)}
+              </div>
             </div>
           ` : ''}
+          
+          <div class="join-section">
+            <div class="join-inputs">
+              <input type="text" class="join-input" id="name-${classId}" placeholder="Enter your name">
+              <input type="email" class="join-input" id="email-${classId}" placeholder="Enter your email">
+            </div>
+            <div class="join-buttons">
+              ${!isFull ? `<button class="join-btn" id="join-${classId}">Join Class</button>` : ''}
+              ${standby.length < 4 ? `<button class="join-btn standby" id="joinStandby-${classId}">Join Standby</button>` : ''}
+            </div>
+          </div>
         </div>
       `;
 
-      // Add event listener for join button after creating the card
-      if (!isFull) {
-        setTimeout(() => {
+      // Add event listeners
+      setTimeout(() => {
+        // Duplicate button
+        if (currentUser) {
+          const duplicateBtn = document.getElementById(`duplicate-${classId}`);
+          if (duplicateBtn) {
+            duplicateBtn.addEventListener('click', () => duplicateClass(classId));
+          }
+        }
+        
+        // Join buttons
+        if (!isFull) {
           const joinBtn = document.getElementById(`join-${classId}`);
           if (joinBtn) {
             joinBtn.addEventListener('click', () => joinClass(classId));
           }
-        }, 0);
-      }
+        }
+        
+        const joinStandbyBtn = document.getElementById(`joinStandby-${classId}`);
+        if (joinStandbyBtn) {
+          joinStandbyBtn.addEventListener('click', () => joinStandby(classId));
+        }
+      }, 0);
 
       return card;
     }
@@ -1638,6 +1841,7 @@
               <div>
                 <span class="student-number">${i + 1}.</span>
                 <span class="student-name">${students[i].name}</span>
+                ${students[i].email ? `<span class="student-email">(${students[i].email})</span>` : ''}
                 ${isLateCancel ? '<span class="late-cancel-badge">Late Cancel</span>' : ''}
               </div>
               <button class="remove-btn" id="remove-${classId}-${i}">Remove</button>
@@ -1648,7 +1852,7 @@
         }
       }
       
-      // Add event listeners for remove buttons after a short delay
+      // Add event listeners for remove buttons
       setTimeout(() => {
         for (let i = 0; i < students.length; i++) {
           if (students[i]) {
@@ -1663,10 +1867,42 @@
       return html;
     }
 
+    // Render standby list
+    function renderStandbyList(classId, standby) {
+      let html = '';
+      
+      standby.forEach((student, index) => {
+        html += `
+          <div class="student-item standby-item">
+            <div>
+              <span class="student-number">S${index + 1}.</span>
+              <span class="student-name">${student.name}</span>
+              ${student.email ? `<span class="student-email">(${student.email})</span>` : ''}
+            </div>
+            <button class="remove-btn" id="removeStandby-${classId}-${index}">Remove</button>
+          </div>
+        `;
+      });
+      
+      // Add event listeners for remove buttons
+      setTimeout(() => {
+        standby.forEach((student, index) => {
+          const removeBtn = document.getElementById(`removeStandby-${classId}-${index}`);
+          if (removeBtn) {
+            removeBtn.addEventListener('click', () => removeStandby(classId, index));
+          }
+        });
+      }, 0);
+      
+      return html;
+    }
+
     // Join class
     async function joinClass(classId) {
       const nameInput = document.getElementById(`name-${classId}`);
+      const emailInput = document.getElementById(`email-${classId}`);
       const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
 
       if (!name) {
         showNotification('Please enter your name', 'warning');
@@ -1677,33 +1913,91 @@
       const students = classData.students || [];
 
       if (students.length >= 4) {
-        showNotification('Class is full!', 'error');
+        showNotification('Class is full! You can join the standby list.', 'error');
         return;
       }
 
-      students.push({
+      const newStudent = {
         name,
+        email,
         joinedAt: Date.now()
-      });
+      };
+
+      students.push(newStudent);
 
       try {
         await set(ref(database, `classes/${classId}/students`), students);
         nameInput.value = '';
+        emailInput.value = '';
         showNotification('Successfully joined the class!', 'success');
         
-        // Notify admin
-        if (currentUser) {
-          showNotification(`New student "${name}" joined a class`, 'info');
+        // Send notifications
+        if (email) {
+          sendEmailNotification(email, 'Class Registration Confirmed', 
+            `Hi ${name}, you have successfully registered for the class on ${classData.date} at ${classData.startTime}.`);
         }
+        
+        sendEmailNotification(adminEmail, 'New Student Registration', 
+          `${name} ${email ? `(${email})` : ''} has joined the class on ${classData.date} at ${classData.startTime}.`);
       } catch (error) {
         showNotification('Error joining class: ' + error.message, 'error');
       }
     }
 
-    // Remove student
+    // Join standby
+    async function joinStandby(classId) {
+      const nameInput = document.getElementById(`name-${classId}`);
+      const emailInput = document.getElementById(`email-${classId}`);
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+
+      if (!name || !email) {
+        showNotification('Please enter both name and email for standby list', 'warning');
+        return;
+      }
+
+      const classData = classes[classId];
+      const standby = classData.standby || [];
+
+      if (standby.length >= 4) {
+        showNotification('Standby list is full!', 'error');
+        return;
+      }
+
+      const newStandby = {
+        name,
+        email,
+        joinedAt: Date.now()
+      };
+
+      standby.push(newStandby);
+
+      try {
+        await set(ref(database, `classes/${classId}/standby`), standby);
+        nameInput.value = '';
+        emailInput.value = '';
+        showNotification('Successfully joined the standby list!', 'success');
+        
+        // Send notifications
+        sendEmailNotification(email, 'Standby List Confirmation', 
+          `Hi ${name}, you have been added to the standby list for the class on ${classData.date} at ${classData.startTime}. We'll notify you if a spot becomes available.`);
+        
+        sendEmailNotification(adminEmail, 'New Standby Registration', 
+          `${name} (${email}) has joined the standby list for the class on ${classData.date} at ${classData.startTime}.`);
+      } catch (error) {
+        showNotification('Error joining standby: ' + error.message, 'error');
+      }
+    }
+
+    // Remove student with confirmation
     async function removeStudent(classId, index) {
+      if (!confirm('Are you sure you want to cancel this registration?')) {
+        return;
+      }
+      
       const classData = classes[classId];
       const students = classData.students || [];
+      const standby = classData.standby || [];
       const student = students[index];
 
       if (!student) return;
@@ -1719,23 +2013,90 @@
           ...student,
           lateCancel: true
         };
-        showNotification('Late cancellation marked. Please notify the coach!', 'warning');
+        
+        try {
+          await set(ref(database, `classes/${classId}/students`), students);
+          showNotification('Late cancellation marked. Please notify the coach!', 'warning');
+          
+          sendEmailNotification(adminEmail, 'Late Cancellation', 
+            `${student.name} has made a late cancellation for the class on ${classData.date} at ${classData.startTime}.`);
+        } catch (error) {
+          showNotification('Error updating student: ' + error.message, 'error');
+        }
       } else {
         // Normal removal
         students.splice(index, 1);
+        
+        // Check if there are standby students
+        if (standby.length > 0) {
+          // Move first standby to students
+          const standbyStudent = standby.shift();
+          students.push(standbyStudent);
+          
+          try {
+            await update(ref(database, `classes/${classId}`), {
+              students: students,
+              standby: standby
+            });
+            
+            showNotification('Student removed. A standby student has been promoted!', 'success');
+            
+            // Notify the promoted standby student
+            if (standbyStudent.email) {
+              sendEmailNotification(standbyStudent.email, 'You\'ve Got a Spot!', 
+                `Hi ${standbyStudent.name}, good news! A spot has opened up and you've been moved from the standby list to the confirmed list for the class on ${classData.date} at ${classData.startTime}.`);
+            }
+            
+            // Notify admin
+            sendEmailNotification(adminEmail, 'Student Cancellation & Standby Promotion', 
+              `${student.name} has cancelled their registration. ${standbyStudent.name} has been promoted from standby for the class on ${classData.date} at ${classData.startTime}.`);
+          } catch (error) {
+            showNotification('Error updating class: ' + error.message, 'error');
+          }
+        } else {
+          try {
+            await set(ref(database, `classes/${classId}/students`), students);
+            showNotification('Student removed successfully', 'success');
+            
+            sendEmailNotification(adminEmail, 'Student Cancellation', 
+              `${student.name} has cancelled their registration for the class on ${classData.date} at ${classData.startTime}.`);
+          } catch (error) {
+            showNotification('Error removing student: ' + error.message, 'error');
+          }
+        }
       }
+    }
+
+    // Remove standby with confirmation
+    async function removeStandby(classId, index) {
+      if (!confirm('Are you sure you want to remove yourself from the standby list?')) {
+        return;
+      }
+      
+      const classData = classes[classId];
+      const standby = classData.standby || [];
+      const standbyStudent = standby[index];
+
+      if (!standbyStudent) return;
+
+      standby.splice(index, 1);
 
       try {
-        await set(ref(database, `classes/${classId}/students`), students);
-        showNotification('Student updated successfully', 'success');
+        await set(ref(database, `classes/${classId}/standby`), standby);
+        showNotification('Removed from standby list', 'success');
+        
+        sendEmailNotification(adminEmail, 'Standby Cancellation', 
+          `${standbyStudent.name} has removed themselves from the standby list for the class on ${classData.date} at ${classData.startTime}.`);
       } catch (error) {
-        showNotification('Error updating student: ' + error.message, 'error');
+        showNotification('Error removing from standby: ' + error.message, 'error');
       }
     }
 
     // Make functions available globally
     window.joinClass = joinClass;
+    window.joinStandby = joinStandby;
     window.removeStudent = removeStudent;
+    window.removeStandby = removeStandby;
   </script>
 </body>
 </html>
