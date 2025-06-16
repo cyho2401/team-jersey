@@ -745,6 +745,16 @@
       background-color: var(--gray-600);
     }
 
+    .class-expired-notice {
+      background-color: var(--gray-100);
+      border: 1px solid var(--gray-400);
+      border-radius: 5px;
+      padding: 15px;
+      text-align: center;
+      color: var(--gray-600);
+      font-style: italic;
+    }
+
     /* Add Class Modal Styles */
     .modal {
       display: none;
@@ -1486,6 +1496,13 @@
       return `${year}-${month}-${day}`;
     }
 
+    // Check if class time has passed
+    function hasClassTimePassed(classDate, classStartTime) {
+      const now = new Date();
+      const classDateTime = new Date(`${classDate} ${classStartTime}`);
+      return classDateTime < now;
+    }
+
     // Generate time options for dropdowns
     function generateTimeOptions() {
       const startSelect = document.getElementById('classStartTime');
@@ -1567,7 +1584,7 @@
     }
 
     // Calendar functions
-    function generateCalendar() {
+    function generateCalendar(shouldSelectToday = false) {
       const year = currentMonth.getFullYear();
       const month = currentMonth.getMonth();
       const firstDay = new Date(year, month, 1);
@@ -1607,8 +1624,16 @@
         dayElement.textContent = day;
         
         const currentDate = new Date(year, month, day);
-        if (currentDate.toDateString() === today.toDateString()) {
+        const isToday = currentDate.toDateString() === today.toDateString();
+        
+        if (isToday) {
           dayElement.classList.add('today');
+          // Auto-select today when first opening add class modal
+          if (shouldSelectToday) {
+            setTimeout(() => {
+              dayElement.click();
+            }, 100);
+          }
         }
         
         dayElement.addEventListener('click', () => selectDate(currentDate));
@@ -1765,7 +1790,8 @@
       }
       
       document.getElementById('addClassModal').classList.add('active');
-      generateCalendar();
+      // Generate calendar and auto-select today if adding new class
+      generateCalendar(!classData);
     }
 
     function closeModal(modalId) {
@@ -2285,6 +2311,10 @@
       const activeStudents = students.filter(s => !s.lateCancel);
       const isFull = activeStudents.length >= maxStudents;
       const spotsLeft = Math.max(0, maxStudents - activeStudents.length);
+      
+      // Check if class time has passed
+      const classTimePassed = hasClassTimePassed(classData.date, classData.startTime);
+      const canStudentsModify = !classTimePassed || currentUser;
 
       const card = document.createElement('div');
       card.className = `class-card ${isFull ? 'class-full' : ''} ${isPast ? 'past' : ''}`;
@@ -2319,7 +2349,7 @@
               ${activeStudents.length >= maxStudents ? '<span class="list-badge">FULL</span>' : ''}
             </div>
             <div class="students-list" id="students-${classId}">
-              ${renderStudentsList(classId, students, maxStudents, isPast)}
+              ${renderStudentsList(classId, students, maxStudents, isPast, canStudentsModify)}
             </div>
           </div>
           
@@ -2330,26 +2360,32 @@
                 <span class="list-badge">${standby.length}</span>
               </div>
               <div class="students-list" id="standby-${classId}">
-                ${renderStandbyList(classId, standby, isPast)}
+                ${renderStandbyList(classId, standby, isPast, canStudentsModify)}
               </div>
             </div>
           ` : ''}
           
-          ${!isPast ? `
-            <div class="join-section">
-              <div class="join-inputs">
-                <input type="text" class="join-input" id="name-${classId}" placeholder="Enter your name">
-                <input type="email" class="join-input" id="email-${classId}" placeholder="Email (optional)">
+          ${!isPast ? (
+            classTimePassed && !currentUser ? `
+              <div class="class-expired-notice">
+                This class has already started. Registration is closed.
               </div>
-              <div class="join-buttons">
-                ${!isFull ? `
-                  <button class="join-btn" id="join-${classId}">Join Class</button>
-                ` : `
-                  <button class="join-btn standby" id="joinStandby-${classId}">Join Standby</button>
-                `}
+            ` : `
+              <div class="join-section">
+                <div class="join-inputs">
+                  <input type="text" class="join-input" id="name-${classId}" placeholder="Enter your name">
+                  <input type="email" class="join-input" id="email-${classId}" placeholder="Email (optional)">
+                </div>
+                <div class="join-buttons">
+                  ${!isFull ? `
+                    <button class="join-btn" id="join-${classId}">Join Class</button>
+                  ` : `
+                    <button class="join-btn standby" id="joinStandby-${classId}">Join Standby</button>
+                  `}
+                </div>
               </div>
-            </div>
-          ` : ''}
+            `
+          ) : ''}
         </div>
       `;
 
@@ -2375,8 +2411,8 @@
           }
         }
         
-        // Join buttons
-        if (!isPast) {
+        // Join buttons (only if class time hasn't passed or admin is logged in)
+        if (!isPast && (!classTimePassed || currentUser)) {
           if (!isFull) {
             const joinBtn = document.getElementById(`join-${classId}`);
             if (joinBtn) {
@@ -2395,7 +2431,7 @@
     }
 
     // Render students list
-    function renderStudentsList(classId, students, maxStudents, isPast = false) {
+    function renderStudentsList(classId, students, maxStudents, isPast = false, canModify = true) {
       let html = '';
       const activeStudents = students.filter(s => !s.lateCancel);
       const lateCancelStudents = students.filter(s => s.lateCancel);
@@ -2411,7 +2447,7 @@
                 <span class="student-name">${activeStudents[i].name}</span>
                 ${activeStudents[i].email ? `<span class="student-email">(${activeStudents[i].email})</span>` : ''}
               </div>
-              ${!isPast ? `<button class="remove-btn" id="remove-${classId}-${studentIndex}">Remove</button>` : ''}
+              ${!isPast && canModify ? `<button class="remove-btn" id="remove-${classId}-${studentIndex}">Remove</button>` : ''}
             </div>
           `;
         } else {
@@ -2432,7 +2468,7 @@
                 ${student.email ? `<span class="student-email">(${student.email})</span>` : ''}
                 <span class="late-cancel-badge">Late Cancel</span>
               </div>
-              ${!isPast ? `<button class="remove-btn" id="remove-${classId}-${studentIndex}">Remove</button>` : ''}
+              ${!isPast && currentUser ? `<button class="remove-btn" id="remove-${classId}-${studentIndex}">Remove</button>` : ''}
             </div>
           `;
         });
@@ -2440,7 +2476,7 @@
       }
       
       // Add event listeners for remove buttons
-      if (!isPast) {
+      if (!isPast && canModify) {
         setTimeout(() => {
           for (let i = 0; i < students.length; i++) {
             if (students[i]) {
@@ -2457,7 +2493,7 @@
     }
 
     // Render standby list
-    function renderStandbyList(classId, standby, isPast = false) {
+    function renderStandbyList(classId, standby, isPast = false, canModify = true) {
       let html = '';
       
       standby.forEach((student, index) => {
@@ -2468,13 +2504,13 @@
               <span class="student-name">${student.name}</span>
               ${student.email ? `<span class="student-email">(${student.email})</span>` : ''}
             </div>
-            ${!isPast ? `<button class="remove-btn" id="removeStandby-${classId}-${index}">Remove</button>` : ''}
+            ${!isPast && canModify ? `<button class="remove-btn" id="removeStandby-${classId}-${index}">Remove</button>` : ''}
           </div>
         `;
       });
       
       // Add event listeners for remove buttons
-      if (!isPast) {
+      if (!isPast && canModify) {
         setTimeout(() => {
           standby.forEach((student, index) => {
             const removeBtn = document.getElementById(`removeStandby-${classId}-${index}`);
