@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>豐玉籃球隊 - 2025屏東盃</title>
-  <!-- Add docx library for Word export -->
-  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+  <!-- Add docxtemplater and JSZip for Word template processing -->
+  <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.37.11/build/docxtemplater.js"></script>
+  <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+  <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip-utils.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <!-- Add html2canvas for JPG export -->
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -99,6 +101,105 @@
       text-align: center;
     }
 
+    .template-section {
+      background: #f8f9fa;
+      border: 2px dashed #1565C0;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .template-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .template-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: white;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .template-status.ready {
+      color: #2e7d32;
+      border: 2px solid #4caf50;
+    }
+
+    .template-status.not-ready {
+      color: #d32f2f;
+      border: 2px solid #f44336;
+    }
+
+    .template-upload {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .file-input-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: #1565C0;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .file-input-label:hover {
+      background: #0D47A1;
+      transform: translateY(-1px);
+    }
+
+    .template-url-input {
+      flex: 1;
+      min-width: 300px;
+      padding: 10px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .template-url-btn {
+      padding: 10px 20px;
+      background: #1565C0;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .template-url-btn:hover {
+      background: #0D47A1;
+      transform: translateY(-1px);
+    }
+
     .export-buttons {
       display: flex;
       gap: 20px;
@@ -145,6 +246,27 @@
       margin-top: 15px;
       font-size: 14px;
       color: #666;
+    }
+
+    .template-instructions {
+      background: #e3f2fd;
+      border: 1px solid #1565C0;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      font-size: 13px;
+      color: #0D47A1;
+      text-align: left;
+    }
+
+    .template-instructions h4 {
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .template-instructions ul {
+      margin-left: 20px;
+      line-height: 1.6;
     }
 
     /* JPG Export Preview - Reduced width */
@@ -1029,6 +1151,15 @@
       .jpg-members-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .template-url-input {
+        min-width: 200px;
+      }
+
+      .template-upload {
+        flex-direction: column;
+        align-items: stretch;
+      }
     }
   </style>
 </head>
@@ -1313,8 +1444,45 @@
         <span>📄</span>
         <span>匯出報名表</span>
       </h2>
+
+      <!-- Template Section -->
+      <div class="template-section">
+        <div class="template-info">
+          <div class="template-status" id="templateStatus">
+            <span>❌</span>
+            <span>尚未載入 Word 模板</span>
+          </div>
+        </div>
+        
+        <div class="template-upload">
+          <div class="file-input-wrapper">
+            <input type="file" id="templateFile" accept=".docx" onchange="handleTemplateUpload(event)">
+            <label for="templateFile" class="file-input-label">
+              <span>📁</span>
+              <span>選擇模板檔案</span>
+            </label>
+          </div>
+          
+          <span style="color: #666; font-size: 14px;">或</span>
+          
+          <input type="text" class="template-url-input" id="templateUrl" placeholder="輸入模板檔案 URL">
+          <button class="template-url-btn" onclick="loadTemplateFromUrl()">載入 URL</button>
+        </div>
+
+        <div class="template-instructions">
+          <h4>📌 模板準備說明：</h4>
+          <ul>
+            <li>在 Word 檔案中，將要替換的內容改為佔位符</li>
+            <li>格式：{name2}, {height2}, {weight2} （從第2行開始）</li>
+            <li>例如：第2行的姓名欄位改為 {name2}</li>
+            <li>第3行使用 {name3}, {height3}, {weight3}，以此類推</li>
+            <li>系統會自動排除毛、布、趙教的資料</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="export-buttons">
-        <button class="export-btn" onclick="exportToWord()" id="exportBtn">
+        <button class="export-btn" onclick="exportToWord()" id="exportBtn" disabled>
           <span>📥</span>
           <span>匯出 Word 報名表</span>
         </button>
@@ -1324,7 +1492,7 @@
         </button>
       </div>
       <div class="export-info">
-        Word 檔案將包含所有隊員的姓名、身高、體重資料（不包含毛、布、趙教）<br>
+        Word 檔案將使用上傳的模板，填入隊員資料（不包含毛、布、趙教）<br>
         JPG 圖片將顯示航班分組資訊
       </div>
     </div>
@@ -1365,6 +1533,8 @@
     window.exportToWord = exportToWord;
     window.exportToJPG = exportToJPG;
     window.toggleForm = toggleForm;
+    window.handleTemplateUpload = handleTemplateUpload;
+    window.loadTemplateFromUrl = loadTemplateFromUrl;
 
     // 所有隊員名單
     const allMembers = [
@@ -1374,15 +1544,39 @@
       "皮", "表", "達", "銘"
     ];
 
-    // 中文姓名對照表
+    // 中文姓名對照表 - 根據最新的報名表更新
     const chineseNameMapping = {
       "趙教": "趙志華",
       "布": "布永輝",
-      "毛": "張子基"
+      "毛": "張子基",
+      "Earnest": "梁獻丰",
+      "tsan": "梁國全", 
+      "天": "何仲恩",
+      "Yee": "余仕恆",
+      "大師兄": "崔俊煒",
+      "Rex": "盧柏佑",
+      "wingsun": "葉鴻騫",
+      "Tak": "潘立德",
+      "Pine": "楊子豐",
+      "表": "方燦裕",
+      "Martin": "林穎新",
+      "Tf": "葉尚義",
+      "仁": "葉尚仁",
+      "宏": "韓智光",
+      "James": "林嘉浩",
+      "adain": "梁卓弘",
+      "Alvin": "黃禮恆",
+      "Jason": "劉梓宏",
+      "巨峰": "劉結峰",
+      "文威": "黃文威",
+      "洲": "方鎮洲",
+      "皮": "王健安",
+      "達": "陸宇達"
     };
 
     // Store current data globally
     let currentMemberData = {};
+    let templateContent = null;
 
     // Toggle form function
     function toggleForm() {
@@ -1391,6 +1585,58 @@
       
       formHeader.classList.toggle('active');
       formContent.classList.toggle('show');
+    }
+
+    // Handle template file upload
+    function handleTemplateUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        templateContent = e.target.result;
+        updateTemplateStatus(true);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // Load template from URL
+    async function loadTemplateFromUrl() {
+      const url = document.getElementById('templateUrl').value.trim();
+      if (!url) {
+        alert('請輸入模板檔案的 URL');
+        return;
+      }
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('無法載入檔案');
+        }
+        
+        templateContent = await response.arrayBuffer();
+        updateTemplateStatus(true);
+        alert('模板載入成功！');
+      } catch (error) {
+        console.error('載入模板錯誤:', error);
+        alert('載入模板失敗，請確認 URL 是否正確');
+      }
+    }
+
+    // Update template status
+    function updateTemplateStatus(loaded) {
+      const templateStatus = document.getElementById('templateStatus');
+      const exportBtn = document.getElementById('exportBtn');
+      
+      if (loaded) {
+        templateStatus.className = 'template-status ready';
+        templateStatus.innerHTML = '<span>✅</span><span>模板已載入</span>';
+        exportBtn.disabled = false;
+      } else {
+        templateStatus.className = 'template-status not-ready';
+        templateStatus.innerHTML = '<span>❌</span><span>尚未載入 Word 模板</span>';
+        exportBtn.disabled = true;
+      }
     }
 
     // Auth state observer
@@ -1510,8 +1756,13 @@
       }
     }
 
-    // Export to Word function
+    // Export to Word function using template
     async function exportToWord() {
+      if (!templateContent) {
+        alert('請先上傳 Word 模板檔案');
+        return;
+      }
+
       const exportBtn = document.getElementById('exportBtn');
       exportBtn.disabled = true;
       exportBtn.innerHTML = '<span class="loading-spinner"></span>正在生成 Word 檔案...';
@@ -1549,287 +1800,46 @@
         // Sort members alphabetically
         members.sort((a, b) => a.name.localeCompare(b.name));
         
-        // Create table rows with exact formatting
-        const tableRows = [];
+        // Prepare data for template
+        const templateData = {};
         
-        // Add all 23 rows (starting from row 2, since row 1 is pre-filled with 張子基)
+        // Fill in data starting from row 2
         for (let i = 0; i < 23; i++) {
+          const rowNum = i + 2; // Start from row 2
           const member = members[i];
-          const row = new docx.TableRow({
-            height: { value: 600, rule: docx.HeightRule.ATLEAST },
-            children: [
-              new docx.TableCell({
-                children: [new docx.Paragraph({
-                  text: (i + 2).toString(),
-                  alignment: docx.AlignmentType.CENTER,
-                  spacing: { before: 60, after: 60 }
-                })],
-                verticalAlign: docx.VerticalAlign.CENTER,
-                width: { size: 8, type: docx.WidthType.PERCENTAGE }
-              }),
-              new docx.TableCell({
-                children: [new docx.Paragraph({
-                  text: member ? member.chineseName : "",
-                  alignment: docx.AlignmentType.CENTER,
-                  spacing: { before: 60, after: 60 }
-                })],
-                verticalAlign: docx.VerticalAlign.CENTER,
-                width: { size: 20, type: docx.WidthType.PERCENTAGE }
-              }),
-              new docx.TableCell({
-                children: [new docx.Paragraph({
-                  text: "隊員",
-                  alignment: docx.AlignmentType.CENTER,
-                  spacing: { before: 60, after: 60 }
-                })],
-                verticalAlign: docx.VerticalAlign.CENTER,
-                width: { size: 12, type: docx.WidthType.PERCENTAGE }
-              }),
-              new docx.TableCell({
-                children: [new docx.Paragraph("")],
-                verticalAlign: docx.VerticalAlign.CENTER,
-                width: { size: 12, type: docx.WidthType.PERCENTAGE }
-              }),
-              new docx.TableCell({
-                children: [new docx.Paragraph("")],
-                verticalAlign: docx.VerticalAlign.CENTER,
-                width: { size: 20, type: docx.WidthType.PERCENTAGE }
-              }),
-              new docx.TableCell({
-                children: [new docx.Paragraph({
-                  text: member && member.height ? member.height.toString() : "",
-                  alignment: docx.AlignmentType.CENTER,
-                  spacing: { before: 60, after: 60 }
-                })],
-                verticalAlign: docx.VerticalAlign.CENTER,
-                width: { size: 14, type: docx.WidthType.PERCENTAGE }
-              }),
-              new docx.TableCell({
-                children: [new docx.Paragraph({
-                  text: member && member.weight ? member.weight.toString() : "",
-                  alignment: docx.AlignmentType.CENTER,
-                  spacing: { before: 60, after: 60 }
-                })],
-                verticalAlign: docx.VerticalAlign.CENTER,
-                width: { size: 14, type: docx.WidthType.PERCENTAGE }
-              })
-            ]
-          });
-          tableRows.push(row);
+          
+          templateData[`name${rowNum}`] = member ? member.chineseName : "";
+          templateData[`height${rowNum}`] = member && member.height ? member.height.toString() : "";
+          templateData[`weight${rowNum}`] = member && member.weight ? member.weight.toString() : "";
         }
         
-        // Create document with exact formatting from attached Word file
-        const doc = new docx.Document({
-          sections: [{
-            properties: {
-              page: {
-                margin: {
-                  top: 720,   // 0.5 inch
-                  right: 720,
-                  bottom: 720,
-                  left: 720,
-                },
-                size: {
-                  orientation: docx.PageOrientation.PORTRAIT,
-                  width: 11906, // A4 width
-                  height: 16838 // A4 height
-                }
-              }
-            },
-            children: [
-              new docx.Paragraph({
-                text: "114年「山水茶堂」籃球邀請賽報名表",
-                heading: docx.HeadingLevel.TITLE,
-                alignment: docx.AlignmentType.CENTER,
-                spacing: { after: 400 },
-                run: {
-                  font: "標楷體",
-                  size: 32
-                }
-              }),
-              new docx.Table({
-                width: {
-                  size: 100,
-                  type: docx.WidthType.PERCENTAGE
-                },
-                borders: {
-                  top: { style: docx.BorderStyle.SINGLE, size: 2 },
-                  bottom: { style: docx.BorderStyle.SINGLE, size: 2 },
-                  left: { style: docx.BorderStyle.SINGLE, size: 2 },
-                  right: { style: docx.BorderStyle.SINGLE, size: 2 },
-                  insideHorizontal: { style: docx.BorderStyle.SINGLE, size: 1 },
-                  insideVertical: { style: docx.BorderStyle.SINGLE, size: 1 }
-                },
-                rows: [
-                  new docx.TableRow({
-                    children: [
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "校名", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 12, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "香港豐玉", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 20, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "組別", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 12, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "邀請賽", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 20, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "電話", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 18, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "line", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 18, type: docx.WidthType.PERCENTAGE }
-                      })
-                    ]
-                  }),
-                  new docx.TableRow({
-                    children: [
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "校長", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph("")],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "教練", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "趙志華", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "助理\n教練", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "布永輝", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "管理", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      })
-                    ]
-                  })
-                ]
-              }),
-              new docx.Paragraph({
-                text: "",
-                spacing: { after: 200 }
-              }),
-              new docx.Table({
-                width: {
-                  size: 100,
-                  type: docx.WidthType.PERCENTAGE
-                },
-                borders: {
-                  top: { style: docx.BorderStyle.SINGLE, size: 2 },
-                  bottom: { style: docx.BorderStyle.SINGLE, size: 2 },
-                  left: { style: docx.BorderStyle.SINGLE, size: 2 },
-                  right: { style: docx.BorderStyle.SINGLE, size: 2 },
-                  insideHorizontal: { style: docx.BorderStyle.SINGLE, size: 1 },
-                  insideVertical: { style: docx.BorderStyle.SINGLE, size: 1 }
-                },
-                rows: [
-                  new docx.TableRow({
-                    children: [
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "編號", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 8, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "姓名", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 20, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "職稱", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 12, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "年級", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 12, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "出生\n年月日", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 20, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "身高", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 14, type: docx.WidthType.PERCENTAGE }
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "體重", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 14, type: docx.WidthType.PERCENTAGE }
-                      })
-                    ]
-                  }),
-                  // First row is pre-filled with 張子基
-                  new docx.TableRow({
-                    height: { value: 600, rule: docx.HeightRule.ATLEAST },
-                    children: [
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "1", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "張子基", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "隊長", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph("")],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph("")],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "185", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph({ text: "93", alignment: docx.AlignmentType.CENTER })],
-                        verticalAlign: docx.VerticalAlign.CENTER
-                      })
-                    ]
-                  }),
-                  ...tableRows
-                ]
-              })
-            ]
-          }]
+        // Load the template
+        const zip = new PizZip(templateContent);
+        const doc = new window.docxtemplater(zip, {
+          paragraphLoop: true,
+          linebreaks: true
         });
         
-        // Generate and save
-        const blob = await docx.Packer.toBlob(doc);
-        saveAs(blob, "114年山水茶堂籃球邀請賽報名表-豐玉.docx");
+        // Set the template variables
+        doc.setData(templateData);
+        
+        try {
+          // Render the document
+          doc.render();
+        } catch (error) {
+          console.error('渲染錯誤:', error);
+          alert('模板渲染失敗，請確認模板格式是否正確');
+          return;
+        }
+        
+        // Generate output
+        const out = doc.getZip().generate({
+          type: "blob",
+          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        });
+        
+        // Save the file
+        saveAs(out, "114年山水茶堂籃球邀請賽報名表-豐玉-已填寫.docx");
         
       } catch (error) {
         console.error('Export error:', error);
