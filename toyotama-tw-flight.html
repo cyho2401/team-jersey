@@ -1327,7 +1327,7 @@
         </button>
       </div>
       <div class="export-info">
-        Word 檔案將使用模板格式，填入隊員資料<br>
+        Word 檔案將使用模板格式，填入隊員資料（不包含毛、布、趙教、Tf）<br>
         JPG 圖片將顯示航班分組資訊
       </div>
     </div>
@@ -1517,7 +1517,7 @@
       }
     }
 
-    // Export to Word function using template
+    // Export to Word function using template with improved error handling
     async function exportToWord() {
       const exportBtn = document.getElementById('exportBtn');
       exportBtn.disabled = true;
@@ -1533,7 +1533,7 @@
         }
         
         const templateContent = await response.arrayBuffer();
-        console.log('模板載入成功');
+        console.log('模板載入成功，大小:', templateContent.byteLength, 'bytes');
         
         // Get data from Firebase
         const snapshot = await new Promise((resolve) => {
@@ -1566,8 +1566,9 @@
         
         // Sort members alphabetically
         members.sort((a, b) => a.name.localeCompare(b.name));
+        console.log('準備填入的成員數量:', members.length);
         
-        // Prepare data for template
+        // Prepare data for template - ensure all fields have values
         const templateData = {};
         
         // Fill in data starting from name1 (row 3 in the document)
@@ -1575,16 +1576,39 @@
           const rowNum = i + 1; // Template uses name1 through name22
           const member = members[i];
           
-          templateData[`name${rowNum}`] = member ? member.chineseName : "";
+          // 確保所有欄位都有值（空字串也可以）
+          templateData[`name${rowNum}`] = member ? member.chineseName.toString() : "";
           templateData[`height${rowNum}`] = member && member.height ? member.height.toString() : "";
           templateData[`weight${rowNum}`] = member && member.weight ? member.weight.toString() : "";
         }
         
-        // Load the template
-        const zip = new PizZip(templateContent);
+        console.log('模板資料範例:', {
+          name1: templateData.name1,
+          height1: templateData.height1,
+          weight1: templateData.weight1
+        });
+        
+        // Load the template with better error handling
+        let zip;
+        try {
+          zip = new PizZip(templateContent);
+        } catch (error) {
+          console.error('無法解析模板檔案:', error);
+          throw new Error('模板檔案格式錯誤，請確認是有效的 Word 檔案');
+        }
+        
+        // Configure docxtemplater with error handling
         const doc = new window.docxtemplater(zip, {
           paragraphLoop: true,
-          linebreaks: true
+          linebreaks: true,
+          parser: function(tag) {
+            // 自定義 parser 以處理可能的格式問題
+            return {
+              get: function(scope) {
+                return scope[tag] || "";
+              }
+            };
+          }
         });
         
         // Set the template variables
@@ -1593,9 +1617,25 @@
         try {
           // Render the document
           doc.render();
+          console.log('文件渲染成功');
         } catch (error) {
-          console.error('渲染錯誤:', error);
-          alert('模板渲染失敗，請確認模板格式是否正確');
+          console.error('渲染錯誤詳情:', error);
+          
+          // 嘗試取得更詳細的錯誤資訊
+          if (error.properties && error.properties.errors) {
+            const errors = error.properties.errors;
+            console.error('模板錯誤列表:', errors);
+            
+            // 建立錯誤訊息
+            let errorMessage = '模板渲染失敗：\n';
+            errors.forEach(err => {
+              errorMessage += `- ${err.message} (位置: ${err.properties.explanation})\n`;
+            });
+            
+            alert(errorMessage);
+          } else {
+            alert('模板渲染失敗，可能是模板格式問題。請檢查模板中的佔位符是否正確。');
+          }
           return;
         }
         
@@ -1607,10 +1647,22 @@
         
         // Save the file
         saveAs(out, "114年山水茶堂籃球邀請賽報名表-豐玉-已填寫.docx");
+        console.log('檔案已成功生成並下載');
         
       } catch (error) {
         console.error('Export error:', error);
-        alert(`匯出失敗：${error.message}`);
+        
+        // 提供更詳細的錯誤訊息
+        let errorMessage = '匯出失敗：';
+        if (error.message.includes('無法載入模板')) {
+          errorMessage += '無法從伺服器載入模板檔案，請稍後再試';
+        } else if (error.message.includes('模板檔案格式錯誤')) {
+          errorMessage += error.message;
+        } else {
+          errorMessage += error.message || '未知錯誤';
+        }
+        
+        alert(errorMessage);
       } finally {
         exportBtn.disabled = false;
         exportBtn.innerHTML = '<span>📥</span><span>匯出 Word 報名表</span>';
