@@ -147,44 +147,44 @@
       color: #666;
     }
 
-    /* JPG Export Preview */
+    /* JPG Export Preview - Reduced width */
     .jpg-export-container {
       display: none;
       position: fixed;
       top: -9999px;
       left: -9999px;
       background: white;
-      padding: 20px;
-      width: 1400px;
+      padding: 15px;
+      width: 700px; /* Reduced from 1400px */
       font-family: Arial, sans-serif;
     }
 
     .jpg-export-header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .jpg-export-title {
-      font-size: 24px;
+      font-size: 20px;
       font-weight: bold;
       color: #1565C0;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
     }
 
     .jpg-export-subtitle {
-      font-size: 16px;
+      font-size: 14px;
       color: #666;
     }
 
     .jpg-flights-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
 
     .jpg-flight-section {
       border: 1px solid #ddd;
-      border-radius: 8px;
+      border-radius: 6px;
       overflow: hidden;
       background: #f9f9f9;
     }
@@ -192,11 +192,11 @@
     .jpg-flight-header {
       background: #1565C0;
       color: white;
-      padding: 8px 12px;
+      padding: 5px 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .jpg-flight-info {
@@ -205,23 +205,23 @@
 
     .jpg-member-count {
       background: rgba(255, 255, 255, 0.2);
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 13px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
     }
 
     .jpg-members-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      padding: 8px;
-      gap: 5px;
-      font-size: 12px;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px;
+      gap: 3px;
+      font-size: 11px;
     }
 
     .jpg-member-item {
-      padding: 4px 8px;
+      padding: 3px 6px;
       background: white;
-      border-radius: 4px;
+      border-radius: 3px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1026,8 +1026,8 @@
         width: 100%;
       }
 
-      .jpg-flights-grid {
-        grid-template-columns: 1fr;
+      .jpg-members-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
@@ -1324,7 +1324,7 @@
         </button>
       </div>
       <div class="export-info">
-        Word 檔案將包含所有隊員的姓名、身高、體重資料<br>
+        Word 檔案將包含所有隊員的姓名、身高、體重資料（不包含毛、布、趙教）<br>
         JPG 圖片將顯示航班分組資訊
       </div>
     </div>
@@ -1531,45 +1531,36 @@
           return;
         }
         
-        // Prepare members data
+        // Prepare members data, excluding 毛, 布, 趙教
         const members = [];
         
-        // First add 毛 as captain if exists
-        if (data["毛"]) {
-          members.push({
-            name: "毛",
-            chineseName: data["毛"].chineseName || "張子基",
-            height: data["毛"].height || "",
-            weight: data["毛"].weight || "",
-            position: "隊長"
-          });
-        }
-        
-        // Then add all other members (excluding 布 and 毛)
         Object.entries(data).forEach(([name, info]) => {
-          if (name === "布" || name === "毛") return;
+          // Exclude 毛, 布, 趙教
+          if (name === "毛" || name === "布" || name === "趙教") return;
           
           members.push({
             name: name,
             chineseName: info.chineseName || chineseNameMapping[name] || "",
             height: info.height || "",
-            weight: info.weight || "",
-            position: "隊員"
+            weight: info.weight || ""
           });
         });
         
-        // Create table rows with exact PDF formatting
+        // Sort members alphabetically
+        members.sort((a, b) => a.name.localeCompare(b.name));
+        
+        // Create table rows with exact formatting
         const tableRows = [];
         
-        // Add all 24 rows (matching PDF exactly)
-        for (let i = 0; i < 24; i++) {
+        // Add all 23 rows (starting from row 2, since row 1 is pre-filled with 張子基)
+        for (let i = 0; i < 23; i++) {
           const member = members[i];
           const row = new docx.TableRow({
             height: { value: 600, rule: docx.HeightRule.ATLEAST },
             children: [
               new docx.TableCell({
                 children: [new docx.Paragraph({
-                  text: (i + 1).toString(),
+                  text: (i + 2).toString(),
                   alignment: docx.AlignmentType.CENTER,
                   spacing: { before: 60, after: 60 }
                 })],
@@ -1587,7 +1578,7 @@
               }),
               new docx.TableCell({
                 children: [new docx.Paragraph({
-                  text: member ? member.position : "隊員",
+                  text: "隊員",
                   alignment: docx.AlignmentType.CENTER,
                   spacing: { before: 60, after: 60 }
                 })],
@@ -1627,7 +1618,7 @@
           tableRows.push(row);
         }
         
-        // Create document with exact PDF formatting
+        // Create document with exact formatting from attached Word file
         const doc = new docx.Document({
           sections: [{
             properties: {
@@ -1695,8 +1686,7 @@
                       new docx.TableCell({
                         children: [new docx.Paragraph({ text: "電話", alignment: docx.AlignmentType.CENTER })],
                         verticalAlign: docx.VerticalAlign.CENTER,
-                        width: { size: 18, type: docx.WidthType.PERCENTAGE },
-                        columnSpan: 2
+                        width: { size: 18, type: docx.WidthType.PERCENTAGE }
                       }),
                       new docx.TableCell({
                         children: [new docx.Paragraph({ text: "line", alignment: docx.AlignmentType.CENTER })],
@@ -1793,6 +1783,40 @@
                         children: [new docx.Paragraph({ text: "體重", alignment: docx.AlignmentType.CENTER })],
                         verticalAlign: docx.VerticalAlign.CENTER,
                         width: { size: 14, type: docx.WidthType.PERCENTAGE }
+                      })
+                    ]
+                  }),
+                  // First row is pre-filled with 張子基
+                  new docx.TableRow({
+                    height: { value: 600, rule: docx.HeightRule.ATLEAST },
+                    children: [
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "1", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "張子基", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "隊長", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("")],
+                        verticalAlign: docx.VerticalAlign.CENTER
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("")],
+                        verticalAlign: docx.VerticalAlign.CENTER
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "185", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "93", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
                       })
                     ]
                   }),
