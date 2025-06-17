@@ -101,6 +101,67 @@
       text-align: center;
     }
 
+    /* Template URL section */
+    .template-url-section {
+      background: #f8f9fa;
+      border: 2px dashed #1565C0;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .template-url-info {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .template-url-input-group {
+      display: flex;
+      gap: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .template-url-input {
+      flex: 1;
+      padding: 10px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .template-url-btn {
+      padding: 10px 20px;
+      background: #1565C0;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+
+    .template-url-btn:hover {
+      background: #0D47A1;
+      transform: translateY(-1px);
+    }
+
+    .template-status {
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .template-status.success {
+      color: #4caf50;
+    }
+
+    .template-status.error {
+      color: #f44336;
+    }
+
     .export-buttons {
       display: flex;
       gap: 20px;
@@ -1031,6 +1092,10 @@
       .jpg-members-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .template-url-input-group {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -1316,6 +1381,21 @@
         <span>匯出報名表</span>
       </h2>
 
+      <!-- Template URL Section -->
+      <div class="template-url-section">
+        <div class="template-url-info">
+          如果自動載入模板失敗，請輸入模板檔案的完整 URL（例如從 Google Drive 或 Dropbox 分享的連結）
+        </div>
+        <div class="template-url-input-group">
+          <input type="text" 
+                 class="template-url-input" 
+                 id="templateUrlInput" 
+                 placeholder="https://example.com/application.docx">
+          <button class="template-url-btn" onclick="setTemplateUrl()">設定模板</button>
+        </div>
+        <div class="template-status" id="templateStatus"></div>
+      </div>
+
       <div class="export-buttons">
         <button class="export-btn" onclick="exportToWord()" id="exportBtn">
           <span>📥</span>
@@ -1327,7 +1407,7 @@
         </button>
       </div>
       <div class="export-info">
-        Word 檔案將使用模板格式，填入隊員資料（不包含毛、布、趙教、Tf）<br>
+        Word 檔案將使用模板格式，填入隊員資料<br>
         JPG 圖片將顯示航班分組資訊
       </div>
     </div>
@@ -1368,6 +1448,10 @@
     window.exportToWord = exportToWord;
     window.exportToJPG = exportToJPG;
     window.toggleForm = toggleForm;
+    window.setTemplateUrl = setTemplateUrl;
+
+    // Global variable for template URL
+    let customTemplateUrl = null;
 
     // 所有隊員名單 - 移除皮、杰、銘
     const allMembers = [
@@ -1395,6 +1479,22 @@
       
       formHeader.classList.toggle('active');
       formContent.classList.toggle('show');
+    }
+
+    // Set template URL function
+    function setTemplateUrl() {
+      const urlInput = document.getElementById('templateUrlInput');
+      const statusDiv = document.getElementById('templateStatus');
+      
+      customTemplateUrl = urlInput.value.trim();
+      
+      if (customTemplateUrl) {
+        statusDiv.textContent = '✓ 已設定自訂模板 URL';
+        statusDiv.className = 'template-status success';
+      } else {
+        statusDiv.textContent = '請輸入有效的 URL';
+        statusDiv.className = 'template-status error';
+      }
     }
 
     // Auth state observer
@@ -1521,15 +1621,39 @@
       exportBtn.innerHTML = '<span class="loading-spinner"></span>正在生成 Word 檔案...';
       
       try {
-        // First, load the template from the same directory
-        const templateUrl = 'application.docx';
-        
-        const response = await fetch(templateUrl);
-        if (!response.ok) {
-          throw new Error('無法載入模板檔案');
+        // Try different template URLs
+        const templateUrls = [
+          customTemplateUrl, // Custom URL if provided
+          './application.docx', // Same directory
+          'application.docx', // Relative path
+          '/application.docx', // Root path
+          window.location.origin + '/application.docx' // Full URL
+        ].filter(url => url); // Remove null/empty values
+
+        let templateContent = null;
+        let successUrl = null;
+
+        // Try each URL until one works
+        for (const url of templateUrls) {
+          try {
+            console.log(`Trying to load template from: ${url}`);
+            const response = await fetch(url);
+            if (response.ok) {
+              templateContent = await response.arrayBuffer();
+              successUrl = url;
+              console.log(`Successfully loaded template from: ${url}`);
+              break;
+            } else {
+              console.log(`Failed to load from ${url}: ${response.status} ${response.statusText}`);
+            }
+          } catch (error) {
+            console.log(`Error loading from ${url}:`, error.message);
+          }
         }
-        
-        const templateContent = await response.arrayBuffer();
+
+        if (!templateContent) {
+          throw new Error('無法載入模板檔案，請確認檔案已上傳或使用上方輸入框設定正確的 URL');
+        }
         
         // Get data from Firebase
         const snapshot = await new Promise((resolve) => {
@@ -1606,7 +1730,7 @@
         
       } catch (error) {
         console.error('Export error:', error);
-        alert('匯出失敗，請重試。確保模板檔案 application.docx 在相同目錄下。');
+        alert(`匯出失敗：${error.message}`);
       } finally {
         exportBtn.disabled = false;
         exportBtn.innerHTML = '<span>📥</span><span>匯出 Word 報名表</span>';
