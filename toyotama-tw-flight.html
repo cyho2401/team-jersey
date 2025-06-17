@@ -417,19 +417,60 @@
     .form-card {
       background: white;
       border-radius: 20px;
-      padding: 30px;
+      padding: 0;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
       margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .form-header {
+      padding: 30px;
+      border-bottom: 1px solid #e9ecef;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .form-header:hover {
+      background-color: #f8f9fa;
+    }
+
+    .form-header.active {
+      background-color: #f8f9fa;
     }
 
     .form-title {
       font-size: 24px;
       font-weight: bold;
       color: #333;
-      margin-bottom: 25px;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-title-text {
       display: flex;
       align-items: center;
       gap: 10px;
+    }
+
+    .toggle-icon {
+      font-size: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .form-header.active .toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .form-content {
+      padding: 30px;
+      display: none;
+    }
+
+    .form-content.show {
+      display: block;
     }
 
     .form-group {
@@ -1059,179 +1100,186 @@
     </div>
 
     <div class="form-card">
-      <h2 class="form-title">
-        <span>📝</span>
-        <span>隊員資訊登記</span>
-      </h2>
-
-      <div class="member-stats" id="memberStats" style="display: none;">
-        <div class="stat-item">
-          <span>✓ 資料完整：</span>
-          <span class="stat-number" id="completeCount">0</span>
-          <span>人</span>
-        </div>
-        <div class="stat-item">
-          <span>⚠ 待補資料：</span>
-          <span class="stat-number" id="incompleteCount">0</span>
-          <span>人</span>
-        </div>
-        <div class="stat-item">
-          <span>✗ 未登記：</span>
-          <span class="stat-number" id="notSubmittedCount">0</span>
-          <span>人</span>
-        </div>
+      <div class="form-header" onclick="toggleForm()">
+        <h2 class="form-title">
+          <div class="form-title-text">
+            <span>📝</span>
+            <span>隊員資訊登記</span>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </h2>
       </div>
 
-      <div class="existing-data-notice" id="existingDataNotice">
-        ℹ️ 此隊員已有航班登記資料，航班資訊已自動填入。請補充個人資料。
+      <div class="form-content" id="formContent">
+        <div class="member-stats" id="memberStats" style="display: none;">
+          <div class="stat-item">
+            <span>✓ 資料完整：</span>
+            <span class="stat-number" id="completeCount">0</span>
+            <span>人</span>
+          </div>
+          <div class="stat-item">
+            <span>⚠ 待補資料：</span>
+            <span class="stat-number" id="incompleteCount">0</span>
+            <span>人</span>
+          </div>
+          <div class="stat-item">
+            <span>✗ 未登記：</span>
+            <span class="stat-number" id="notSubmittedCount">0</span>
+            <span>人</span>
+          </div>
+        </div>
+
+        <div class="existing-data-notice" id="existingDataNotice">
+          ℹ️ 此隊員已有航班登記資料，航班資訊已自動填入。請補充個人資料。
+        </div>
+
+        <form id="memberForm">
+          <div class="form-group">
+            <label for="memberName">隊員姓名</label>
+            <select id="memberName" required>
+              <option value="">請選擇隊員</option>
+              <!-- Options will be dynamically populated -->
+            </select>
+          </div>
+
+          <!-- Personal Information Section -->
+          <div class="form-section">
+            <div class="section-title">
+              <span>👤</span>
+              <span>個人資料</span>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="chineseName">中文全名</label>
+                <input type="text" id="chineseName" placeholder="請輸入中文全名" required>
+              </div>
+              <div class="form-group">
+                <label for="height">身高 (公分)</label>
+                <input type="number" id="height" placeholder="例如：175" min="150" max="220" required>
+              </div>
+              <div class="form-group">
+                <label for="weight">體重 (公斤)</label>
+                <input type="number" id="weight" placeholder="例如：70" min="40" max="150" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flight Information Section -->
+          <div class="form-section">
+            <div class="section-title">
+              <span>✈️</span>
+              <span>航班資訊</span>
+            </div>
+
+            <div class="form-group">
+              <label>出發日期</label>
+              <div class="date-options">
+                <button type="button" class="date-btn" data-date="2025-06-19">6月19日</button>
+                <button type="button" class="date-btn" data-date="2025-06-20">6月20日</button>
+                <button type="button" class="date-btn" data-date="other">其他日期</button>
+              </div>
+              <div class="other-date-input" id="otherDateInput">
+                <input type="date" id="customDate" min="2025-06-01" max="2025-12-31">
+              </div>
+              <input type="hidden" id="selectedDate" required>
+            </div>
+
+            <div class="form-group">
+              <label>選擇航班</label>
+              <div class="flight-options">
+                <button type="button" class="flight-btn" data-flight="HX234-0800">
+                  <div class="airline-logo">🔵</div>
+                  <div class="airline-name">HK Express 香港快運</div>
+                  <div class="flight-info">
+                    <span class="flight-time">08:00 - 09:30</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="CX420-0835">
+                  <div class="airline-logo">🟢</div>
+                  <div class="airline-name">Cathay Pacific 國泰航空</div>
+                  <div class="flight-info">
+                    <span class="flight-time">08:35 - 10:15</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="CI920-1010">
+                  <div class="airline-logo">🔴</div>
+                  <div class="airline-name">China Airlines 中華航空</div>
+                  <div class="flight-info">
+                    <span class="flight-time">10:10 - 11:45</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="AE390-1010">
+                  <div class="airline-logo">🟡</div>
+                  <div class="airline-name">Mandarin Airlines 華信航空</div>
+                  <div class="flight-info">
+                    <span class="flight-time">10:10 - 11:45</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="CX422-1035">
+                  <div class="airline-logo">🟢</div>
+                  <div class="airline-name">Cathay Pacific 國泰航空</div>
+                  <div class="flight-info">
+                    <span class="flight-time">10:35 - 12:15</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="BR828-1205">
+                  <div class="airline-logo">🟢</div>
+                  <div class="airline-name">EVA Air 長榮航空</div>
+                  <div class="flight-info">
+                    <span class="flight-time">12:05 - 13:40</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="HX236-1245">
+                  <div class="airline-logo">🔵</div>
+                  <div class="airline-name">HK Express 香港快運</div>
+                  <div class="flight-info">
+                    <span class="flight-time">12:45 - 14:15</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="manual-input-toggle">
+              <button type="button" class="toggle-btn" onclick="toggleManualInput()">
+                或手動輸入其他航班
+              </button>
+            </div>
+
+            <div class="manual-input" id="manualInput">
+              <div class="input-row">
+                <div class="form-group">
+                  <label for="customAirline">航空公司</label>
+                  <input type="text" id="customAirline" placeholder="例如：HK Express">
+                </div>
+                <div class="form-group">
+                  <label for="customFlightNo">航班編號</label>
+                  <input type="text" id="customFlightNo" placeholder="例如：HX234">
+                </div>
+              </div>
+              <div class="input-row">
+                <div class="form-group">
+                  <label for="customDeparture">起飛時間</label>
+                  <input type="time" id="customDeparture">
+                </div>
+                <div class="form-group">
+                  <label for="customArrival">抵達時間</label>
+                  <input type="time" id="customArrival">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="selectedFlight" required>
+          <button type="submit" class="submit-btn">提交資料</button>
+        </form>
       </div>
-
-      <form id="memberForm">
-        <div class="form-group">
-          <label for="memberName">隊員姓名</label>
-          <select id="memberName" required>
-            <option value="">請選擇隊員</option>
-            <!-- Options will be dynamically populated -->
-          </select>
-        </div>
-
-        <!-- Personal Information Section -->
-        <div class="form-section">
-          <div class="section-title">
-            <span>👤</span>
-            <span>個人資料</span>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="chineseName">中文全名</label>
-              <input type="text" id="chineseName" placeholder="請輸入中文全名" required>
-            </div>
-            <div class="form-group">
-              <label for="height">身高 (公分)</label>
-              <input type="number" id="height" placeholder="例如：175" min="150" max="220" required>
-            </div>
-            <div class="form-group">
-              <label for="weight">體重 (公斤)</label>
-              <input type="number" id="weight" placeholder="例如：70" min="40" max="150" required>
-            </div>
-          </div>
-        </div>
-
-        <!-- Flight Information Section -->
-        <div class="form-section">
-          <div class="section-title">
-            <span>✈️</span>
-            <span>航班資訊</span>
-          </div>
-
-          <div class="form-group">
-            <label>出發日期</label>
-            <div class="date-options">
-              <button type="button" class="date-btn" data-date="2025-06-19">6月19日</button>
-              <button type="button" class="date-btn" data-date="2025-06-20">6月20日</button>
-              <button type="button" class="date-btn" data-date="other">其他日期</button>
-            </div>
-            <div class="other-date-input" id="otherDateInput">
-              <input type="date" id="customDate" min="2025-06-01" max="2025-12-31">
-            </div>
-            <input type="hidden" id="selectedDate" required>
-          </div>
-
-          <div class="form-group">
-            <label>選擇航班</label>
-            <div class="flight-options">
-              <button type="button" class="flight-btn" data-flight="HX234-0800">
-                <div class="airline-logo">🔵</div>
-                <div class="airline-name">HK Express 香港快運</div>
-                <div class="flight-info">
-                  <span class="flight-time">08:00 - 09:30</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="CX420-0835">
-                <div class="airline-logo">🟢</div>
-                <div class="airline-name">Cathay Pacific 國泰航空</div>
-                <div class="flight-info">
-                  <span class="flight-time">08:35 - 10:15</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="CI920-1010">
-                <div class="airline-logo">🔴</div>
-                <div class="airline-name">China Airlines 中華航空</div>
-                <div class="flight-info">
-                  <span class="flight-time">10:10 - 11:45</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="AE390-1010">
-                <div class="airline-logo">🟡</div>
-                <div class="airline-name">Mandarin Airlines 華信航空</div>
-                <div class="flight-info">
-                  <span class="flight-time">10:10 - 11:45</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="CX422-1035">
-                <div class="airline-logo">🟢</div>
-                <div class="airline-name">Cathay Pacific 國泰航空</div>
-                <div class="flight-info">
-                  <span class="flight-time">10:35 - 12:15</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="BR828-1205">
-                <div class="airline-logo">🟢</div>
-                <div class="airline-name">EVA Air 長榮航空</div>
-                <div class="flight-info">
-                  <span class="flight-time">12:05 - 13:40</span>
-                </div>
-              </button>
-
-              <button type="button" class="flight-btn" data-flight="HX236-1245">
-                <div class="airline-logo">🔵</div>
-                <div class="airline-name">HK Express 香港快運</div>
-                <div class="flight-info">
-                  <span class="flight-time">12:45 - 14:15</span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <div class="manual-input-toggle">
-            <button type="button" class="toggle-btn" onclick="toggleManualInput()">
-              或手動輸入其他航班
-            </button>
-          </div>
-
-          <div class="manual-input" id="manualInput">
-            <div class="input-row">
-              <div class="form-group">
-                <label for="customAirline">航空公司</label>
-                <input type="text" id="customAirline" placeholder="例如：HK Express">
-              </div>
-              <div class="form-group">
-                <label for="customFlightNo">航班編號</label>
-                <input type="text" id="customFlightNo" placeholder="例如：HX234">
-              </div>
-            </div>
-            <div class="input-row">
-              <div class="form-group">
-                <label for="customDeparture">起飛時間</label>
-                <input type="time" id="customDeparture">
-              </div>
-              <div class="form-group">
-                <label for="customArrival">抵達時間</label>
-                <input type="time" id="customArrival">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <input type="hidden" id="selectedFlight" required>
-        <button type="submit" class="submit-btn">提交資料</button>
-      </form>
     </div>
 
     <div class="table-card">
@@ -1311,6 +1359,7 @@
     window.toggleManualInput = toggleManualInput;
     window.exportToWord = exportToWord;
     window.exportToJPG = exportToJPG;
+    window.toggleForm = toggleForm;
 
     // 所有隊員名單
     const allMembers = [
@@ -1329,6 +1378,15 @@
 
     // Store current data globally
     let currentMemberData = {};
+
+    // Toggle form function
+    function toggleForm() {
+      const formHeader = document.querySelector('.form-header');
+      const formContent = document.getElementById('formContent');
+      
+      formHeader.classList.toggle('active');
+      formContent.classList.toggle('show');
+    }
 
     // Auth state observer
     onAuthStateChanged(auth, (user) => {
@@ -1483,35 +1541,34 @@
           return;
         }
         
-        // Prepare members data (excluding 布)
+        // Prepare members data
         const members = [];
-        let captainIndex = -1;
         
+        // First add 張子基 as captain if exists
+        if (data["adain"]) {
+          members.push({
+            name: "adain",
+            chineseName: data["adain"].chineseName || "張子基",
+            height: data["adain"].height || "",
+            weight: data["adain"].weight || "",
+            position: "隊長"
+          });
+        }
+        
+        // Then add all other members (excluding 布 and adain)
         Object.entries(data).forEach(([name, info]) => {
-          if (name === "布") return; // Skip 布永輝
+          if (name === "布" || name === "adain") return;
           
-          const memberData = {
+          members.push({
             name: name,
             chineseName: info.chineseName || chineseNameMapping[name] || "",
             height: info.height || "",
             weight: info.weight || "",
-            position: name === "adain" ? "隊長" : "隊員"
-          };
-          
-          if (name === "adain") {
-            captainIndex = members.length;
-          }
-          
-          members.push(memberData);
+            position: "隊員"
+          });
         });
         
-        // Ensure captain is first
-        if (captainIndex > 0) {
-          const captain = members.splice(captainIndex, 1)[0];
-          members.unshift(captain);
-        }
-        
-        // Create table rows
+        // Create table rows with proper formatting
         const tableRows = [];
         
         // Header row
@@ -1520,57 +1577,64 @@
             new docx.TableCell({
               children: [new docx.Paragraph({
                 text: "編號",
-                alignment: docx.AlignmentType.CENTER
+                alignment: docx.AlignmentType.CENTER,
+                style: "tableHeader"
               })],
-              verticalAlign: docx.VerticalAlign.CENTER
+              width: { size: 8, type: docx.WidthType.PERCENTAGE }
             }),
             new docx.TableCell({
               children: [new docx.Paragraph({
                 text: "姓名",
-                alignment: docx.AlignmentType.CENTER
+                alignment: docx.AlignmentType.CENTER,
+                style: "tableHeader"
               })],
-              verticalAlign: docx.VerticalAlign.CENTER
+              width: { size: 20, type: docx.WidthType.PERCENTAGE }
             }),
             new docx.TableCell({
               children: [new docx.Paragraph({
                 text: "職稱",
-                alignment: docx.AlignmentType.CENTER
+                alignment: docx.AlignmentType.CENTER,
+                style: "tableHeader"
               })],
-              verticalAlign: docx.VerticalAlign.CENTER
+              width: { size: 12, type: docx.WidthType.PERCENTAGE }
             }),
             new docx.TableCell({
               children: [new docx.Paragraph({
                 text: "年級",
-                alignment: docx.AlignmentType.CENTER
+                alignment: docx.AlignmentType.CENTER,
+                style: "tableHeader"
               })],
-              verticalAlign: docx.VerticalAlign.CENTER
+              width: { size: 12, type: docx.WidthType.PERCENTAGE }
             }),
             new docx.TableCell({
               children: [new docx.Paragraph({
                 text: "出生年月日",
-                alignment: docx.AlignmentType.CENTER
+                alignment: docx.AlignmentType.CENTER,
+                style: "tableHeader"
               })],
-              verticalAlign: docx.VerticalAlign.CENTER
+              width: { size: 20, type: docx.WidthType.PERCENTAGE }
             }),
             new docx.TableCell({
               children: [new docx.Paragraph({
                 text: "身高",
-                alignment: docx.AlignmentType.CENTER
+                alignment: docx.AlignmentType.CENTER,
+                style: "tableHeader"
               })],
-              verticalAlign: docx.VerticalAlign.CENTER
+              width: { size: 14, type: docx.WidthType.PERCENTAGE }
             }),
             new docx.TableCell({
               children: [new docx.Paragraph({
                 text: "體重",
-                alignment: docx.AlignmentType.CENTER
+                alignment: docx.AlignmentType.CENTER,
+                style: "tableHeader"
               })],
-              verticalAlign: docx.VerticalAlign.CENTER
+              width: { size: 14, type: docx.WidthType.PERCENTAGE }
             })
           ]
         });
         tableRows.push(headerRow);
         
-        // Add all 24 rows (as per the template)
+        // Add all 24 rows
         for (let i = 0; i < 24; i++) {
           const member = members[i];
           const row = new docx.TableRow({
@@ -1579,72 +1643,92 @@
                 children: [new docx.Paragraph({
                   text: (i + 1).toString(),
                   alignment: docx.AlignmentType.CENTER
-                })],
-                verticalAlign: docx.VerticalAlign.CENTER
+                })]
               }),
               new docx.TableCell({
                 children: [new docx.Paragraph({
                   text: member ? member.chineseName : "",
                   alignment: docx.AlignmentType.CENTER
-                })],
-                verticalAlign: docx.VerticalAlign.CENTER
+                })]
               }),
               new docx.TableCell({
                 children: [new docx.Paragraph({
                   text: member ? member.position : "隊員",
                   alignment: docx.AlignmentType.CENTER
-                })],
-                verticalAlign: docx.VerticalAlign.CENTER
+                })]
               }),
               new docx.TableCell({
-                children: [new docx.Paragraph("")],
-                verticalAlign: docx.VerticalAlign.CENTER
+                children: [new docx.Paragraph("")]
               }),
               new docx.TableCell({
-                children: [new docx.Paragraph("")],
-                verticalAlign: docx.VerticalAlign.CENTER
+                children: [new docx.Paragraph("")]
               }),
               new docx.TableCell({
                 children: [new docx.Paragraph({
                   text: member && member.height ? `${member.height}` : "",
                   alignment: docx.AlignmentType.CENTER
-                })],
-                verticalAlign: docx.VerticalAlign.CENTER
+                })]
               }),
               new docx.TableCell({
                 children: [new docx.Paragraph({
                   text: member && member.weight ? `${member.weight}` : "",
                   alignment: docx.AlignmentType.CENTER
-                })],
-                verticalAlign: docx.VerticalAlign.CENTER
+                })]
               })
             ]
           });
           tableRows.push(row);
         }
         
-        // Create document
+        // Create document with proper page settings
         const doc = new docx.Document({
+          styles: {
+            paragraphStyles: [{
+              id: "tableHeader",
+              name: "Table Header",
+              basedOn: "Normal",
+              run: {
+                bold: true
+              }
+            }]
+          },
           sections: [{
-            properties: {},
+            properties: {
+              page: {
+                margin: {
+                  top: 1134, // 2cm
+                  right: 1134, // 2cm
+                  bottom: 1134, // 2cm
+                  left: 1134, // 2cm
+                }
+              }
+            },
             children: [
               new docx.Paragraph({
                 text: "114年「山水茶堂」籃球邀請賽報名表",
                 heading: docx.HeadingLevel.TITLE,
                 alignment: docx.AlignmentType.CENTER,
-                spacing: { after: 300 }
+                spacing: { after: 400 }
               }),
               new docx.Table({
                 width: {
                   size: 100,
                   type: docx.WidthType.PERCENTAGE
                 },
+                borders: {
+                  top: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  bottom: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  left: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  right: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  insideHorizontal: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  insideVertical: { style: docx.BorderStyle.SINGLE, size: 1 }
+                },
                 rows: [
                   new docx.TableRow({
                     children: [
                       new docx.TableCell({
                         children: [new docx.Paragraph("校名")],
-                        width: { size: 15, type: docx.WidthType.PERCENTAGE }
+                        width: { size: 12, type: docx.WidthType.PERCENTAGE }
                       }),
                       new docx.TableCell({
                         children: [new docx.Paragraph("香港豐玉")],
@@ -1652,7 +1736,7 @@
                       }),
                       new docx.TableCell({
                         children: [new docx.Paragraph("組別")],
-                        width: { size: 15, type: docx.WidthType.PERCENTAGE }
+                        width: { size: 12, type: docx.WidthType.PERCENTAGE }
                       }),
                       new docx.TableCell({
                         children: [new docx.Paragraph("邀請賽")],
@@ -1660,12 +1744,11 @@
                       }),
                       new docx.TableCell({
                         children: [new docx.Paragraph("電話/line")],
-                        columnSpan: 2,
-                        width: { size: 30, type: docx.WidthType.PERCENTAGE }
+                        width: { size: 16, type: docx.WidthType.PERCENTAGE }
                       }),
                       new docx.TableCell({
                         children: [new docx.Paragraph("")],
-                        width: { size: 0, type: docx.WidthType.PERCENTAGE }
+                        width: { size: 20, type: docx.WidthType.PERCENTAGE }
                       })
                     ]
                   }),
@@ -1704,6 +1787,14 @@
                 width: {
                   size: 100,
                   type: docx.WidthType.PERCENTAGE
+                },
+                borders: {
+                  top: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  bottom: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  left: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  right: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  insideHorizontal: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  insideVertical: { style: docx.BorderStyle.SINGLE, size: 1 }
                 },
                 rows: tableRows
               })
