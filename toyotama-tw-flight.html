@@ -587,30 +587,104 @@
       font-size: 14px;
     }
 
-    table {
+    /* New styles for grouped flight display */
+    .flight-group {
+      margin-bottom: 25px;
+      border: 2px solid #e9ecef;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .flight-header {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .flight-details {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .flight-date-header {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1565C0;
+      margin-bottom: 5px;
+    }
+
+    .flight-airline-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .flight-airline-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .flight-no {
+      background: #1565C0;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .flight-time-info {
+      font-size: 18px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .flight-passenger-count {
+      background: #4caf50;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 16px;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .members-table {
       width: 100%;
       border-collapse: collapse;
     }
 
-    thead {
+    .members-table thead {
       background: #f8f9fa;
     }
 
-    th {
-      padding: 15px;
+    .members-table th {
+      padding: 12px 15px;
       text-align: left;
       font-weight: 600;
-      color: #555;
-      border-bottom: 2px solid #e0e0e0;
+      color: #666;
+      font-size: 14px;
+      border-bottom: 1px solid #e9ecef;
     }
 
-    td {
-      padding: 15px;
-      border-bottom: 1px solid #f0f0f0;
+    .members-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 15px;
     }
 
-    tbody tr:hover {
+    .members-table tbody tr:hover {
       background: #f8f9fa;
+    }
+
+    .members-table tbody tr:last-child td {
+      border-bottom: none;
     }
 
     .member-name {
@@ -618,32 +692,32 @@
       color: #333;
     }
 
-    .airline-tag {
-      display: inline-block;
-      padding: 4px 12px;
-      background: #e3f2fd;
-      color: #0D47A1;
+    .date-section {
+      margin-bottom: 40px;
+    }
+
+    .date-section-header {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      color: white;
+      padding: 15px 25px;
       border-radius: 15px;
-      font-size: 12px;
-      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(21, 101, 192, 0.3);
     }
 
-    .time-badge {
-      background: #f3e5f5;
-      color: #7b1fa2;
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
+    .date-section-title {
+      font-size: 20px;
+      font-weight: bold;
     }
 
-    .date-badge {
-      background: #e8f5e9;
-      color: #2e7d32;
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
+    .date-total-count {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 16px;
+      border-radius: 15px;
+      font-size: 16px;
     }
 
     .empty-state {
@@ -726,10 +800,6 @@
         overflow-x: auto;
       }
 
-      table {
-        min-width: 700px;
-      }
-
       .date-options {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -737,6 +807,31 @@
       .member-stats {
         flex-direction: column;
         align-items: flex-start;
+      }
+
+      .flight-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .flight-airline-info {
+        flex-wrap: wrap;
+      }
+
+      .date-section-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .members-table {
+        font-size: 14px;
+      }
+
+      .members-table th,
+      .members-table td {
+        padding: 10px;
       }
     }
   </style>
@@ -982,29 +1077,15 @@
       <div class="table-header">
         <h2 class="form-title">
           <span>📊</span>
-          <span>隊員登記狀況</span>
+          <span>隊員登記狀況 - 按航班分組</span>
         </h2>
         <div class="member-count" id="memberCount">已登記: 0 人</div>
       </div>
       
       <div id="tableContainer">
-        <table id="memberTable">
-          <thead>
-            <tr>
-              <th>狀態</th>
-              <th>隊員姓名</th>
-              <th>中文姓名</th>
-              <th>身高</th>
-              <th>體重</th>
-              <th>出發日期</th>
-              <th>航空公司</th>
-              <th>起飛時間</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody">
-            <!-- Data will be populated here -->
-          </tbody>
-        </table>
+        <div id="flightGroupsContainer">
+          <!-- Flight groups will be populated here -->
+        </div>
         <div class="empty-state" id="emptyState">
           <div class="empty-state-icon">📝</div>
           <p>尚未有隊員完成資訊登記</p>
@@ -1506,74 +1587,160 @@
       });
     });
 
+    // Group members by date and flight
+    function groupMembersByFlight(data) {
+      const grouped = {};
+      
+      Object.entries(data).forEach(([memberName, memberData]) => {
+        const date = memberData.date;
+        const flightKey = `${memberData.flightNo}-${memberData.departure}-${memberData.arrival}`;
+        
+        if (!grouped[date]) {
+          grouped[date] = {};
+        }
+        
+        if (!grouped[date][flightKey]) {
+          grouped[date][flightKey] = {
+            airline: memberData.airline,
+            flightNo: memberData.flightNo,
+            departure: memberData.departure,
+            arrival: memberData.arrival,
+            members: []
+          };
+        }
+        
+        grouped[date][flightKey].members.push({
+          name: memberName,
+          ...memberData
+        });
+      });
+      
+      return grouped;
+    }
+
     // 監聽資料變更
     const flightsRef = ref(db, 'toyotama-flights');
     onValue(flightsRef, (snapshot) => {
       const data = snapshot.val();
-      const tableBody = document.getElementById('tableBody');
+      const flightGroupsContainer = document.getElementById('flightGroupsContainer');
       const emptyState = document.getElementById('emptyState');
-      const table = document.getElementById('memberTable');
       const memberCount = document.getElementById('memberCount');
 
-      tableBody.innerHTML = '';
+      flightGroupsContainer.innerHTML = '';
       existingMemberData = data || {};
 
       // Update member dropdown
       updateMemberDropdown();
 
       if (!data) {
-        table.style.display = 'none';
+        flightGroupsContainer.style.display = 'none';
         emptyState.style.display = 'block';
         memberCount.textContent = '已登記: 0 人';
         return;
       }
 
-      table.style.display = 'table';
+      flightGroupsContainer.style.display = 'block';
       emptyState.style.display = 'none';
 
-      const members = Object.keys(data);
-      memberCount.textContent = `已登記: ${members.length} 人`;
+      const totalMembers = Object.keys(data).length;
+      memberCount.textContent = `已登記: ${totalMembers} 人`;
 
-      // 排序
-      members.sort((a, b) => {
-        const dataA = data[a];
-        const dataB = data[b];
+      // Group members by date and flight
+      const groupedData = groupMembersByFlight(data);
+      
+      // Sort dates
+      const sortedDates = Object.keys(groupedData).sort();
+      
+      sortedDates.forEach(date => {
+        // Create date section
+        const dateSection = document.createElement('div');
+        dateSection.className = 'date-section';
         
-        if (dataA.date !== dataB.date) {
-          return dataA.date.localeCompare(dataB.date);
-        }
-        return dataA.departure.localeCompare(dataB.departure);
-      });
-
-      members.forEach(member => {
-        const memberData = data[member];
-        const row = document.createElement('tr');
+        // Count total members for this date
+        let dateTotalCount = 0;
+        Object.values(groupedData[date]).forEach(flight => {
+          dateTotalCount += flight.members.length;
+        });
         
-        // 檢查資料是否完整
-        const isComplete = isDataComplete(memberData);
-        
-        row.innerHTML = `
-          <td>
-            ${isComplete ? 
-              '<span class="status-icon status-complete">✓</span>' : 
-              '<span class="status-icon status-incomplete">!</span>'}
-          </td>
-          <td class="member-name">${member}</td>
-          <td>${memberData.chineseName || '<span class="pending-input">待輸入</span>'}</td>
-          <td>${memberData.height ? memberData.height + ' cm' : '<span class="pending-input">待輸入</span>'}</td>
-          <td>${memberData.weight ? memberData.weight + ' kg' : '<span class="pending-input">待輸入</span>'}</td>
-          <td>
-            <span class="date-badge">${formatDateDMY(memberData.date)}</span>
-          </td>
-          <td>
-            <span class="airline-tag">${memberData.airline}</span>
-          </td>
-          <td>
-            <span class="time-badge">${memberData.departure}</span>
-          </td>
+        // Date header
+        const dateSectionHeader = document.createElement('div');
+        dateSectionHeader.className = 'date-section-header';
+        dateSectionHeader.innerHTML = `
+          <div class="date-section-title">📅 ${formatDateDMY(date)}</div>
+          <div class="date-total-count">共 ${dateTotalCount} 人</div>
         `;
+        dateSection.appendChild(dateSectionHeader);
         
-        tableBody.appendChild(row);
+        // Sort flights by departure time
+        const sortedFlights = Object.entries(groupedData[date]).sort((a, b) => {
+          return a[1].departure.localeCompare(b[1].departure);
+        });
+        
+        // Create flight groups
+        sortedFlights.forEach(([flightKey, flightInfo]) => {
+          const flightGroup = document.createElement('div');
+          flightGroup.className = 'flight-group';
+          
+          // Flight header
+          const flightHeader = document.createElement('div');
+          flightHeader.className = 'flight-header';
+          flightHeader.innerHTML = `
+            <div class="flight-details">
+              <div class="flight-airline-info">
+                <span class="flight-airline-name">${flightInfo.airline}</span>
+                <span class="flight-no">${flightInfo.flightNo}</span>
+              </div>
+              <div class="flight-time-info">${flightInfo.departure} - ${flightInfo.arrival}</div>
+            </div>
+            <div class="flight-passenger-count">${flightInfo.members.length} 人</div>
+          `;
+          flightGroup.appendChild(flightHeader);
+          
+          // Members table
+          const membersTable = document.createElement('table');
+          membersTable.className = 'members-table';
+          
+          const thead = document.createElement('thead');
+          thead.innerHTML = `
+            <tr>
+              <th style="width: 50px;">狀態</th>
+              <th>隊員姓名</th>
+              <th>中文姓名</th>
+              <th>身高</th>
+              <th>體重</th>
+            </tr>
+          `;
+          membersTable.appendChild(thead);
+          
+          const tbody = document.createElement('tbody');
+          
+          // Sort members by name
+          flightInfo.members.sort((a, b) => a.name.localeCompare(b.name));
+          
+          flightInfo.members.forEach(member => {
+            const isComplete = isDataComplete(member);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>
+                ${isComplete ? 
+                  '<span class="status-icon status-complete">✓</span>' : 
+                  '<span class="status-icon status-incomplete">!</span>'}
+              </td>
+              <td class="member-name">${member.name}</td>
+              <td>${member.chineseName || '<span class="pending-input">待輸入</span>'}</td>
+              <td>${member.height ? member.height + ' cm' : '<span class="pending-input">待輸入</span>'}</td>
+              <td>${member.weight ? member.weight + ' kg' : '<span class="pending-input">待輸入</span>'}</td>
+            `;
+            tbody.appendChild(row);
+          });
+          
+          membersTable.appendChild(tbody);
+          flightGroup.appendChild(membersTable);
+          
+          dateSection.appendChild(flightGroup);
+        });
+        
+        flightGroupsContainer.appendChild(dateSection);
       });
     });
   </script>
