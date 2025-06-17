@@ -1345,6 +1345,10 @@
       </h2>
 
       <div class="export-buttons">
+        <button class="export-btn" onclick="exportToWord()" id="exportBtn">
+          <span>📥</span>
+          <span>匯出 Word 報名表</span>
+        </button>
         <button class="export-btn csv" onclick="exportToCSV()" id="exportCsvBtn">
           <span>📊</span>
           <span>匯出 CSV 檔案</span>
@@ -1355,6 +1359,7 @@
         </button>
       </div>
       <div class="export-info">
+        Word 檔案將使用模板格式，填入隊員資料（前兩位已固定為楊子豐、張子基）<br>
         CSV 檔案可在 Excel 中開啟編輯，包含所有隊員資料<br>
         JPG 圖片將顯示航班分組資訊
       </div>
@@ -1398,6 +1403,7 @@
     window.closeAdminLogin = closeAdminLogin;
     window.logout = logout;
     window.toggleManualInput = toggleManualInput;
+    window.exportToWord = exportToWord;
     window.exportToCSV = exportToCSV;
     window.exportToJPG = exportToJPG;
     window.toggleForm = toggleForm;
@@ -1451,7 +1457,150 @@
       }
     });
 
-    // Export to CSV function - Alternative to Word
+    // Export to Word function - Modified to handle the specific template format
+    async function exportToWord() {
+      const exportBtn = document.getElementById('exportBtn');
+      exportBtn.disabled = true;
+      exportBtn.innerHTML = '<span class="loading-spinner"></span>正在生成 Word 檔案...';
+      
+      try {
+        // Load template from fixed URL
+        console.log('載入模板從:', TEMPLATE_URL);
+        const response = await fetch(TEMPLATE_URL);
+        
+        if (!response.ok) {
+          throw new Error(`無法載入模板檔案: ${response.status} ${response.statusText}`);
+        }
+        
+        const templateContent = await response.arrayBuffer();
+        console.log('模板載入成功，大小:', templateContent.byteLength, 'bytes');
+        
+        // Get data from Firebase
+        const snapshot = await new Promise((resolve) => {
+          const flightsRef = ref(db, 'toyotama-flights');
+          onValue(flightsRef, (snapshot) => {
+            resolve(snapshot);
+          }, { onlyOnce: true });
+        });
+        
+        const data = snapshot.val();
+        if (!data) {
+          alert('沒有可匯出的資料');
+          return;
+        }
+        
+        // Prepare members data
+        // 楊子豐 (Tf) 和 張子基 (毛) 已在模板中固定於位置 1 和 2
+        // 從位置 3 開始填入其他成員
+        const excludedFromList = ["毛", "布", "趙教", "Tf"]; // 這些不列入填充名單
+        const members = [];
+        
+        Object.entries(data).forEach(([name, info]) => {
+          if (!excludedFromList.includes(name)) {
+            members.push({
+              name: name,
+              chineseName: info.chineseName || chineseNameMapping[name] || "",
+              height: info.height || "",
+              weight: info.weight || ""
+            });
+          }
+        });
+        
+        // Sort members alphabetically
+        members.sort((a, b) => a.name.localeCompare(b.name));
+        console.log('準備填入的成員數量:', members.length);
+        
+        // Prepare data for template
+        const templateData = {};
+        
+        // Fill in data starting from name1 through name22
+        for (let i = 0; i < 22; i++) {
+          const member = members[i];
+          const num = i + 1;
+          
+          if (member) {
+            templateData[`name${num}`] = member.chineseName;
+            templateData[`height${num}`] = member.height.toString();
+            templateData[`weight${num}`] = member.weight.toString();
+          } else {
+            // 空白資料
+            templateData[`name${num}`] = "";
+            templateData[`height${num}`] = "";
+            templateData[`weight${num}`] = "";
+          }
+        }
+        
+        console.log('模板資料準備完成，範例:', {
+          name1: templateData.name1,
+          height1: templateData.height1,
+          weight1: templateData.weight1
+        });
+        
+        // Load the template
+        const zip = new PizZip(templateContent);
+        const doc = new window.docxtemplater(zip, {
+          paragraphLoop: true,
+          linebreaks: true,
+          delimiters: {
+            start: '{{',
+            end: '}}'
+          }
+        });
+        
+        // Set the template variables
+        doc.setData(templateData);
+        
+        try {
+          // Render the document
+          doc.render();
+          console.log('文件渲染成功');
+        } catch (error) {
+          console.error('渲染錯誤:', error);
+          
+          // 顯示詳細錯誤
+          const errorDiv = document.getElementById('errorDetails');
+          const errorContent = document.getElementById('errorContent');
+          errorDiv.style.display = 'block';
+          
+          if (error.properties && error.properties.errors) {
+            let errorText = '';
+            error.properties.errors.forEach(err => {
+              errorText += `錯誤: ${err.message}\n`;
+              errorText += `位置: ${err.properties.explanation || '未知'}\n`;
+              errorText += `範圍: ${err.properties.scope || '未知'}\n\n`;
+            });
+            errorContent.textContent = errorText;
+          } else {
+            errorContent.textContent = error.message || '未知錯誤';
+          }
+          
+          alert('模板渲染失敗，請查看錯誤詳情');
+          return;
+        }
+        
+        // Generate output
+        const out = doc.getZip().generate({
+          type: "blob",
+          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        });
+        
+        // Save the file
+        saveAs(out, "114年山水茶堂籃球邀請賽報名表-豐玉.docx");
+        console.log('檔案已成功生成並下載');
+        
+        // Hide error details if successful
+        document.getElementById('errorDetails').style.display = 'none';
+        
+      } catch (error) {
+        console.error('Export error:', error);
+        alert(`匯出失敗：${error.message}`);
+      } finally {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = '<span>📥</span><span>匯出 Word 報名表</span>';
+      }
+    }
+
+    // Export to CSV function
     async function exportToCSV() {
       const exportBtn = document.getElementById('exportCsvBtn');
       exportBtn.disabled = true;
@@ -1476,11 +1625,10 @@
         let csvContent = '\uFEFF'; // UTF-8 BOM for Excel
         csvContent += '編號,姓名,中文姓名,身高,體重,出發日期,航空公司,航班編號,起飛時間,抵達時間\n';
         
-        // Create ordered list excluding 毛、布、趙教、Tf but including their data separately
-        const excludedMembers = ["毛", "布", "趙教", "Tf"];
+        // Create ordered list
         const reportMembers = [];
         
-        // First add the confirmed members in fixed positions
+        // First add the fixed members
         reportMembers.push({
           number: 1,
           name: "Tf",
@@ -1499,10 +1647,12 @@
           data: data["毛"] || {}
         });
         
-        // Then add all other members (excluding 毛、布、趙教、Tf)
+        // Then add all other members
         let number = 3;
+        const excludedFromNumbering = ["毛", "Tf"]; // Already added above
+        
         Object.entries(data).forEach(([name, info]) => {
-          if (!excludedMembers.includes(name)) {
+          if (!excludedFromNumbering.includes(name)) {
             reportMembers.push({
               number: number++,
               name: name,
