@@ -154,76 +154,77 @@
       top: -9999px;
       left: -9999px;
       background: white;
-      padding: 40px;
-      width: 1200px;
+      padding: 20px;
+      width: 1400px;
       font-family: Arial, sans-serif;
     }
 
     .jpg-export-header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
     }
 
     .jpg-export-title {
-      font-size: 32px;
+      font-size: 24px;
       font-weight: bold;
       color: #1565C0;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
 
     .jpg-export-subtitle {
-      font-size: 20px;
+      font-size: 16px;
       color: #666;
     }
 
+    .jpg-flights-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
     .jpg-flight-section {
-      margin-bottom: 30px;
-      border: 2px solid #e9ecef;
-      border-radius: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
       overflow: hidden;
+      background: #f9f9f9;
     }
 
     .jpg-flight-header {
       background: #1565C0;
       color: white;
-      padding: 15px 20px;
+      padding: 8px 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-size: 14px;
     }
 
     .jpg-flight-info {
-      font-size: 18px;
       font-weight: bold;
     }
 
     .jpg-member-count {
       background: rgba(255, 255, 255, 0.2);
-      padding: 5px 15px;
-      border-radius: 15px;
-      font-size: 16px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 13px;
     }
 
-    .jpg-members-table {
-      width: 100%;
-      border-collapse: collapse;
+    .jpg-members-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 8px;
+      gap: 5px;
+      font-size: 12px;
     }
 
-    .jpg-members-table th {
-      background: #f8f9fa;
-      padding: 10px;
-      text-align: left;
-      font-weight: bold;
-      border-bottom: 2px solid #e9ecef;
-    }
-
-    .jpg-members-table td {
-      padding: 10px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .jpg-members-table tr:last-child td {
-      border-bottom: none;
+    .jpg-member-item {
+      padding: 4px 8px;
+      background: white;
+      border-radius: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Admin Login Modal */
@@ -1024,6 +1025,10 @@
       .export-btn {
         width: 100%;
       }
+
+      .jpg-flights-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -1088,7 +1093,7 @@
       <h1 class="jpg-export-title">豐玉籃球隊 - 2025屏東盃</h1>
       <p class="jpg-export-subtitle">航班分組資訊</p>
     </div>
-    <div id="jpgFlightContent">
+    <div class="jpg-flights-grid" id="jpgFlightContent">
       <!-- Flight content will be generated here -->
     </div>
   </div>
@@ -1373,7 +1378,7 @@
     const chineseNameMapping = {
       "趙教": "趙志華",
       "布": "布永輝",
-      "adain": "張子基"
+      "毛": "張子基"
     };
 
     // Store current data globally
@@ -1449,41 +1454,26 @@
             header.className = 'jpg-flight-header';
             header.innerHTML = `
               <div class="jpg-flight-info">
-                ${formatDateDMY(date)} | ${flightInfo.airline} | ${flightInfo.flightNo} | ${flightInfo.departure} - ${flightInfo.arrival}
+                ${formatDateDMY(date)} | ${flightInfo.flightNo} | ${flightInfo.departure}
               </div>
               <div class="jpg-member-count">${flightInfo.members.length} 人</div>
             `;
             flightSection.appendChild(header);
             
-            // Table
-            const table = document.createElement('table');
-            table.className = 'jpg-members-table';
+            // Members grid
+            const membersGrid = document.createElement('div');
+            membersGrid.className = 'jpg-members-grid';
             
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-              <tr>
-                <th style="width: 60px;">編號</th>
-                <th>隊員姓名</th>
-                <th>中文姓名</th>
-              </tr>
-            `;
-            table.appendChild(thead);
-            
-            const tbody = document.createElement('tbody');
             flightInfo.members.sort((a, b) => a.name.localeCompare(b.name));
             
             flightInfo.members.forEach((member, index) => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${member.name}</td>
-                <td>${member.chineseName || '-'}</td>
-              `;
-              tbody.appendChild(row);
+              const memberItem = document.createElement('div');
+              memberItem.className = 'jpg-member-item';
+              memberItem.textContent = `${index + 1}. ${member.name}`;
+              membersGrid.appendChild(memberItem);
             });
             
-            table.appendChild(tbody);
-            flightSection.appendChild(table);
+            flightSection.appendChild(membersGrid);
             jpgContent.appendChild(flightSection);
           });
         });
@@ -1544,20 +1534,20 @@
         // Prepare members data
         const members = [];
         
-        // First add 張子基 as captain if exists
-        if (data["adain"]) {
+        // First add 毛 as captain if exists
+        if (data["毛"]) {
           members.push({
-            name: "adain",
-            chineseName: data["adain"].chineseName || "張子基",
-            height: data["adain"].height || "",
-            weight: data["adain"].weight || "",
+            name: "毛",
+            chineseName: data["毛"].chineseName || "張子基",
+            height: data["毛"].height || "",
+            weight: data["毛"].weight || "",
             position: "隊長"
           });
         }
         
-        // Then add all other members (excluding 布 and adain)
+        // Then add all other members (excluding 布 and 毛)
         Object.entries(data).forEach(([name, info]) => {
-          if (name === "布" || name === "adain") return;
+          if (name === "布" || name === "毛") return;
           
           members.push({
             name: name,
@@ -1568,138 +1558,90 @@
           });
         });
         
-        // Create table rows with proper formatting
+        // Create table rows with exact PDF formatting
         const tableRows = [];
         
-        // Header row
-        const headerRow = new docx.TableRow({
-          children: [
-            new docx.TableCell({
-              children: [new docx.Paragraph({
-                text: "編號",
-                alignment: docx.AlignmentType.CENTER,
-                style: "tableHeader"
-              })],
-              width: { size: 8, type: docx.WidthType.PERCENTAGE }
-            }),
-            new docx.TableCell({
-              children: [new docx.Paragraph({
-                text: "姓名",
-                alignment: docx.AlignmentType.CENTER,
-                style: "tableHeader"
-              })],
-              width: { size: 20, type: docx.WidthType.PERCENTAGE }
-            }),
-            new docx.TableCell({
-              children: [new docx.Paragraph({
-                text: "職稱",
-                alignment: docx.AlignmentType.CENTER,
-                style: "tableHeader"
-              })],
-              width: { size: 12, type: docx.WidthType.PERCENTAGE }
-            }),
-            new docx.TableCell({
-              children: [new docx.Paragraph({
-                text: "年級",
-                alignment: docx.AlignmentType.CENTER,
-                style: "tableHeader"
-              })],
-              width: { size: 12, type: docx.WidthType.PERCENTAGE }
-            }),
-            new docx.TableCell({
-              children: [new docx.Paragraph({
-                text: "出生年月日",
-                alignment: docx.AlignmentType.CENTER,
-                style: "tableHeader"
-              })],
-              width: { size: 20, type: docx.WidthType.PERCENTAGE }
-            }),
-            new docx.TableCell({
-              children: [new docx.Paragraph({
-                text: "身高",
-                alignment: docx.AlignmentType.CENTER,
-                style: "tableHeader"
-              })],
-              width: { size: 14, type: docx.WidthType.PERCENTAGE }
-            }),
-            new docx.TableCell({
-              children: [new docx.Paragraph({
-                text: "體重",
-                alignment: docx.AlignmentType.CENTER,
-                style: "tableHeader"
-              })],
-              width: { size: 14, type: docx.WidthType.PERCENTAGE }
-            })
-          ]
-        });
-        tableRows.push(headerRow);
-        
-        // Add all 24 rows
+        // Add all 24 rows (matching PDF exactly)
         for (let i = 0; i < 24; i++) {
           const member = members[i];
           const row = new docx.TableRow({
+            height: { value: 600, rule: docx.HeightRule.ATLEAST },
             children: [
               new docx.TableCell({
                 children: [new docx.Paragraph({
                   text: (i + 1).toString(),
-                  alignment: docx.AlignmentType.CENTER
-                })]
+                  alignment: docx.AlignmentType.CENTER,
+                  spacing: { before: 60, after: 60 }
+                })],
+                verticalAlign: docx.VerticalAlign.CENTER,
+                width: { size: 8, type: docx.WidthType.PERCENTAGE }
               }),
               new docx.TableCell({
                 children: [new docx.Paragraph({
                   text: member ? member.chineseName : "",
-                  alignment: docx.AlignmentType.CENTER
-                })]
+                  alignment: docx.AlignmentType.CENTER,
+                  spacing: { before: 60, after: 60 }
+                })],
+                verticalAlign: docx.VerticalAlign.CENTER,
+                width: { size: 20, type: docx.WidthType.PERCENTAGE }
               }),
               new docx.TableCell({
                 children: [new docx.Paragraph({
                   text: member ? member.position : "隊員",
-                  alignment: docx.AlignmentType.CENTER
-                })]
+                  alignment: docx.AlignmentType.CENTER,
+                  spacing: { before: 60, after: 60 }
+                })],
+                verticalAlign: docx.VerticalAlign.CENTER,
+                width: { size: 12, type: docx.WidthType.PERCENTAGE }
               }),
               new docx.TableCell({
-                children: [new docx.Paragraph("")]
+                children: [new docx.Paragraph("")],
+                verticalAlign: docx.VerticalAlign.CENTER,
+                width: { size: 12, type: docx.WidthType.PERCENTAGE }
               }),
               new docx.TableCell({
-                children: [new docx.Paragraph("")]
+                children: [new docx.Paragraph("")],
+                verticalAlign: docx.VerticalAlign.CENTER,
+                width: { size: 20, type: docx.WidthType.PERCENTAGE }
               }),
               new docx.TableCell({
                 children: [new docx.Paragraph({
-                  text: member && member.height ? `${member.height}` : "",
-                  alignment: docx.AlignmentType.CENTER
-                })]
+                  text: member && member.height ? member.height.toString() : "",
+                  alignment: docx.AlignmentType.CENTER,
+                  spacing: { before: 60, after: 60 }
+                })],
+                verticalAlign: docx.VerticalAlign.CENTER,
+                width: { size: 14, type: docx.WidthType.PERCENTAGE }
               }),
               new docx.TableCell({
                 children: [new docx.Paragraph({
-                  text: member && member.weight ? `${member.weight}` : "",
-                  alignment: docx.AlignmentType.CENTER
-                })]
+                  text: member && member.weight ? member.weight.toString() : "",
+                  alignment: docx.AlignmentType.CENTER,
+                  spacing: { before: 60, after: 60 }
+                })],
+                verticalAlign: docx.VerticalAlign.CENTER,
+                width: { size: 14, type: docx.WidthType.PERCENTAGE }
               })
             ]
           });
           tableRows.push(row);
         }
         
-        // Create document with proper page settings
+        // Create document with exact PDF formatting
         const doc = new docx.Document({
-          styles: {
-            paragraphStyles: [{
-              id: "tableHeader",
-              name: "Table Header",
-              basedOn: "Normal",
-              run: {
-                bold: true
-              }
-            }]
-          },
           sections: [{
             properties: {
               page: {
                 margin: {
-                  top: 1134, // 2cm
-                  right: 1134, // 2cm
-                  bottom: 1134, // 2cm
-                  left: 1134, // 2cm
+                  top: 720,   // 0.5 inch
+                  right: 720,
+                  bottom: 720,
+                  left: 720,
+                },
+                size: {
+                  orientation: docx.PageOrientation.PORTRAIT,
+                  width: 11906, // A4 width
+                  height: 16838 // A4 height
                 }
               }
             },
@@ -1708,7 +1650,11 @@
                 text: "114年「山水茶堂」籃球邀請賽報名表",
                 heading: docx.HeadingLevel.TITLE,
                 alignment: docx.AlignmentType.CENTER,
-                spacing: { after: 400 }
+                spacing: { after: 400 },
+                run: {
+                  font: "標楷體",
+                  size: 32
+                }
               }),
               new docx.Table({
                 width: {
@@ -1716,10 +1662,10 @@
                   type: docx.WidthType.PERCENTAGE
                 },
                 borders: {
-                  top: { style: docx.BorderStyle.SINGLE, size: 1 },
-                  bottom: { style: docx.BorderStyle.SINGLE, size: 1 },
-                  left: { style: docx.BorderStyle.SINGLE, size: 1 },
-                  right: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  top: { style: docx.BorderStyle.SINGLE, size: 2 },
+                  bottom: { style: docx.BorderStyle.SINGLE, size: 2 },
+                  left: { style: docx.BorderStyle.SINGLE, size: 2 },
+                  right: { style: docx.BorderStyle.SINGLE, size: 2 },
                   insideHorizontal: { style: docx.BorderStyle.SINGLE, size: 1 },
                   insideVertical: { style: docx.BorderStyle.SINGLE, size: 1 }
                 },
@@ -1727,53 +1673,67 @@
                   new docx.TableRow({
                     children: [
                       new docx.TableCell({
-                        children: [new docx.Paragraph("校名")],
+                        children: [new docx.Paragraph({ text: "校名", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
                         width: { size: 12, type: docx.WidthType.PERCENTAGE }
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("香港豐玉")],
+                        children: [new docx.Paragraph({ text: "香港豐玉", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
                         width: { size: 20, type: docx.WidthType.PERCENTAGE }
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("組別")],
+                        children: [new docx.Paragraph({ text: "組別", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
                         width: { size: 12, type: docx.WidthType.PERCENTAGE }
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("邀請賽")],
+                        children: [new docx.Paragraph({ text: "邀請賽", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
                         width: { size: 20, type: docx.WidthType.PERCENTAGE }
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("電話/line")],
-                        width: { size: 16, type: docx.WidthType.PERCENTAGE }
+                        children: [new docx.Paragraph({ text: "電話", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
+                        width: { size: 18, type: docx.WidthType.PERCENTAGE },
+                        columnSpan: 2
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("")],
-                        width: { size: 20, type: docx.WidthType.PERCENTAGE }
+                        children: [new docx.Paragraph({ text: "line", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
+                        width: { size: 18, type: docx.WidthType.PERCENTAGE }
                       })
                     ]
                   }),
                   new docx.TableRow({
                     children: [
                       new docx.TableCell({
-                        children: [new docx.Paragraph("校長")]
+                        children: [new docx.Paragraph({ text: "校長", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("")]
+                        children: [new docx.Paragraph("")],
+                        verticalAlign: docx.VerticalAlign.CENTER
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("教練")]
+                        children: [new docx.Paragraph({ text: "教練", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("趙志華")]
+                        children: [new docx.Paragraph({ text: "趙志華", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("助理教練")]
+                        children: [new docx.Paragraph({ text: "助理\n教練", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("布永輝")]
+                        children: [new docx.Paragraph({ text: "布永輝", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
                       }),
                       new docx.TableCell({
-                        children: [new docx.Paragraph("管理")]
+                        children: [new docx.Paragraph({ text: "管理", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER
                       })
                     ]
                   })
@@ -1789,14 +1749,55 @@
                   type: docx.WidthType.PERCENTAGE
                 },
                 borders: {
-                  top: { style: docx.BorderStyle.SINGLE, size: 1 },
-                  bottom: { style: docx.BorderStyle.SINGLE, size: 1 },
-                  left: { style: docx.BorderStyle.SINGLE, size: 1 },
-                  right: { style: docx.BorderStyle.SINGLE, size: 1 },
+                  top: { style: docx.BorderStyle.SINGLE, size: 2 },
+                  bottom: { style: docx.BorderStyle.SINGLE, size: 2 },
+                  left: { style: docx.BorderStyle.SINGLE, size: 2 },
+                  right: { style: docx.BorderStyle.SINGLE, size: 2 },
                   insideHorizontal: { style: docx.BorderStyle.SINGLE, size: 1 },
                   insideVertical: { style: docx.BorderStyle.SINGLE, size: 1 }
                 },
-                rows: tableRows
+                rows: [
+                  new docx.TableRow({
+                    children: [
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "編號", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
+                        width: { size: 8, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "姓名", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
+                        width: { size: 20, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "職稱", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
+                        width: { size: 12, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "年級", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
+                        width: { size: 12, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "出生\n年月日", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
+                        width: { size: 20, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "身高", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
+                        width: { size: 14, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph({ text: "體重", alignment: docx.AlignmentType.CENTER })],
+                        verticalAlign: docx.VerticalAlign.CENTER,
+                        width: { size: 14, type: docx.WidthType.PERCENTAGE }
+                      })
+                    ]
+                  }),
+                  ...tableRows
+                ]
               })
             ]
           }]
