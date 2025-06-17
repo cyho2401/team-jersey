@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>豐玉籃球隊 - 2025屏東盃</title>
+  <!-- Add docx library for Word export -->
+  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -82,6 +85,48 @@
     .admin-btn:hover {
       background: rgba(255, 255, 255, 0.3);
       transform: translateY(-1px);
+    }
+
+    /* Export button styles */
+    .export-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .export-btn {
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .export-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    .export-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .export-info {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #666;
     }
 
     /* Admin Login Modal */
@@ -897,6 +942,21 @@
       <p>隊員資訊登記系統</p>
     </div>
 
+    <!-- Export Section -->
+    <div class="export-section">
+      <h2 class="form-title">
+        <span>📄</span>
+        <span>匯出報名表</span>
+      </h2>
+      <button class="export-btn" onclick="exportToWord()" id="exportBtn">
+        <span>📥</span>
+        <span>匯出為 Word 檔案</span>
+      </button>
+      <div class="export-info">
+        匯出的報名表將包含所有已登記的隊員資料（姓名、身高、體重）
+      </div>
+    </div>
+
     <div class="form-card">
       <h2 class="form-title">
         <span>📝</span>
@@ -1126,6 +1186,7 @@
     window.closeAdminLogin = closeAdminLogin;
     window.logout = logout;
     window.toggleManualInput = toggleManualInput;
+    window.exportToWord = exportToWord;
 
     // 所有隊員名單
     const allMembers = [
@@ -1134,6 +1195,28 @@
       "仁", "光", "天", "奶", "宏", "巨峰", "文威", "杰", "毛", "洲", 
       "皮", "表", "達", "銘"
     ];
+
+    // 中文姓名對照表
+    const chineseNameMapping = {
+      "趙教": "趙教",
+      "adain": "張子基",
+      "James": "林嘉浩",
+      "tsan": "梁國全",
+      "巨峰": "劉結峰",
+      "銘": "潘兆鏗",
+      "wingsun": "葉鴻騫",
+      "Rex": "盧柏佑",
+      "光": "何弘匡",
+      "杰": "劉杰",
+      "洲": "方鎮洲",
+      "仁": "葉尚仁",
+      "天": "何仲恩",
+      "表": "方燦裕",
+      "Tak": "潘立德",
+      "Alvin": "劉偉立",
+      "奶": "黃歡",
+      "Jason": "羅仲禧"
+    };
 
     // Auth state observer
     onAuthStateChanged(auth, (user) => {
@@ -1152,6 +1235,211 @@
         adminLoggedIn.style.display = 'none';
       }
     });
+
+    // Export to Word function
+    async function exportToWord() {
+      const exportBtn = document.getElementById('exportBtn');
+      exportBtn.disabled = true;
+      exportBtn.innerHTML = '<span class="loading-spinner"></span>正在生成 Word 檔案...';
+      
+      try {
+        // Get data from Firebase
+        const snapshot = await new Promise((resolve) => {
+          const flightsRef = ref(db, 'toyotama-flights');
+          onValue(flightsRef, (snapshot) => {
+            resolve(snapshot);
+          }, { onlyOnce: true });
+        });
+        
+        const data = snapshot.val();
+        if (!data) {
+          alert('沒有可匯出的資料');
+          return;
+        }
+        
+        // Filter out 布永輝 and prepare data
+        const members = [];
+        let captainIndex = -1;
+        
+        Object.entries(data).forEach(([name, info]) => {
+          if (name === "布") return; // Skip 布永輝
+          
+          const memberData = {
+            name: name,
+            chineseName: info.chineseName || chineseNameMapping[name] || name,
+            height: info.height || "",
+            weight: info.weight || "",
+            position: name === "adain" ? "隊長" : "隊員"
+          };
+          
+          if (name === "adain") {
+            captainIndex = members.length;
+          }
+          
+          members.push(memberData);
+        });
+        
+        // Ensure captain is first
+        if (captainIndex > 0) {
+          const captain = members.splice(captainIndex, 1)[0];
+          members.unshift(captain);
+        }
+        
+        // Create table rows for the document
+        const tableRows = [];
+        
+        // Header row
+        const headerRow = new docx.TableRow({
+          children: [
+            new docx.TableCell({
+              children: [new docx.Paragraph("編號")],
+              width: { size: 10, type: docx.WidthType.PERCENTAGE }
+            }),
+            new docx.TableCell({
+              children: [new docx.Paragraph("姓名")],
+              width: { size: 20, type: docx.WidthType.PERCENTAGE }
+            }),
+            new docx.TableCell({
+              children: [new docx.Paragraph("職稱")],
+              width: { size: 15, type: docx.WidthType.PERCENTAGE }
+            }),
+            new docx.TableCell({
+              children: [new docx.Paragraph("年級")],
+              width: { size: 15, type: docx.WidthType.PERCENTAGE }
+            }),
+            new docx.TableCell({
+              children: [new docx.Paragraph("出生年月日")],
+              width: { size: 20, type: docx.WidthType.PERCENTAGE }
+            }),
+            new docx.TableCell({
+              children: [new docx.Paragraph("身高")],
+              width: { size: 10, type: docx.WidthType.PERCENTAGE }
+            }),
+            new docx.TableCell({
+              children: [new docx.Paragraph("體重")],
+              width: { size: 10, type: docx.WidthType.PERCENTAGE }
+            })
+          ],
+          tableHeader: true
+        });
+        
+        tableRows.push(headerRow);
+        
+        // Data rows
+        members.forEach((member, index) => {
+          const row = new docx.TableRow({
+            children: [
+              new docx.TableCell({
+                children: [new docx.Paragraph((index + 1).toString())]
+              }),
+              new docx.TableCell({
+                children: [new docx.Paragraph(member.chineseName)]
+              }),
+              new docx.TableCell({
+                children: [new docx.Paragraph(member.position)]
+              }),
+              new docx.TableCell({
+                children: [new docx.Paragraph("")]  // Empty for 年級
+              }),
+              new docx.TableCell({
+                children: [new docx.Paragraph("")]  // Empty for 出生年月日
+              }),
+              new docx.TableCell({
+                children: [new docx.Paragraph(member.height ? `${member.height}cm` : "")]
+              }),
+              new docx.TableCell({
+                children: [new docx.Paragraph(member.weight ? `${member.weight}kg` : "")]
+              })
+            ]
+          });
+          tableRows.push(row);
+        });
+        
+        // Create the document
+        const doc = new docx.Document({
+          sections: [{
+            properties: {},
+            children: [
+              new docx.Paragraph({
+                text: "114年「山水茶堂」籃球邀請賽報名表",
+                heading: docx.HeadingLevel.TITLE,
+                alignment: docx.AlignmentType.CENTER
+              }),
+              new docx.Paragraph({
+                text: "",
+                spacing: { after: 200 }
+              }),
+              new docx.Table({
+                width: {
+                  size: 100,
+                  type: docx.WidthType.PERCENTAGE
+                },
+                rows: [
+                  new docx.TableRow({
+                    children: [
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("校名")],
+                        width: { size: 15, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("香港豐玉")],
+                        width: { size: 35, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("組別")],
+                        width: { size: 15, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("邀請賽")],
+                        width: { size: 35, type: docx.WidthType.PERCENTAGE }
+                      })
+                    ]
+                  }),
+                  new docx.TableRow({
+                    children: [
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("教練")]
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("趙教")]
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("電話/Line")]
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("")]
+                      })
+                    ]
+                  })
+                ]
+              }),
+              new docx.Paragraph({
+                text: "",
+                spacing: { after: 200 }
+              }),
+              new docx.Table({
+                width: {
+                  size: 100,
+                  type: docx.WidthType.PERCENTAGE
+                },
+                rows: tableRows
+              })
+            ]
+          }]
+        });
+        
+        // Generate and save the document
+        const blob = await docx.Packer.toBlob(doc);
+        saveAs(blob, "豐玉籃球隊_山水茶堂邀請賽報名表.docx");
+        
+      } catch (error) {
+        console.error('Export error:', error);
+        alert('匯出失敗，請重試');
+      } finally {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = '<span>📥</span><span>匯出為 Word 檔案</span>';
+      }
+    }
 
     // Admin login functions
     function showAdminLogin() {
