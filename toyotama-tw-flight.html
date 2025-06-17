@@ -7,6 +7,8 @@
   <!-- Add docx library for Word export -->
   <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <!-- Add html2canvas for JPG export -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -93,8 +95,15 @@
       border-radius: 20px;
       padding: 30px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-      margin-bottom: 30px;
+      margin-top: 30px;
       text-align: center;
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     .export-btn {
@@ -113,9 +122,18 @@
       gap: 10px;
     }
 
+    .export-btn.jpg {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+      box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+    }
+
     .export-btn:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    .export-btn.jpg:hover:not(:disabled) {
+      box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
     }
 
     .export-btn:disabled {
@@ -127,6 +145,85 @@
       margin-top: 15px;
       font-size: 14px;
       color: #666;
+    }
+
+    /* JPG Export Preview */
+    .jpg-export-container {
+      display: none;
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      background: white;
+      padding: 40px;
+      width: 1200px;
+      font-family: Arial, sans-serif;
+    }
+
+    .jpg-export-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .jpg-export-title {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1565C0;
+      margin-bottom: 10px;
+    }
+
+    .jpg-export-subtitle {
+      font-size: 20px;
+      color: #666;
+    }
+
+    .jpg-flight-section {
+      margin-bottom: 30px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .jpg-flight-header {
+      background: #1565C0;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .jpg-flight-info {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .jpg-member-count {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 5px 15px;
+      border-radius: 15px;
+      font-size: 16px;
+    }
+
+    .jpg-members-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .jpg-members-table th {
+      background: #f8f9fa;
+      padding: 10px;
+      text-align: left;
+      font-weight: bold;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .jpg-members-table td {
+      padding: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .jpg-members-table tr:last-child td {
+      border-bottom: none;
     }
 
     /* Admin Login Modal */
@@ -878,6 +975,14 @@
       .members-table td {
         padding: 10px;
       }
+
+      .export-buttons {
+        flex-direction: column;
+      }
+
+      .export-btn {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -936,25 +1041,21 @@
     </div>
   </div>
 
+  <!-- JPG Export Container -->
+  <div class="jpg-export-container" id="jpgExportContainer">
+    <div class="jpg-export-header">
+      <h1 class="jpg-export-title">豐玉籃球隊 - 2025屏東盃</h1>
+      <p class="jpg-export-subtitle">航班分組資訊</p>
+    </div>
+    <div id="jpgFlightContent">
+      <!-- Flight content will be generated here -->
+    </div>
+  </div>
+
   <div class="container">
     <div class="header">
       <h1>🏀 豐玉籃球隊 - 2025屏東盃</h1>
       <p>隊員資訊登記系統</p>
-    </div>
-
-    <!-- Export Section -->
-    <div class="export-section">
-      <h2 class="form-title">
-        <span>📄</span>
-        <span>匯出報名表</span>
-      </h2>
-      <button class="export-btn" onclick="exportToWord()" id="exportBtn">
-        <span>📥</span>
-        <span>匯出為 Word 檔案</span>
-      </button>
-      <div class="export-info">
-        匯出的報名表將包含所有已登記的隊員資料（姓名、身高、體重）
-      </div>
     </div>
 
     <div class="form-card">
@@ -1152,6 +1253,28 @@
         </div>
       </div>
     </div>
+
+    <!-- Export Section at the bottom -->
+    <div class="export-section">
+      <h2 class="form-title">
+        <span>📄</span>
+        <span>匯出報名表</span>
+      </h2>
+      <div class="export-buttons">
+        <button class="export-btn" onclick="exportToWord()" id="exportBtn">
+          <span>📥</span>
+          <span>匯出 Word 報名表</span>
+        </button>
+        <button class="export-btn jpg" onclick="exportToJPG()" id="exportJpgBtn">
+          <span>🖼️</span>
+          <span>匯出 JPG 航班分組</span>
+        </button>
+      </div>
+      <div class="export-info">
+        Word 檔案將包含所有隊員的姓名、身高、體重資料<br>
+        JPG 圖片將顯示航班分組資訊
+      </div>
+    </div>
   </div>
 
   <!-- Firebase SDKs -->
@@ -1187,6 +1310,7 @@
     window.logout = logout;
     window.toggleManualInput = toggleManualInput;
     window.exportToWord = exportToWord;
+    window.exportToJPG = exportToJPG;
 
     // 所有隊員名單
     const allMembers = [
@@ -1198,25 +1322,13 @@
 
     // 中文姓名對照表
     const chineseNameMapping = {
-      "趙教": "趙教",
-      "adain": "張子基",
-      "James": "林嘉浩",
-      "tsan": "梁國全",
-      "巨峰": "劉結峰",
-      "銘": "潘兆鏗",
-      "wingsun": "葉鴻騫",
-      "Rex": "盧柏佑",
-      "光": "何弘匡",
-      "杰": "劉杰",
-      "洲": "方鎮洲",
-      "仁": "葉尚仁",
-      "天": "何仲恩",
-      "表": "方燦裕",
-      "Tak": "潘立德",
-      "Alvin": "劉偉立",
-      "奶": "黃歡",
-      "Jason": "羅仲禧"
+      "趙教": "趙志華",
+      "布": "布永輝",
+      "adain": "張子基"
     };
+
+    // Store current data globally
+    let currentMemberData = {};
 
     // Auth state observer
     onAuthStateChanged(auth, (user) => {
@@ -1235,6 +1347,120 @@
         adminLoggedIn.style.display = 'none';
       }
     });
+
+    // Export to JPG function
+    async function exportToJPG() {
+      const exportBtn = document.getElementById('exportJpgBtn');
+      exportBtn.disabled = true;
+      exportBtn.innerHTML = '<span class="loading-spinner"></span>正在生成 JPG 圖片...';
+      
+      try {
+        // Get data from Firebase
+        const snapshot = await new Promise((resolve) => {
+          const flightsRef = ref(db, 'toyotama-flights');
+          onValue(flightsRef, (snapshot) => {
+            resolve(snapshot);
+          }, { onlyOnce: true });
+        });
+        
+        const data = snapshot.val();
+        if (!data) {
+          alert('沒有可匯出的資料');
+          return;
+        }
+        
+        // Generate JPG content
+        const jpgContent = document.getElementById('jpgFlightContent');
+        jpgContent.innerHTML = '';
+        
+        // Group members by date and flight
+        const groupedData = groupMembersByFlight(data);
+        const sortedDates = Object.keys(groupedData).sort();
+        
+        sortedDates.forEach(date => {
+          const sortedFlights = Object.entries(groupedData[date]).sort((a, b) => {
+            return a[1].departure.localeCompare(b[1].departure);
+          });
+          
+          sortedFlights.forEach(([flightKey, flightInfo]) => {
+            const flightSection = document.createElement('div');
+            flightSection.className = 'jpg-flight-section';
+            
+            // Header
+            const header = document.createElement('div');
+            header.className = 'jpg-flight-header';
+            header.innerHTML = `
+              <div class="jpg-flight-info">
+                ${formatDateDMY(date)} | ${flightInfo.airline} | ${flightInfo.flightNo} | ${flightInfo.departure} - ${flightInfo.arrival}
+              </div>
+              <div class="jpg-member-count">${flightInfo.members.length} 人</div>
+            `;
+            flightSection.appendChild(header);
+            
+            // Table
+            const table = document.createElement('table');
+            table.className = 'jpg-members-table';
+            
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+              <tr>
+                <th style="width: 60px;">編號</th>
+                <th>隊員姓名</th>
+                <th>中文姓名</th>
+              </tr>
+            `;
+            table.appendChild(thead);
+            
+            const tbody = document.createElement('tbody');
+            flightInfo.members.sort((a, b) => a.name.localeCompare(b.name));
+            
+            flightInfo.members.forEach((member, index) => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${member.name}</td>
+                <td>${member.chineseName || '-'}</td>
+              `;
+              tbody.appendChild(row);
+            });
+            
+            table.appendChild(tbody);
+            flightSection.appendChild(table);
+            jpgContent.appendChild(flightSection);
+          });
+        });
+        
+        // Show container temporarily
+        const container = document.getElementById('jpgExportContainer');
+        container.style.display = 'block';
+        
+        // Generate image
+        const canvas = await html2canvas(container, {
+          scale: 2,
+          backgroundColor: '#ffffff'
+        });
+        
+        // Hide container
+        container.style.display = 'none';
+        
+        // Convert to blob and download
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `豐玉籃球隊_航班分組_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '-')}.jpg`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }, 'image/jpeg', 0.95);
+        
+      } catch (error) {
+        console.error('Export error:', error);
+        alert('匯出失敗，請重試');
+      } finally {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = '<span>🖼️</span><span>匯出 JPG 航班分組</span>';
+      }
+    }
 
     // Export to Word function
     async function exportToWord() {
@@ -1257,7 +1483,7 @@
           return;
         }
         
-        // Filter out 布永輝 and prepare data
+        // Prepare members data (excluding 布)
         const members = [];
         let captainIndex = -1;
         
@@ -1266,7 +1492,7 @@
           
           const memberData = {
             name: name,
-            chineseName: info.chineseName || chineseNameMapping[name] || name,
+            chineseName: info.chineseName || chineseNameMapping[name] || "",
             height: info.height || "",
             weight: info.weight || "",
             position: name === "adain" ? "隊長" : "隊員"
@@ -1285,77 +1511,119 @@
           members.unshift(captain);
         }
         
-        // Create table rows for the document
+        // Create table rows
         const tableRows = [];
         
         // Header row
         const headerRow = new docx.TableRow({
           children: [
             new docx.TableCell({
-              children: [new docx.Paragraph("編號")],
-              width: { size: 10, type: docx.WidthType.PERCENTAGE }
+              children: [new docx.Paragraph({
+                text: "編號",
+                alignment: docx.AlignmentType.CENTER
+              })],
+              verticalAlign: docx.VerticalAlign.CENTER
             }),
             new docx.TableCell({
-              children: [new docx.Paragraph("姓名")],
-              width: { size: 20, type: docx.WidthType.PERCENTAGE }
+              children: [new docx.Paragraph({
+                text: "姓名",
+                alignment: docx.AlignmentType.CENTER
+              })],
+              verticalAlign: docx.VerticalAlign.CENTER
             }),
             new docx.TableCell({
-              children: [new docx.Paragraph("職稱")],
-              width: { size: 15, type: docx.WidthType.PERCENTAGE }
+              children: [new docx.Paragraph({
+                text: "職稱",
+                alignment: docx.AlignmentType.CENTER
+              })],
+              verticalAlign: docx.VerticalAlign.CENTER
             }),
             new docx.TableCell({
-              children: [new docx.Paragraph("年級")],
-              width: { size: 15, type: docx.WidthType.PERCENTAGE }
+              children: [new docx.Paragraph({
+                text: "年級",
+                alignment: docx.AlignmentType.CENTER
+              })],
+              verticalAlign: docx.VerticalAlign.CENTER
             }),
             new docx.TableCell({
-              children: [new docx.Paragraph("出生年月日")],
-              width: { size: 20, type: docx.WidthType.PERCENTAGE }
+              children: [new docx.Paragraph({
+                text: "出生年月日",
+                alignment: docx.AlignmentType.CENTER
+              })],
+              verticalAlign: docx.VerticalAlign.CENTER
             }),
             new docx.TableCell({
-              children: [new docx.Paragraph("身高")],
-              width: { size: 10, type: docx.WidthType.PERCENTAGE }
+              children: [new docx.Paragraph({
+                text: "身高",
+                alignment: docx.AlignmentType.CENTER
+              })],
+              verticalAlign: docx.VerticalAlign.CENTER
             }),
             new docx.TableCell({
-              children: [new docx.Paragraph("體重")],
-              width: { size: 10, type: docx.WidthType.PERCENTAGE }
+              children: [new docx.Paragraph({
+                text: "體重",
+                alignment: docx.AlignmentType.CENTER
+              })],
+              verticalAlign: docx.VerticalAlign.CENTER
             })
-          ],
-          tableHeader: true
+          ]
         });
-        
         tableRows.push(headerRow);
         
-        // Data rows
-        members.forEach((member, index) => {
+        // Add all 24 rows (as per the template)
+        for (let i = 0; i < 24; i++) {
+          const member = members[i];
           const row = new docx.TableRow({
             children: [
               new docx.TableCell({
-                children: [new docx.Paragraph((index + 1).toString())]
+                children: [new docx.Paragraph({
+                  text: (i + 1).toString(),
+                  alignment: docx.AlignmentType.CENTER
+                })],
+                verticalAlign: docx.VerticalAlign.CENTER
               }),
               new docx.TableCell({
-                children: [new docx.Paragraph(member.chineseName)]
+                children: [new docx.Paragraph({
+                  text: member ? member.chineseName : "",
+                  alignment: docx.AlignmentType.CENTER
+                })],
+                verticalAlign: docx.VerticalAlign.CENTER
               }),
               new docx.TableCell({
-                children: [new docx.Paragraph(member.position)]
+                children: [new docx.Paragraph({
+                  text: member ? member.position : "隊員",
+                  alignment: docx.AlignmentType.CENTER
+                })],
+                verticalAlign: docx.VerticalAlign.CENTER
               }),
               new docx.TableCell({
-                children: [new docx.Paragraph("")]  // Empty for 年級
+                children: [new docx.Paragraph("")],
+                verticalAlign: docx.VerticalAlign.CENTER
               }),
               new docx.TableCell({
-                children: [new docx.Paragraph("")]  // Empty for 出生年月日
+                children: [new docx.Paragraph("")],
+                verticalAlign: docx.VerticalAlign.CENTER
               }),
               new docx.TableCell({
-                children: [new docx.Paragraph(member.height ? `${member.height}cm` : "")]
+                children: [new docx.Paragraph({
+                  text: member && member.height ? `${member.height}` : "",
+                  alignment: docx.AlignmentType.CENTER
+                })],
+                verticalAlign: docx.VerticalAlign.CENTER
               }),
               new docx.TableCell({
-                children: [new docx.Paragraph(member.weight ? `${member.weight}kg` : "")]
+                children: [new docx.Paragraph({
+                  text: member && member.weight ? `${member.weight}` : "",
+                  alignment: docx.AlignmentType.CENTER
+                })],
+                verticalAlign: docx.VerticalAlign.CENTER
               })
             ]
           });
           tableRows.push(row);
-        });
+        }
         
-        // Create the document
+        // Create document
         const doc = new docx.Document({
           sections: [{
             properties: {},
@@ -1363,11 +1631,8 @@
               new docx.Paragraph({
                 text: "114年「山水茶堂」籃球邀請賽報名表",
                 heading: docx.HeadingLevel.TITLE,
-                alignment: docx.AlignmentType.CENTER
-              }),
-              new docx.Paragraph({
-                text: "",
-                spacing: { after: 200 }
+                alignment: docx.AlignmentType.CENTER,
+                spacing: { after: 300 }
               }),
               new docx.Table({
                 width: {
@@ -1383,7 +1648,7 @@
                       }),
                       new docx.TableCell({
                         children: [new docx.Paragraph("香港豐玉")],
-                        width: { size: 35, type: docx.WidthType.PERCENTAGE }
+                        width: { size: 20, type: docx.WidthType.PERCENTAGE }
                       }),
                       new docx.TableCell({
                         children: [new docx.Paragraph("組別")],
@@ -1391,23 +1656,41 @@
                       }),
                       new docx.TableCell({
                         children: [new docx.Paragraph("邀請賽")],
-                        width: { size: 35, type: docx.WidthType.PERCENTAGE }
+                        width: { size: 20, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("電話/line")],
+                        columnSpan: 2,
+                        width: { size: 30, type: docx.WidthType.PERCENTAGE }
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("")],
+                        width: { size: 0, type: docx.WidthType.PERCENTAGE }
                       })
                     ]
                   }),
                   new docx.TableRow({
                     children: [
                       new docx.TableCell({
-                        children: [new docx.Paragraph("教練")]
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph("趙教")]
-                      }),
-                      new docx.TableCell({
-                        children: [new docx.Paragraph("電話/Line")]
+                        children: [new docx.Paragraph("校長")]
                       }),
                       new docx.TableCell({
                         children: [new docx.Paragraph("")]
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("教練")]
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("趙志華")]
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("助理教練")]
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("布永輝")]
+                      }),
+                      new docx.TableCell({
+                        children: [new docx.Paragraph("管理")]
                       })
                     ]
                   })
@@ -1428,16 +1711,16 @@
           }]
         });
         
-        // Generate and save the document
+        // Generate and save
         const blob = await docx.Packer.toBlob(doc);
-        saveAs(blob, "豐玉籃球隊_山水茶堂邀請賽報名表.docx");
+        saveAs(blob, "114年山水茶堂籃球邀請賽報名表-豐玉.docx");
         
       } catch (error) {
         console.error('Export error:', error);
         alert('匯出失敗，請重試');
       } finally {
         exportBtn.disabled = false;
-        exportBtn.innerHTML = '<span>📥</span><span>匯出為 Word 檔案</span>';
+        exportBtn.innerHTML = '<span>📥</span><span>匯出 Word 報名表</span>';
       }
     }
 
@@ -1916,6 +2199,7 @@
 
       flightGroupsContainer.innerHTML = '';
       existingMemberData = data || {};
+      currentMemberData = data || {};
 
       // Update member dropdown
       updateMemberDropdown();
