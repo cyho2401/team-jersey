@@ -1327,7 +1327,7 @@
         </button>
       </div>
       <div class="export-info">
-        Word 檔案將使用模板格式，填入隊員資料（不包含毛、布、趙教）<br>
+        Word 檔案將使用模板格式，填入隊員資料（不包含毛、布、趙教、Tf）<br>
         JPG 圖片將顯示航班分組資訊
       </div>
     </div>
@@ -1369,42 +1369,20 @@
     window.exportToJPG = exportToJPG;
     window.toggleForm = toggleForm;
 
-    // 所有隊員名單
+    // 所有隊員名單 - 移除皮、杰、銘
     const allMembers = [
       "趙教", "布", "adain", "Alvin", "Earnest", "James", "Jason", "Martin", 
       "Pine", "Rex", "Tak", "Tf", "tsan", "wingsun", "Yee", "大師兄", 
-      "仁", "光", "天", "奶", "宏", "巨峰", "文威", "杰", "毛", "洲", 
-      "皮", "表", "達", "銘"
+      "仁", "光", "天", "奶", "宏", "巨峰", "文威", "毛", "洲", 
+      "表", "達"
     ];
 
-    // 中文姓名對照表 - 根據最新的報名表更新
+    // 中文姓名對照表 - 只保留確認的對照
     const chineseNameMapping = {
       "趙教": "趙志華",
       "布": "布永輝",
       "毛": "張子基",
-      "Pine": "楊子豐",
-      "Earnest": "梁獻丰",
-      "tsan": "梁國全", 
-      "天": "何仲恩",
-      "Yee": "余仕恆",
-      "大師兄": "崔俊煒",
-      "Rex": "盧柏佑",
-      "wingsun": "葉鴻騫",
-      "Tak": "潘立德",
-      "表": "方燦裕",
-      "Martin": "林穎新",
-      "Tf": "葉尚義",
-      "仁": "葉尚仁",
-      "宏": "韓智光",
-      "James": "林嘉浩",
-      "adain": "梁卓弘",
-      "Alvin": "黃禮恆",
-      "Jason": "劉梓宏",
-      "巨峰": "劉結峰",
-      "文威": "黃文威",
-      "洲": "方鎮洲",
-      "皮": "王健安",
-      "達": "陸宇達"
+      "Tf": "楊子豐"
     };
 
     // Store current data globally
@@ -1544,7 +1522,7 @@
       
       try {
         // First, load the template from the same directory
-        const templateUrl = 'Application.docx';
+        const templateUrl = 'application.docx';
         
         const response = await fetch(templateUrl);
         if (!response.ok) {
@@ -1567,12 +1545,12 @@
           return;
         }
         
-        // Prepare members data, excluding 毛, 布, 趙教
+        // Prepare members data, excluding 毛, 布, 趙教, Tf
         const members = [];
         
         Object.entries(data).forEach(([name, info]) => {
-          // Exclude 毛, 布, 趙教
-          if (name === "毛" || name === "布" || name === "趙教") return;
+          // Exclude 毛, 布, 趙教, Tf
+          if (name === "毛" || name === "布" || name === "趙教" || name === "Tf") return;
           
           members.push({
             name: name,
@@ -1624,11 +1602,11 @@
         });
         
         // Save the file
-        saveAs(out, "Application.docx");
+        saveAs(out, "114年山水茶堂籃球邀請賽報名表-豐玉-已填寫.docx");
         
       } catch (error) {
         console.error('Export error:', error);
-        alert('匯出失敗，請重試。確保模板檔案在相同目錄下。');
+        alert('匯出失敗，請重試。確保模板檔案 application.docx 在相同目錄下。');
       } finally {
         exportBtn.disabled = false;
         exportBtn.innerHTML = '<span>📥</span><span>匯出 Word 報名表</span>';
@@ -1925,6 +1903,11 @@
         return;
       }
 
+      // 如果選擇的是有確認中文姓名的隊員，自動填入
+      if (chineseNameMapping[memberName]) {
+        document.getElementById('chineseName').value = chineseNameMapping[memberName];
+      }
+
       // 檢查是否有已存在的資料
       if (existingMemberData[memberName]) {
         const memberData = existingMemberData[memberName];
@@ -1995,6 +1978,11 @@
       } else {
         // 沒有現有資料，重置表單
         resetForm();
+        
+        // 但保留已自動填入的中文姓名
+        if (chineseNameMapping[memberName]) {
+          document.getElementById('chineseName').value = chineseNameMapping[memberName];
+        }
       }
     });
 
