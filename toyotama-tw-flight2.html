@@ -1560,41 +1560,44 @@
 
         <!-- Group Standings Display (Initially Hidden) -->
         <div class="standings-container" id="standingsContainer">
-          <div class="standings-group">
-            <h3 class="standings-title">A組排名</h3>
-            <table class="standings-table">
-              <thead>
-                <tr>
-                  <th>排名</th>
-                  <th>球隊</th>
-                  <th>勝</th>
-                  <th>負</th>
-                  <th>分差</th>
-                </tr>
-              </thead>
-              <tbody id="groupAStandings">
-                <tr><td colspan="5" class="no-data">尚未有比賽結果</td></tr>
-              </tbody>
-            </table>
-          </div>
-          
-          <div class="standings-group">
-            <h3 class="standings-title">B組排名</h3>
-            <table class="standings-table">
-              <thead>
-                <tr>
-                  <th>排名</th>
-                  <th>球隊</th>
-                  <th>勝</th>
-                  <th>負</th>
-                  <th>分差</th>
-                </tr>
-              </thead>
-              <tbody id="groupBStandings">
-                <tr><td colspan="5" class="no-data">尚未有比賽結果</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <!-- Update the standings tables in both groups -->
+<div class="standings-group">
+  <h3 class="standings-title">A組排名</h3>
+  <table class="standings-table">
+    <thead>
+      <tr>
+        <th>排名</th>
+        <th>球隊</th>
+        <th>勝</th>
+        <th>和</th>
+        <th>負</th>
+        <th>分差</th>
+      </tr>
+    </thead>
+    <tbody id="groupAStandings">
+      <tr><td colspan="6" class="no-data">尚未有比賽結果</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="standings-group">
+  <h3 class="standings-title">B組排名</h3>
+  <table class="standings-table">
+    <thead>
+      <tr>
+        <th>排名</th>
+        <th>球隊</th>
+        <th>勝</th>
+        <th>和</th>
+        <th>負</th>
+        <th>分差</th>
+      </tr>
+    </thead>
+    <tbody id="groupBStandings">
+      <tr><td colspan="6" class="no-data">尚未有比賽結果</td></tr>
+    </tbody>
+  </table>
+</div>
         </div>
 
         <div class="schedule-groups">
@@ -3242,119 +3245,137 @@ setTimeout(() => {
     });
   });
 }, 1000);
-
-    // Calculate standings
-    function calculateStandings() {
-      const standings = {
-        A: {},
-        B: {}
+// Calculate standings
+function calculateStandings() {
+  const standings = {
+    A: {},
+    B: {}
+  };
+  
+  let hasScores = false;
+  
+  // Initialize standings
+  Object.entries(groups).forEach(([group, teams]) => {
+    teams.forEach(team => {
+      standings[group][team] = {
+        played: 0,
+        won: 0,
+        tied: 0,  // Add tied field
+        lost: 0,
+        pointsFor: 0,
+        pointsAgainst: 0,
+        pointDiff: 0,
+        points: 0,  // Add points field (3 for win, 1 for tie, 0 for loss)
+        headToHead: {}
       };
+    });
+  });
+  
+  // Process match results
+  Object.values(matchScores).forEach(match => {
+    if (match.group && standings[match.group]) {
+      hasScores = true;
+      const team1 = match.team1;
+      const team2 = match.team2;
+      const team1Score = match.team1Score;
+      const team2Score = match.team2Score;
       
-      let hasScores = false;
+      // Update stats
+      standings[match.group][team1].played++;
+      standings[match.group][team2].played++;
       
-      // Initialize standings
-      Object.entries(groups).forEach(([group, teams]) => {
-        teams.forEach(team => {
-          standings[group][team] = {
-            played: 0,
-            won: 0,
-            lost: 0,
-            pointsFor: 0,
-            pointsAgainst: 0,
-            pointDiff: 0,
-            headToHead: {}
-          };
-        });
-      });
+      standings[match.group][team1].pointsFor += team1Score;
+      standings[match.group][team1].pointsAgainst += team2Score;
+      standings[match.group][team2].pointsFor += team2Score;
+      standings[match.group][team2].pointsAgainst += team1Score;
       
-      // Process match results
-      Object.values(matchScores).forEach(match => {
-        if (match.group && standings[match.group]) {
-          hasScores = true;
-          const team1 = match.team1;
-          const team2 = match.team2;
-          const team1Score = match.team1Score;
-          const team2Score = match.team2Score;
-          
-          // Update stats
-          standings[match.group][team1].played++;
-          standings[match.group][team2].played++;
-          
-          standings[match.group][team1].pointsFor += team1Score;
-          standings[match.group][team1].pointsAgainst += team2Score;
-          standings[match.group][team2].pointsFor += team2Score;
-          standings[match.group][team2].pointsAgainst += team1Score;
-          
-          if (team1Score > team2Score) {
-            standings[match.group][team1].won++;
-            standings[match.group][team2].lost++;
-            standings[match.group][team1].headToHead[team2] = 1;
-            standings[match.group][team2].headToHead[team1] = -1;
-          } else {
-            standings[match.group][team2].won++;
-            standings[match.group][team1].lost++;
-            standings[match.group][team2].headToHead[team1] = 1;
-            standings[match.group][team1].headToHead[team2] = -1;
-          }
-          
-          standings[match.group][team1].pointDiff = standings[match.group][team1].pointsFor - standings[match.group][team1].pointsAgainst;
-          standings[match.group][team2].pointDiff = standings[match.group][team2].pointsFor - standings[match.group][team2].pointsAgainst;
-        }
-      });
-      
-      // Sort standings
-      const sortedStandings = {};
-      Object.entries(standings).forEach(([group, teams]) => {
-        sortedStandings[group] = Object.entries(teams)
-          .map(([teamName, stats]) => ({ teamName, ...stats }))
-          .sort((a, b) => {
-            // Sort by wins
-            if (a.won !== b.won) return b.won - a.won;
-            // If tied, check head-to-head
-            if (a.headToHead[b.teamName]) return -a.headToHead[b.teamName];
-            // If// If still tied, use point differential
-            return b.pointDiff - a.pointDiff;
-          });
-      });
-      
-      // Store current standings globally
-      currentStandings = sortedStandings;
-      
-      // Show/hide standings based on whether we have scores
-      if (hasScores) {
-        document.getElementById('groupComposition').style.display = 'none';
-        document.getElementById('standingsContainer').classList.add('show');
+      if (team1Score > team2Score) {
+        // Team 1 wins
+        standings[match.group][team1].won++;
+        standings[match.group][team2].lost++;
+        standings[match.group][team1].points += 3;
+        standings[match.group][team1].headToHead[team2] = 1;
+        standings[match.group][team2].headToHead[team1] = -1;
+      } else if (team1Score < team2Score) {
+        // Team 2 wins
+        standings[match.group][team2].won++;
+        standings[match.group][team1].lost++;
+        standings[match.group][team2].points += 3;
+        standings[match.group][team2].headToHead[team1] = 1;
+        standings[match.group][team1].headToHead[team2] = -1;
       } else {
-        document.getElementById('groupComposition').style.display = 'grid';
-        document.getElementById('standingsContainer').classList.remove('show');
+        // Tie
+        standings[match.group][team1].tied++;
+        standings[match.group][team2].tied++;
+        standings[match.group][team1].points += 1;
+        standings[match.group][team2].points += 1;
+        standings[match.group][team1].headToHead[team2] = 0;
+        standings[match.group][team2].headToHead[team1] = 0;
       }
       
-      // Update standings display
-      updateStandingsDisplay(sortedStandings);
-      
-      // Update playoff matches
-      updatePlayoffMatches(sortedStandings);
+      standings[match.group][team1].pointDiff = standings[match.group][team1].pointsFor - standings[match.group][team1].pointsAgainst;
+      standings[match.group][team2].pointDiff = standings[match.group][team2].pointsFor - standings[match.group][team2].pointsAgainst;
     }
-
-    // Update standings display
-    function updateStandingsDisplay(standings) {
-      ['A', 'B'].forEach(group => {
-        const tbody = document.getElementById(`group${group}Standings`);
-        if (standings[group].some(team => team.played > 0)) {
-          tbody.innerHTML = standings[group].map((team, index) => `
-            <tr class="${index === 0 ? 'rank-1' : ''}">
-              <td>${index + 1}</td>
-              <td>${team.teamName}</td>
-              <td>${team.won}</td>
-              <td>${team.lost}</td>
-              <td>${team.pointDiff > 0 ? '+' : ''}${team.pointDiff}</td>
-            </tr>
-          `).join('');
-        } else {
-          tbody.innerHTML = '<tr><td colspan="5" class="no-data">尚未有比賽結果</td></tr>';
+  });
+  
+  // Sort standings
+  const sortedStandings = {};
+  Object.entries(standings).forEach(([group, teams]) => {
+    sortedStandings[group] = Object.entries(teams)
+      .map(([teamName, stats]) => ({ teamName, ...stats }))
+      .sort((a, b) => {
+        // Sort by points first (3 for win, 1 for tie)
+        if (a.points !== b.points) return b.points - a.points;
+        // If tied on points, check head-to-head
+        if (a.headToHead[b.teamName] !== undefined && a.headToHead[b.teamName] !== 0) {
+          return -a.headToHead[b.teamName];
         }
+        // If still tied, use point differential
+        if (a.pointDiff !== b.pointDiff) return b.pointDiff - a.pointDiff;
+        // If still tied, use points scored
+        return b.pointsFor - a.pointsFor;
       });
+  });
+  
+  // Store current standings globally
+  currentStandings = sortedStandings;
+  
+  // Show/hide standings based on whether we have scores
+  if (hasScores) {
+    document.getElementById('groupComposition').style.display = 'none';
+    document.getElementById('standingsContainer').classList.add('show');
+  } else {
+    document.getElementById('groupComposition').style.display = 'grid';
+    document.getElementById('standingsContainer').classList.remove('show');
+  }
+  
+  // Update standings display
+  updateStandingsDisplay(sortedStandings);
+  
+  // Update playoff matches
+  updatePlayoffMatches(sortedStandings);
+}
+
+// Update standings display
+function updateStandingsDisplay(standings) {
+  ['A', 'B'].forEach(group => {
+    const tbody = document.getElementById(`group${group}Standings`);
+    if (standings[group].some(team => team.played > 0)) {
+      tbody.innerHTML = standings[group].map((team, index) => `
+        <tr class="${index === 0 ? 'rank-1' : ''}">
+          <td>${index + 1}</td>
+          <td>${team.teamName}</td>
+          <td>${team.won}</td>
+          <td>${team.tied}</td>
+          <td>${team.lost}</td>
+          <td>${team.pointDiff > 0 ? '+' : ''}${team.pointDiff}</td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="6" class="no-data">尚未有比賽結果</td></tr>';
     }
+  });
+}
 
     // Update playoff matches
     function updatePlayoffMatches(standings) {
