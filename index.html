@@ -28,7 +28,7 @@
     
     .container {
       text-align: center;
-      max-width: 1000px;
+      max-width: 1200px;
       width: 100%;
       display: none;
     }
@@ -124,34 +124,29 @@
       font-size: 18px;
     }
     
-    .teams-grid {
+    .teams-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 30px;
       margin: 0 auto;
     }
     
-    .team-card {
+    .team-section {
       background: white;
-      padding: 40px 30px;
+      padding: 30px;
       border-radius: 24px;
       box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      text-decoration: none;
-      color: inherit;
       position: relative;
       overflow: hidden;
-      cursor: pointer;
     }
     
-    .team-card::before {
+    .team-section::before {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       height: 6px;
-      transition: height 0.3s ease;
     }
     
     /* Team Toyotama - Purple */
@@ -159,116 +154,89 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
     
-    /* Team Fungbird - Orange */
-    .team-fungbird::before {
-      background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%);
-    }
-    
     /* Team Gratitude - Blue */
     .team-gratitude::before {
       background: linear-gradient(135deg, #0084ff 0%, #0051cc 100%);
     }
     
-    .team-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    /* Team Fungbird - Orange */
+    .team-fungbird::before {
+      background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 100%);
     }
     
-    .team-card:hover::before {
-      height: 100%;
-      opacity: 0.1;
+    .team-header {
+      text-align: center;
+      margin-bottom: 30px;
     }
     
     .team-icon {
-      font-size: 80px;
-      margin-bottom: 20px;
+      font-size: 60px;
+      margin-bottom: 15px;
       display: block;
     }
     
     .team-name {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: bold;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       color: #2c3e50;
     }
     
     .team-name-en {
-      font-size: 16px;
+      font-size: 14px;
       color: #6c757d;
       font-weight: normal;
       display: block;
       margin-top: 5px;
     }
     
-    .team-desc {
-      color: #6c757d;
-      font-size: 16px;
-      margin-top: 15px;
-    }
-    
-    .admin-links {
-      margin-top: 60px;
-      padding-top: 30px;
-      border-top: 1px solid rgba(0,0,0,0.1);
-    }
-    
-    .admin-title {
-      color: #6c757d;
-      font-size: 14px;
-      margin-bottom: 15px;
-    }
-    
-    .admin-buttons {
+    .team-links {
       display: flex;
-      gap: 15px;
-      justify-content: center;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 10px;
     }
     
-    .admin-btn {
-      padding: 10px 20px;
+    .link-btn {
+      width: 100%;
+      padding: 12px 20px;
+      background: #f8f9fa;
+      color: #2c3e50;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      border: 1px solid #e9ecef;
+      cursor: pointer;
+      text-align: center;
+    }
+    
+    .link-btn:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .link-btn.primary {
+      background: #0084ff;
+      color: white;
+      border-color: #0084ff;
+      font-weight: bold;
+    }
+    
+    .link-btn.primary:hover {
+      background: #0066cc;
+      border-color: #0066cc;
+    }
+    
+    .link-btn.admin {
       background: #6c757d;
       color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      border: none;
+      border-color: #6c757d;
     }
     
-    .admin-btn:hover {
+    .link-btn.admin:hover {
       background: #5a6268;
-      transform: translateY(-1px);
-    }
-    
-    .other-links {
-      margin-top: 40px;
-      padding-top: 30px;
-      border-top: 1px solid rgba(0,0,0,0.1);
-    }
-    
-    .other-title {
-      color: #6c757d;
-      font-size: 14px;
-      margin-bottom: 15px;
-    }
-    
-    .other-btn {
-      padding: 10px 20px;
-      background: #28a745;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: all 0.2s ease;
-      border: none;
-      cursor: pointer;
-    }
-    
-    .other-btn:hover {
-      background: #218838;
-      transform: translateY(-1px);
+      border-color: #5a6268;
     }
     
     .logout-btn {
@@ -289,6 +257,12 @@
       background: #c82333;
     }
     
+    @media (max-width: 1024px) {
+      .teams-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    
     @media (max-width: 768px) {
       h1 {
         font-size: 28px;
@@ -298,20 +272,16 @@
         font-size: 16px;
       }
       
-      .teams-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .team-card {
-        padding: 30px 20px;
+      .team-section {
+        padding: 20px;
       }
       
       .team-icon {
-        font-size: 60px;
+        font-size: 50px;
       }
       
       .team-name {
-        font-size: 24px;
+        font-size: 20px;
       }
       
       .logout-btn {
@@ -347,58 +317,56 @@
     
     <div class="header">
       <h1>球衣登記系統</h1>
-      <p class="subtitle">請選擇您的球隊進行球衣登記</p>
+      <p class="subtitle">請選擇您的球隊進行操作</p>
     </div>
     
-    <div class="teams-grid">
+    <div class="teams-container">
       <!-- Toyotama Team -->
-      <div onclick="navigateTo('toyotama.html')" class="team-card team-toyotama">
-        <span class="team-icon">🏀</span>
-        <div class="team-name">
-          豐玉
-          <span class="team-name-en">Toyotama</span>
+      <div class="team-section team-toyotama">
+        <div class="team-header">
+          <span class="team-icon">🏀</span>
+          <div class="team-name">
+            豐玉
+            <span class="team-name-en">Toyotama</span>
+          </div>
         </div>
-        <div class="team-desc">點擊進入登記</div>
-      </div>
-      
-      <!-- Fungbird Team -->
-      <div onclick="navigateTo('fungbird.html')" class="team-card team-fungbird">
-        <span class="team-icon">🦜</span>
-        <div class="team-name">
-          豐鳥
-          <span class="team-name-en">Fungbird</span>
+        <div class="team-links">
+          <button onclick="navigateTo('toyotama.html')" class="link-btn primary">球衣登記</button>
+          <button onclick="navigateTo('toyotama-admin.html')" class="link-btn admin">管理後台</button>
+          <button onclick="navigateTo('toyotama-tw-flight.html')" class="link-btn">台灣航班</button>
+          <button onclick="navigateTo('toyotama-tw-flight-admin.html')" class="link-btn admin">航班管理</button>
         </div>
-        <div class="team-desc">點擊進入登記</div>
       </div>
       
       <!-- Gratitude Team -->
-      <div onclick="navigateTo('gratitude.html')" class="team-card team-gratitude">
-        <span class="team-icon">🙏</span>
-        <div class="team-name">
-          Gratitude
-          <span class="team-name-en">藍隊（星期六）</span>
+      <div class="team-section team-gratitude">
+        <div class="team-header">
+          <span class="team-icon">🙏</span>
+          <div class="team-name">
+            Gratitude
+            <span class="team-name-en">藍隊（星期六）</span>
+          </div>
         </div>
-        <div class="team-desc">點擊進入登記</div>
+        <div class="team-links">
+          <button onclick="navigateTo('gratitude.html')" class="link-btn primary">球衣登記</button>
+          <button onclick="navigateTo('gratitude-admin.html')" class="link-btn admin">管理後台</button>
+        </div>
       </div>
-    </div>
-    
-    <!-- Admin Links -->
-    <div class="admin-links">
-      <p class="admin-title">管理員入口</p>
-      <div class="admin-buttons">
-        <button onclick="navigateTo('toyotama-admin.html')" class="admin-btn">豐玉管理</button>
-        <button onclick="navigateTo('fungbird-admin.html')" class="admin-btn">豐鳥管理</button>
-        <button onclick="navigateTo('gratitude-admin.html')" class="admin-btn">Gratitude管理</button>
-      </div>
-    </div>
-    
-    <!-- Other Links -->
-    <div class="other-links">
-      <p class="other-title">其他功能</p>
-      <div class="admin-buttons">
-        <button onclick="navigateTo('fungbird-leave.html')" class="other-btn">豐鳥請假表</button>
-        <button onclick="navigateTo('toyotama-tw-flight.html')" class="other-btn">豐玉台灣航班</button>
-        <button onclick="navigateTo('toyotama-tw-flight-admin.html')" class="admin-btn">豐玉台灣航班管理</button>
+      
+      <!-- Fungbird Team -->
+      <div class="team-section team-fungbird">
+        <div class="team-header">
+          <span class="team-icon">🦜</span>
+          <div class="team-name">
+            豐鳥
+            <span class="team-name-en">Fungbird</span>
+          </div>
+        </div>
+        <div class="team-links">
+          <button onclick="navigateTo('fungbird.html')" class="link-btn primary">球衣登記</button>
+          <button onclick="navigateTo('fungbird-admin.html')" class="link-btn admin">管理後台</button>
+          <button onclick="navigateTo('fungbird-leave.html')" class="link-btn">請假表</button>
+        </div>
       </div>
     </div>
   </div>
