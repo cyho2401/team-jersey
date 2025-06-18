@@ -59,8 +59,8 @@
   font-size: 18px;
 }
 
-/* Standings Styles */
-.standings-container {
+/* Group Composition Styles */
+.group-composition {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 25px;
@@ -68,6 +68,57 @@
   padding: 20px;
   background: #f8f9fa;
   border-radius: 15px;
+}
+
+.group-teams {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.group-teams-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1565C0;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.team-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.team-list li {
+  padding: 10px 15px;
+  background: #f8f9fa;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid #e9ecef;
+}
+
+.team-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Standings Styles */
+.standings-container {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 15px;
+}
+
+.standings-container.show {
+  display: grid;
 }
 
 .standings-group {
@@ -131,7 +182,8 @@
 }
 
 @media (max-width: 768px) {
-  .standings-container {
+  .standings-container,
+  .group-composition {
     grid-template-columns: 1fr;
   }
   
@@ -1474,8 +1526,31 @@
       </div>
       
       <div class="schedule-content">
-        <!-- Group Standings Display -->
-        <div class="standings-container">
+        <!-- Group Composition Display -->
+        <div class="group-composition" id="groupComposition">
+          <div class="group-teams">
+            <h3 class="group-teams-title">A組球隊</h3>
+            <ul class="team-list">
+              <li>屏東高中</li>
+              <li>同德高中</li>
+              <li>海皇高中</li>
+              <li>attitude</li>
+            </ul>
+          </div>
+          
+          <div class="group-teams">
+            <h3 class="group-teams-title">B組球隊</h3>
+            <ul class="team-list">
+              <li>屏東金牌</li>
+              <li>屏青</li>
+              <li>香港豐玉</li>
+              <li>廣聯上正</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Group Standings Display (Initially Hidden) -->
+        <div class="standings-container" id="standingsContainer">
           <div class="standings-group">
             <h3 class="standings-title">A組排名</h3>
             <table class="standings-table">
@@ -1659,19 +1734,47 @@
               </div>
               <div class="match-item playoff" data-match-id="13">
                 <span class="match-time">14:10-15:20</span>
-                <span class="match-teams" id="playoff-1">A4 VS B3</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams" id="playoff-1">A4 VS B3</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
               </div>
               <div class="match-item playoff" data-match-id="14">
                 <span class="match-time">15:20-16:30</span>
-                <span class="match-teams" id="playoff-2">A3 VS B4</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams" id="playoff-2">A3 VS B4</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
               </div>
               <div class="match-item playoff" data-match-id="15">
                 <span class="match-time">16:30-17:40</span>
-                <span class="match-teams" id="playoff-3">A2 VS B1</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams" id="playoff-3">A2 VS B1</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
               </div>
               <div class="match-item playoff" data-match-id="16">
                 <span class="match-time">17:40-18:50</span>
-                <span class="match-teams" id="playoff-4">A1 VS B2</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams" id="playoff-4">A1 VS B2</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1682,19 +1785,47 @@
             <div class="match-list">
               <div class="match-item final" data-match-id="17">
                 <span class="match-time">11:00-15:10</span>
-                <span class="match-teams" id="final-78">A4 VS B4</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams" id="final-78">第7-8名決賽</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
               </div>
               <div class="match-item final" data-match-id="18">
                 <span class="match-time">15:10-16:20</span>
-                <span class="match-teams" id="final-56">A3 VS B3</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams" id="final-56">第5-6名決賽</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
               </div>
               <div class="match-item final" data-match-id="19">
                 <span class="match-time">16:20-17:30</span>
-                <span class="match-teams" id="final-34">A2 VS B2</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams" id="final-34">第3-4名決賽</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
               </div>
               <div class="match-item final" data-match-id="20">
                 <span class="match-time">17:30-18:40</span>
-                <span class="match-teams" id="final-12">A1 VS B1</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams" id="final-12">冠軍賽</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -3004,6 +3135,7 @@
 
     // Store match scores
     let matchScores = {};
+    let currentStandings = {};
 
     // Load scores from Firebase on page load
     const scoresRef = ref(db, 'toyotama-tournament-scores');
@@ -3039,33 +3171,45 @@
           const team2Score = matchItem.querySelector('.team2-score').value;
           
           if (team1Score !== '' && team2Score !== '') {
+            // Get team names for playoff/final matches
+            let team1, team2, group;
+            
+            if (matchItem.dataset.team1 && matchItem.dataset.team2) {
+              // Regular group match
+              team1 = matchItem.dataset.team1;
+              team2 = matchItem.dataset.team2;
+              group = matchItem.dataset.group;
+            } else {
+              // Playoff or final match - extract team names from display
+              const matchTeamsElement = matchItem.querySelector('.match-teams');
+              const teamsText = matchTeamsElement.textContent;
+              const teams = teamsText.split(' VS ');
+              team1 = teams[0].trim();
+              team2 = teams[1].trim();
+              group = null; // No group for playoff/final matches
+            }
+            
             // Save to Firebase
             const scoreData = {
               matchId: matchId,
-              team1: matchItem.dataset.team1,
-              team2: matchItem.dataset.team2,
+              team1: team1,
+              team2: team2,
               team1Score: parseInt(team1Score),
               team2Score: parseInt(team2Score),
-              group: matchItem.dataset.group,
+              group: group,
               timestamp: Date.now()
             };
             
-            // Check if user is admin
-            const user = auth.currentUser;
-            if (user) {
-              set(ref(db, `toyotama-tournament-scores/${matchId}`), scoreData)
-                .then(() => {
-                  matchScores[matchId] = scoreData;
-                  calculateStandings();
-                })
-                .catch(error => {
-                  console.error('Error saving score:', error);
-                  alert('儲存比分時發生錯誤');
-                });
-            } else {
-              alert('請先登入管理員帳號才能輸入比分');
-              this.value = '';
-            }
+            // Allow everyone to save scores (removed admin check)
+            set(ref(db, `toyotama-tournament-scores/${matchId}`), scoreData)
+              .then(() => {
+                matchScores[matchId] = scoreData;
+                calculateStandings();
+              })
+              .catch(error => {
+                console.error('Error saving score:', error);
+                alert('儲存比分時發生錯誤');
+              });
           }
         });
       });
@@ -3077,6 +3221,8 @@
         A: {},
         B: {}
       };
+      
+      let hasScores = false;
       
       // Initialize standings
       Object.entries(groups).forEach(([group, teams]) => {
@@ -3096,6 +3242,7 @@
       // Process match results
       Object.values(matchScores).forEach(match => {
         if (match.group && standings[match.group]) {
+          hasScores = true;
           const team1 = match.team1;
           const team2 = match.team2;
           const team1Score = match.team1Score;
@@ -3137,57 +3284,4 @@
             if (a.won !== b.won) return b.won - a.won;
             // If tied, check head-to-head
             if (a.headToHead[b.teamName]) return -a.headToHead[b.teamName];
-            // If still tied, use point differential
-            return b.pointDiff - a.pointDiff;
-          });
-      });
-      
-      // Update standings display
-      updateStandingsDisplay(sortedStandings);
-      
-      // Update playoff matches
-      updatePlayoffMatches(sortedStandings);
-    }
-
-    // Update standings display
-    function updateStandingsDisplay(standings) {
-      ['A', 'B'].forEach(group => {
-        const tbody = document.getElementById(`group${group}Standings`);
-        if (standings[group].some(team => team.played > 0)) {
-          tbody.innerHTML = standings[group].map((team, index) => `
-            <tr class="${index === 0 ? 'rank-1' : ''}">
-              <td>${index + 1}</td>
-              <td>${team.teamName}</td>
-              <td>${team.won}</td>
-              <td>${team.lost}</td>
-              <td>${team.pointDiff > 0 ? '+' : ''}${team.pointDiff}</td>
-            </tr>
-          `).join('');
-        } else {
-          tbody.innerHTML = '<tr><td colspan="5" class="no-data">尚未有比賽結果</td></tr>';
-        }
-      });
-    }
-
-    // Update playoff matches
-    function updatePlayoffMatches(standings) {
-      if (standings.A.length === 4 && standings.B.length === 4 && 
-          standings.A.every(team => team.played >= 3) && 
-          standings.B.every(team => team.played >= 3)) {
-        
-        // Update playoff matches
-        document.getElementById('playoff-1').textContent = `${standings.A[3].teamName} VS ${standings.B[2].teamName}`;
-        document.getElementById('playoff-2').textContent = `${standings.A[2].teamName} VS ${standings.B[3].teamName}`;
-        document.getElementById('playoff-3').textContent = `${standings.A[1].teamName} VS ${standings.B[0].teamName}`;
-        document.getElementById('playoff-4').textContent = `${standings.A[0].teamName} VS ${standings.B[1].teamName}`;
-        
-        // Update final matches
-        document.getElementById('final-78').textContent = `第7-8名決賽`;
-        document.getElementById('final-56').textContent = `第5-6名決賽`;
-        document.getElementById('final-34').textContent = `第3-4名決賽`;
-        document.getElementById('final-12').textContent = `冠軍賽`;
-      }
-    }
-  </script>
-</body>
-</html>
+            // If
