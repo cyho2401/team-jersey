@@ -12,6 +12,198 @@
   <!-- Add html2canvas for JPG export -->
   <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
+/* Tournament Schedule Styles */
+.tournament-schedule-card {
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.schedule-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 25px 30px;
+  border-bottom: 2px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.schedule-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-highlight {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.team-badge {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+}
+
+.match-info {
+  color: #666;
+  font-size: 14px;
+}
+
+.schedule-content {
+  padding: 30px;
+}
+
+.schedule-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
+  margin-bottom: 25px;
+}
+
+.schedule-group {
+  border: 2px solid #e9ecef;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.group-header {
+  background: #1565C0;
+  color: white;
+  padding: 12px 20px;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+}
+
+.match-list {
+  padding: 15px;
+}
+
+.match-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 5px;
+}
+
+.match-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.match-item:hover {
+  background: #f8f9fa;
+}
+
+.match-item.highlight {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  font-weight: 600;
+}
+
+.match-time {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 100px;
+}
+
+.match-teams {
+  color: #333;
+  font-size: 15px;
+  text-align: right;
+  flex: 1;
+  margin-left: 15px;
+}
+
+.match-item.highlight .match-time {
+  color: #856404;
+}
+
+.match-item.highlight .match-teams {
+  color: #856404;
+}
+
+.schedule-note {
+  background: #e3f2fd;
+  border: 2px solid #1565C0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.schedule-note p {
+  margin: 0 0 10px 0;
+  color: #0D47A1;
+  font-size: 16px;
+}
+
+.schedule-note p:last-child {
+  margin-bottom: 0;
+}
+
+.highlight-time {
+  background: #ffc107;
+  color: #333;
+  padding: 2px 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.note-small {
+  font-size: 14px !important;
+  color: #666 !important;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .schedule-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .schedule-groups {
+    grid-template-columns: 1fr;
+  }
+  
+  .match-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .match-teams {
+    text-align: left;
+    margin-left: 0;
+  }
+  
+  .schedule-title {
+    font-size: 20px;
+  }
+}
+
+
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -1130,6 +1322,129 @@
 
   <div class="container">
     <div class="header">
+      <!-- Tournament Schedule Section -->
+<div class="tournament-schedule-card">
+  <div class="schedule-header">
+    <h2 class="schedule-title">
+      <span>🏆</span>
+      <span>114年「山水茶堂」籃球邀請賽 - 賽程表</span>
+    </h2>
+    <div class="team-highlight">
+      <span class="team-badge">香港豐玉</span>
+      <span class="match-info">預定出賽時間</span>
+    </div>
+  </div>
+  
+  <div class="schedule-content">
+    <div class="schedule-groups">
+      <!-- Group A -->
+      <div class="schedule-group">
+        <div class="group-header">組別A</div>
+        <div class="match-list">
+          <div class="match-item">
+            <span class="match-time">09:00-10:40</span>
+            <span class="match-teams">屏東高中VS回憶高中</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">10:10-11:50</span>
+            <span class="match-teams">海皇高中VS attitude</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">11:20-12:30</span>
+            <span class="match-teams">屏東高職VS廣輪上江</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">12:30-13:40</span>
+            <span class="match-teams">屏東 VS新港鴨王</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">13:40-14:50</span>
+            <span class="match-teams">attitude VS屏東高中</span>
+          </div>
+          <div class="match-item highlight">
+            <span class="match-time">14:50-16:00</span>
+            <span class="match-teams">回憶高中VS海皇高中</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">16:00-17:10</span>
+            <span class="match-teams">廣港鴨王VS屏東金剛</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">17:10-18:20</span>
+            <span class="match-teams">廣輪上江VS 屏 東</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Group B -->
+      <div class="schedule-group">
+        <div class="group-header">組別B</div>
+        <div class="match-list">
+          <div class="match-item">
+            <span class="match-time">09:30-10:40</span>
+            <span class="match-teams">屏東高中VS海皇高中</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">10:40-11:50</span>
+            <span class="match-teams">回憶高中VS attitude</span>
+          </div>
+          <div class="match-item highlight">
+            <span class="match-time">11:50-13:00</span>
+            <span class="match-teams">屏東高職VS 屏 東</span>
+          </div>
+          <div class="match-item highlight">
+            <span class="match-time">13:00-14:10</span>
+            <span class="match-teams">廣輪上江VS香港豐玉</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">14:10-15:20</span>
+            <span class="match-teams">A3 VS B3</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">15:20-16:30</span>
+            <span class="match-teams">A3 VS B4</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">16:30-17:40</span>
+            <span class="match-teams">A2 VS B1</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">17:40-18:50</span>
+            <span class="match-teams">A1 VS B2</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Group C -->
+      <div class="schedule-group">
+        <div class="group-header">組別C</div>
+        <div class="match-list">
+          <div class="match-item">
+            <span class="match-time">11:00-15:10</span>
+            <span class="match-teams">A4 VS B4</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">15:10-16:20</span>
+            <span class="match-teams">A3 VS B3</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">16:20-17:30</span>
+            <span class="match-teams">A2 VS B2</span>
+          </div>
+          <div class="match-item">
+            <span class="match-time">17:30-18:40</span>
+            <span class="match-teams">A1 VS B1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="schedule-note">
+      <p>🔸 <strong>香港豐玉</strong> 預定出賽時間：<span class="highlight-time">6月20日 13:00-14:10</span> 對戰廣輪上江</p>
+      <p class="note-small">* 實際賽程可能因現場狀況調整，請以大會公告為準</p>
+    </div>
+  </div>
+</div>
       <h1>🏀 豐玉籃球隊 - 2025屏東盃</h1>
       <p>隊員資訊登記系統</p>
     </div>
