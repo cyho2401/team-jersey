@@ -1,0 +1,3193 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>豐玉籃球隊 - 2025屏東盃</title>
+  <!-- Add docxtemplater and JSZip for Word template processing -->
+  <script src="https://cdn.jsdelivr.net/npm/docxtemplater@3.37.11/build/docxtemplater.js"></script>
+  <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
+  <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip-utils.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <!-- Add html2canvas for JPG export -->
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <style>
+/* Tournament Schedule Styles */
+
+/* Score Input Styles */
+.match-teams-with-score {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  gap: 15px;
+}
+
+.score-input-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 100px;
+}
+
+.score-input {
+  width: 45px;
+  padding: 4px 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.score-input:focus {
+  outline: none;
+  border-color: #1565C0;
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
+}
+
+.score-input::-webkit-inner-spin-button,
+.score-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.score-separator {
+  font-weight: bold;
+  color: #666;
+  font-size: 18px;
+}
+
+/* Standings Styles */
+.standings-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 15px;
+}
+
+.standings-group {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.standings-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1565C0;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.standings-table th {
+  background: #e3f2fd;
+  padding: 10px;
+  text-align: center;
+  font-weight: 600;
+  color: #0D47A1;
+  font-size: 14px;
+}
+
+.standings-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 15px;
+}
+
+.standings-table tr:last-child td {
+  border-bottom: none;
+}
+
+.standings-table .rank-1 {
+  background: #fff3cd;
+  font-weight: bold;
+}
+
+.standings-table .no-data {
+  color: #999;
+  font-style: italic;
+}
+
+.match-item.playoff {
+  background: #e3f2fd;
+  border: 2px solid #1565C0;
+}
+
+.match-item.final {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+}
+
+@media (max-width: 768px) {
+  .standings-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .match-teams-with-score {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .score-input-container {
+    align-self: flex-start;
+  }
+}
+
+
+.tournament-schedule-card {
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.schedule-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 25px 30px;
+  border-bottom: 2px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.schedule-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.team-highlight {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.team-badge {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+}
+
+.match-info {
+  color: #666;
+  font-size: 14px;
+}
+
+.schedule-content {
+  padding: 30px;
+}
+
+.schedule-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
+  margin-bottom: 25px;
+}
+
+.schedule-group {
+  border: 2px solid #e9ecef;
+  border-radius: 15px;
+  overflow: hidden;
+}
+
+.group-header {
+  background: #1565C0;
+  color: white;
+  padding: 12px 20px;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+}
+
+.match-list {
+  padding: 15px;
+}
+
+.match-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 5px;
+}
+
+.match-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.match-item:hover {
+  background: #f8f9fa;
+}
+
+.match-item.highlight {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  font-weight: 600;
+}
+
+.match-time {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 100px;
+}
+
+.match-teams {
+  color: #333;
+  font-size: 15px;
+  text-align: right;
+  flex: 1;
+  margin-left: 15px;
+}
+
+.match-item.highlight .match-time {
+  color: #856404;
+}
+
+.match-item.highlight .match-teams {
+  color: #856404;
+}
+
+.schedule-note {
+  background: #e3f2fd;
+  border: 2px solid #1565C0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.schedule-note p {
+  margin: 0 0 10px 0;
+  color: #0D47A1;
+  font-size: 16px;
+}
+
+.schedule-note p:last-child {
+  margin-bottom: 0;
+}
+
+.highlight-time {
+  background: #ffc107;
+  color: #333;
+  padding: 2px 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.note-small {
+  font-size: 14px !important;
+  color: #666 !important;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .schedule-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .schedule-groups {
+    grid-template-columns: 1fr;
+  }
+  
+  .match-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .match-teams {
+    text-align: left;
+    margin-left: 0;
+  }
+  
+  .schedule-title {
+    font-size: 20px;
+  }
+}
+
+
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+    }
+
+    /* Admin link styled */
+    .admin-link {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+    }
+
+    .admin-link > a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 14px;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+      cursor: pointer;
+    }
+
+    .admin-link > a:hover {
+      opacity: 1;
+    }
+
+    .admin-logged-in {
+      display: none;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px 20px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .admin-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: white;
+      font-size: 14px;
+    }
+
+    .admin-email {
+      font-weight: 500;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .admin-btn {
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+
+    .admin-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Export button styles */
+    .export-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .export-btn {
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .export-btn.jpg {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+      box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+    }
+
+    .export-btn.csv {
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+    }
+
+    .export-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    .export-btn.jpg:hover:not(:disabled) {
+      box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+    }
+
+    .export-btn.csv:hover:not(:disabled) {
+      box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+    }
+
+    .export-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .export-info {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* JPG Export Preview - Reduced width */
+    .jpg-export-container {
+      display: none;
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      background: white;
+      padding: 15px;
+      width: 700px; /* Reduced from 1400px */
+      font-family: Arial, sans-serif;
+    }
+
+    .jpg-export-header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .jpg-export-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1565C0;
+      margin-bottom: 3px;
+    }
+
+    .jpg-export-subtitle {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .jpg-flights-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .jpg-flight-section {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #f9f9f9;
+    }
+
+    .jpg-flight-header {
+      background: #1565C0;
+      color: white;
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .jpg-flight-info {
+      font-weight: bold;
+    }
+
+    .jpg-member-count {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    .jpg-members-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      padding: 6px;
+      gap: 3px;
+      font-size: 11px;
+    }
+
+    .jpg-member-item {
+      padding: 3px 6px;
+      background: white;
+      border-radius: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Admin Login Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-modal {
+      background: white;
+      border-radius: 20px;
+      padding: 0;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: modalAppear 0.3s ease forwards;
+    }
+
+    @keyframes modalAppear {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      padding: 30px;
+      text-align: center;
+      color: white;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #344054;
+    }
+
+    .login-input {
+      padding: 14px 18px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background-color: #f8f9fa;
+    }
+
+    .login-input:focus {
+      outline: none;
+      border-color: #1565C0;
+      background-color: white;
+      box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.1);
+    }
+
+    .login-error {
+      color: #dc3545;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+      background: #fee;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #fcc;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    .login-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .login-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .login-btn.primary {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
+    }
+
+    .login-btn.primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(21, 101, 192, 0.4);
+    }
+
+    .login-btn.primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .login-btn.secondary {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 2px solid #e9ecef;
+    }
+
+    .login-btn.secondary:hover {
+      background: #e9ecef;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 20px;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .header p {
+      font-size: 20px;
+      opacity: 0.95;
+      font-weight: 500;
+    }
+
+    .form-card {
+      background: white;
+      border-radius: 20px;
+      padding: 0;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .form-header {
+      padding: 30px;
+      border-bottom: 1px solid #e9ecef;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .form-header:hover {
+      background-color: #f8f9fa;
+    }
+
+    .form-header.active {
+      background-color: #f8f9fa;
+    }
+
+    .form-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-title-text {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-icon {
+      font-size: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .form-header.active .toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .form-content {
+      padding: 30px;
+      display: none;
+    }
+
+    .form-content.show {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s;
+      background: #fafafa;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: #1565C0;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.1);
+    }
+
+    /* Custom styles for member select dropdown */
+    #memberName optgroup {
+      font-weight: bold;
+      font-style: normal;
+      background: #f8f9fa;
+      color: #333;
+    }
+
+    #memberName option {
+      padding: 8px 16px;
+      font-size: 16px;
+    }
+
+    #memberName option.submitted {
+      color: #2e7d32;
+      font-weight: 600;
+    }
+
+    #memberName option.submitted:before {
+      content: "✓ ";
+    }
+
+    #memberName option.incomplete {
+      color: #ff9800;
+      font-weight: 600;
+    }
+
+    #memberName option.incomplete:before {
+      content: "⚠ ";
+    }
+
+    #memberName option.not-submitted {
+      color: #dc3545;
+    }
+
+    #memberName option.not-submitted:before {
+      content: "✗ ";
+    }
+
+    .member-stats {
+      background: #e3f2fd;
+      border: 1px solid #1565C0;
+      color: #0D47A1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .stat-number {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .date-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .date-btn {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .date-btn:hover {
+      border-color: #1565C0;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(21, 101, 192, 0.2);
+    }
+
+    .date-btn.selected {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      color: white;
+      border-color: transparent;
+    }
+
+    .other-date-input {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .other-date-input.show {
+      display: block;
+    }
+
+    .flight-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .flight-btn {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: left;
+    }
+
+    .flight-btn:hover {
+      border-color: #1565C0;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(21, 101, 192, 0.2);
+    }
+
+    .flight-btn.selected {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      color: white;
+      border-color: transparent;
+    }
+
+    .airline-logo {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .flight-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .flight-time {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .airline-name {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 3px;
+    }
+
+    .flight-btn.selected .airline-name {
+      color: rgba(255,255,255,0.8);
+    }
+
+    .manual-input-toggle {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: 2px dashed #1565C0;
+      color: #1565C0;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    .toggle-btn:hover {
+      background: #1565C0;
+      color: white;
+      border-style: solid;
+    }
+
+    .manual-input {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .manual-input.show {
+      display: block;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .form-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      border: 2px solid #e9ecef;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(21, 101, 192, 0.3);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(21, 101, 192, 0.4);
+    }
+
+    .table-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .member-count {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* New styles for grouped flight display */
+    .flight-group {
+      margin-bottom: 25px;
+      border: 2px solid #e9ecef;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .flight-header {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .flight-details {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .flight-date-header {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1565C0;
+      margin-bottom: 5px;
+    }
+
+    .flight-airline-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .flight-airline-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .flight-no {
+      background: #1565C0;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .flight-time-info {
+      font-size: 18px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .flight-passenger-count {
+      background: #4caf50;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 16px;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .members-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .members-table thead {
+      background: #f8f9fa;
+    }
+
+    .members-table th {
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: 600;
+      color: #666;
+      font-size: 14px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .members-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 15px;
+    }
+
+    .members-table tbody tr:hover {
+      background: #f8f9fa;
+    }
+
+    .members-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .member-name {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .date-section {
+      margin-bottom: 40px;
+    }
+
+    .date-section-header {
+      background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 15px rgba(21, 101, 192, 0.3);
+    }
+
+    .date-section-title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .date-total-count {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 6px 16px;
+      border-radius: 15px;
+      font-size: 16px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 10px;
+      opacity: 0.5;
+    }
+
+    /* New styles for incomplete data */
+    .pending-input {
+      color: #ff9800;
+      font-style: italic;
+      font-size: 13px;
+    }
+
+    .status-icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 12px;
+      line-height: 20px;
+      text-align: center;
+      margin-right: 5px;
+    }
+
+    .status-complete {
+      background: #4caf50;
+      color: white;
+    }
+
+    .status-incomplete {
+      background: #ff9800;
+      color: white;
+    }
+
+    .existing-data-notice {
+      background: #e3f2fd;
+      border: 1px solid #1565C0;
+      color: #0D47A1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .existing-data-notice.show {
+      display: block;
+    }
+
+    .error-details {
+      background: #fee;
+      border: 1px solid #fcc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #dc3545;
+      text-align: left;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .error-details pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    @media (max-width: 768px) {
+      .admin-logged-in {
+        position: static;
+        margin-bottom: 20px;
+        border-radius: 16px;
+      }
+
+      .admin-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .flight-options {
+        grid-template-columns: 1fr;
+      }
+
+      .input-row, .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .table-card {
+        overflow-x: auto;
+      }
+
+      .date-options {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .member-stats {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .flight-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .flight-airline-info {
+        flex-wrap: wrap;
+      }
+
+      .date-section-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .members-table {
+        font-size: 14px;
+      }
+
+      .members-table th,
+      .members-table td {
+        padding: 10px;
+      }
+
+      .export-buttons {
+        flex-direction: column;
+      }
+
+      .export-btn {
+        width: 100%;
+      }
+
+      .jpg-members-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Admin link -->
+  <div class="admin-link">
+    <a onclick="showAdminLogin()" id="adminLoginLink">管理員登入</a>
+    <div class="admin-logged-in" id="adminLoggedIn">
+      <div class="admin-info">
+        <span class="admin-email" id="adminEmail"></span>
+        <div class="admin-actions">
+          <a href="toyotama-tw-flight-admin.html" class="admin-btn" target="_blank">管理面板</a>
+          <button class="admin-btn" onclick="logout()">登出</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="login-modal">
+      <div class="modal-header">
+        <h3>管理員登入</h3>
+      </div>
+      <div class="modal-body">
+        <form class="login-form" id="adminLoginForm">
+          <div class="form-field">
+            <label class="form-label">Email</label>
+            <input 
+              type="email" 
+              class="login-input" 
+              id="adminEmailInput"
+              placeholder="admin@example.com"
+              required
+            />
+          </div>
+          <div class="form-field">
+            <label class="form-label">密碼</label>
+            <input 
+              type="password" 
+              class="login-input" 
+              id="adminPasswordInput"
+              placeholder="請輸入密碼"
+              required
+            />
+          </div>
+          <div class="login-error" id="loginError">登入失敗：<span id="errorMessage"></span></div>
+          <div class="login-buttons">
+            <button type="submit" class="login-btn primary" id="loginSubmitBtn">
+              <span id="loginBtnText">登入</span>
+            </button>
+            <button type="button" class="login-btn secondary" onclick="closeAdminLogin()">取消</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JPG Export Container -->
+  <div class="jpg-export-container" id="jpgExportContainer">
+    <div class="jpg-export-header">
+      <h1 class="jpg-export-title">豐玉籃球隊 - 2025屏東盃</h1>
+      <p class="jpg-export-subtitle">航班分組資訊</p>
+    </div>
+    <div class="jpg-flights-grid" id="jpgFlightContent">
+      <!-- Flight content will be generated here -->
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h1>🏀 豐玉籃球隊 - 2025屏東盃</h1>
+      <p>隊員資訊登記系統</p>
+    </div>
+
+    <!-- Tournament Schedule Section -->
+    <div class="tournament-schedule-card">
+      <div class="schedule-header">
+        <h2 class="schedule-title">
+          <span>🏆</span>
+          <span>114年「山水茶堂」籃球邀請賽 - 賽程表</span>
+        </h2>
+        <div class="team-highlight">
+          <span class="team-badge">香港豐玉</span>
+          <span class="match-info">預定出賽時間</span>
+        </div>
+      </div>
+      
+      <div class="schedule-content">
+        <!-- Group Standings Display -->
+        <div class="standings-container">
+          <div class="standings-group">
+            <h3 class="standings-title">A組排名</h3>
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th>排名</th>
+                  <th>球隊</th>
+                  <th>勝</th>
+                  <th>負</th>
+                  <th>分差</th>
+                </tr>
+              </thead>
+              <tbody id="groupAStandings">
+                <tr><td colspan="5" class="no-data">尚未有比賽結果</td></tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="standings-group">
+            <h3 class="standings-title">B組排名</h3>
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th>排名</th>
+                  <th>球隊</th>
+                  <th>勝</th>
+                  <th>負</th>
+                  <th>分差</th>
+                </tr>
+              </thead>
+              <tbody id="groupBStandings">
+                <tr><td colspan="5" class="no-data">尚未有比賽結果</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="schedule-groups">
+          <!-- Group A -->
+          <div class="schedule-group">
+            <div class="group-header">20/6（星期五）</div>
+            <div class="match-list">
+              <div class="match-item" data-match-id="1" data-group="A" data-team1="屏東高中" data-team2="同德高中">
+                <span class="match-time">09:00-10:40</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">屏東高中 VS 同德高中</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item" data-match-id="2" data-group="A" data-team1="海皇高中" data-team2="attitude">
+                <span class="match-time">10:10-11:50</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">海皇高中 VS attitude</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item" data-match-id="3" data-group="B" data-team1="屏東金牌" data-team2="廣聯上正">
+                <span class="match-time">11:20-12:30</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">屏東金牌 VS 廣聯上正</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item highlight" data-match-id="4" data-group="B" data-team1="屏青" data-team2="香港豐玉">
+                <span class="match-time">12:30-13:40</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">屏青 VS 香港豐玉</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item" data-match-id="5" data-group="A" data-team1="attitude" data-team2="屏東高中">
+                <span class="match-time">13:40-14:50</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">attitude VS 屏東高中</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item" data-match-id="6" data-group="A" data-team1="同德高中" data-team2="海皇高中">
+                <span class="match-time">14:50-16:00</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">同德高中 VS 海皇高中</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item highlight" data-match-id="7" data-group="B" data-team1="香港豐玉" data-team2="屏東金牌">
+                <span class="match-time">16:00-17:10</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">香港豐玉 VS 屏東金牌</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item" data-match-id="8" data-group="B" data-team1="廣聯上正" data-team2="屏青">
+                <span class="match-time">17:10-18:20</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">廣聯上正 VS 屏青</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Group B -->
+          <div class="schedule-group">
+            <div class="group-header">21/6（星期六）</div>
+            <div class="match-list">
+              <div class="match-item" data-match-id="9" data-group="A" data-team1="屏東高中" data-team2="海皇高中">
+                <span class="match-time">09:30-10:40</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">屏東高中 VS 海皇高中</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item" data-match-id="10" data-group="A" data-team1="同德高中" data-team2="attitude">
+                <span class="match-time">10:40-11:50</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">同德高中 VS attitude</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item" data-match-id="11" data-group="B" data-team1="屏東金牌" data-team2="屏青">
+                <span class="match-time">11:50-13:00</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">屏東金牌 VS 屏青</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item highlight" data-match-id="12" data-group="B" data-team1="廣聯上正" data-team2="香港豐玉">
+                <span class="match-time">13:00-14:10</span>
+                <div class="match-teams-with-score">
+                  <span class="match-teams">廣聯上正 VS 香港豐玉</span>
+                  <div class="score-input-container">
+                    <input type="number" class="score-input team1-score" placeholder="-" min="0" max="200">
+                    <span class="score-separator">:</span>
+                    <input type="number" class="score-input team2-score" placeholder="-" min="0" max="200">
+                  </div>
+                </div>
+              </div>
+              <div class="match-item playoff" data-match-id="13">
+                <span class="match-time">14:10-15:20</span>
+                <span class="match-teams" id="playoff-1">A4 VS B3</span>
+              </div>
+              <div class="match-item playoff" data-match-id="14">
+                <span class="match-time">15:20-16:30</span>
+                <span class="match-teams" id="playoff-2">A3 VS B4</span>
+              </div>
+              <div class="match-item playoff" data-match-id="15">
+                <span class="match-time">16:30-17:40</span>
+                <span class="match-teams" id="playoff-3">A2 VS B1</span>
+              </div>
+              <div class="match-item playoff" data-match-id="16">
+                <span class="match-time">17:40-18:50</span>
+                <span class="match-teams" id="playoff-4">A1 VS B2</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Group C -->
+          <div class="schedule-group">
+            <div class="group-header">22/6（星期日）</div>
+            <div class="match-list">
+              <div class="match-item final" data-match-id="17">
+                <span class="match-time">11:00-15:10</span>
+                <span class="match-teams" id="final-78">A4 VS B4</span>
+              </div>
+              <div class="match-item final" data-match-id="18">
+                <span class="match-time">15:10-16:20</span>
+                <span class="match-teams" id="final-56">A3 VS B3</span>
+              </div>
+              <div class="match-item final" data-match-id="19">
+                <span class="match-time">16:20-17:30</span>
+                <span class="match-teams" id="final-34">A2 VS B2</span>
+              </div>
+              <div class="match-item final" data-match-id="20">
+                <span class="match-time">17:30-18:40</span>
+                <span class="match-teams" id="final-12">A1 VS B1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="schedule-note">
+          <p><strong>🔸 香港豐玉 預定賽程：</strong></p>
+          <p>📅 <strong>6月20日（星期五）</strong></p>
+          <p style="margin-left: 20px;">• <span class="highlight-time">12:30-13:40</span> 對戰 屏青</p>
+          <p style="margin-left: 20px;">• <span class="highlight-time">16:00-17:10</span> 對戰 屏東金牌</p>
+          <p>📅 <strong>6月21日（星期六）</strong></p>
+          <p style="margin-left: 20px;">• <span class="highlight-time">13:00-14:10</span> 對戰 廣聯上正</p>
+          <p class="note-small">* 實際賽程可能因現場狀況調整，請以大會公告為準</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-header" onclick="toggleForm()">
+        <h2 class="form-title">
+          <div class="form-title-text">
+            <span>📝</span>
+            <span>隊員資訊登記</span>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </h2>
+      </div>
+
+      <div class="form-content" id="formContent">
+        <div class="member-stats" id="memberStats" style="display: none;">
+          <div class="stat-item">
+            <span>✓ 資料完整：</span>
+            <span class="stat-number" id="completeCount">0</span>
+            <span>人</span>
+          </div>
+          <div class="stat-item">
+            <span>⚠ 待補資料：</span>
+            <span class="stat-number" id="incompleteCount">0</span>
+            <span>人</span>
+          </div>
+          <div class="stat-item">
+            <span>✗ 未登記：</span>
+            <span class="stat-number" id="notSubmittedCount">0</span>
+            <span>人</span>
+          </div>
+        </div>
+
+        <div class="existing-data-notice" id="existingDataNotice">
+          ℹ️ 此隊員已有航班登記資料，航班資訊已自動填入。請補充個人資料。
+        </div>
+
+        <form id="memberForm">
+          <div class="form-group">
+            <label for="memberName">隊員姓名</label>
+            <select id="memberName" required>
+              <option value="">請選擇隊員</option>
+              <!-- Options will be dynamically populated -->
+            </select>
+          </div>
+
+          <!-- Personal Information Section -->
+          <div class="form-section">
+            <div class="section-title">
+              <span>👤</span>
+              <span>個人資料</span>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="chineseName">中文全名</label>
+                <input type="text" id="chineseName" placeholder="請輸入中文全名" required>
+              </div>
+              <div class="form-group">
+                <label for="height">身高 (公分)</label>
+                <input type="number" id="height" placeholder="例如：175" min="150" max="220" required>
+              </div>
+              <div class="form-group">
+                <label for="weight">體重 (公斤)</label>
+                <input type="number" id="weight" placeholder="例如：70" min="40" max="150" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flight Information Section -->
+          <div class="form-section">
+            <div class="section-title">
+              <span>✈️</span>
+              <span>航班資訊</span>
+            </div>
+
+            <div class="form-group">
+              <label>出發日期</label>
+              <div class="date-options">
+                <button type="button" class="date-btn" data-date="2025-06-19">6月19日</button>
+                <button type="button" class="date-btn" data-date="2025-06-20">6月20日</button>
+                <button type="button" class="date-btn" data-date="other">其他日期</button>
+              </div>
+              <div class="other-date-input" id="otherDateInput">
+                <input type="date" id="customDate" min="2025-06-01" max="2025-12-31">
+              </div>
+              <input type="hidden" id="selectedDate" required>
+            </div>
+
+            <div class="form-group">
+              <label>選擇航班</label>
+              <div class="flight-options">
+                <button type="button" class="flight-btn" data-flight="HX234-0800">
+                  <div class="airline-logo">🔵</div>
+                  <div class="airline-name">HK Express 香港快運</div>
+                  <div class="flight-info">
+                    <span class="flight-time">08:00 - 09:30</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="CX420-0835">
+                  <div class="airline-logo">🟢</div>
+                  <div class="airline-name">Cathay Pacific 國泰航空</div>
+                  <div class="flight-info">
+                    <span class="flight-time">08:35 - 10:15</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="CI920-1010">
+                  <div class="airline-logo">🔴</div>
+                  <div class="airline-name">China Airlines 中華航空</div>
+                  <div class="flight-info">
+                    <span class="flight-time">10:10 - 11:45</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="AE390-1010">
+                  <div class="airline-logo">🟡</div>
+                  <div class="airline-name">Mandarin Airlines 華信航空</div>
+                  <div class="flight-info">
+                    <span class="flight-time">10:10 - 11:45</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="CX422-1035">
+                  <div class="airline-logo">🟢</div>
+                  <div class="airline-name">Cathay Pacific 國泰航空</div>
+                  <div class="flight-info">
+                    <span class="flight-time">10:35 - 12:15</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="BR828-1205">
+                  <div class="airline-logo">🟢</div>
+                  <div class="airline-name">EVA Air 長榮航空</div>
+                  <div class="flight-info">
+                    <span class="flight-time">12:05 - 13:40</span>
+                  </div>
+                </button>
+
+                <button type="button" class="flight-btn" data-flight="HX236-1245">
+                  <div class="airline-logo">🔵</div>
+                  <div class="airline-name">HK Express 香港快運</div>
+                  <div class="flight-info">
+                    <span class="flight-time">12:45 - 14:15</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="manual-input-toggle">
+              <button type="button" class="toggle-btn" onclick="toggleManualInput()">
+                或手動輸入其他航班
+              </button>
+            </div>
+
+            <div class="manual-input" id="manualInput">
+              <div class="input-row">
+                <div class="form-group">
+                  <label for="customAirline">航空公司</label>
+                  <input type="text" id="customAirline" placeholder="例如：HK Express">
+                </div>
+                <div class="form-group">
+                  <label for="customFlightNo">航班編號</label>
+                  <input type="text" id="customFlightNo" placeholder="例如：HX234">
+                </div>
+              </div>
+              <div class="input-row">
+                <div class="form-group">
+                  <label for="customDeparture">起飛時間</label>
+                  <input type="time" id="customDeparture">
+                </div>
+                <div class="form-group">
+                  <label for="customArrival">抵達時間</label>
+                  <input type="time" id="customArrival">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="selectedFlight" required>
+          <button type="submit" class="submit-btn">提交資料</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h2 class="form-title">
+          <span>📊</span>
+          <span>隊員登記狀況 - 按航班分組</span>
+        </h2>
+        <div class="member-count" id="memberCount">已登記: 0 人</div>
+      </div>
+      
+      <div id="tableContainer">
+        <div id="flightGroupsContainer">
+          <!-- Flight groups will be populated here -->
+        </div>
+        <div class="empty-state" id="emptyState">
+          <div class="empty-state-icon">📝</div>
+          <p>尚未有隊員完成資訊登記</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Section at the bottom -->
+    <div class="export-section">
+      <h2 class="form-title">
+        <span>📄</span>
+        <span>匯出報名表</span>
+      </h2>
+
+      <div class="export-buttons">
+        <button class="export-btn" onclick="exportToWord()" id="exportBtn">
+          <span>📥</span>
+          <span>匯出 Word 報名表</span>
+        </button>
+        <button class="export-btn csv" onclick="exportToCSV()" id="exportCsvBtn">
+          <span>📊</span>
+          <span>匯出 CSV 檔案</span>
+        </button>
+        <button class="export-btn jpg" onclick="exportToJPG()" id="exportJpgBtn">
+          <span>🖼️</span>
+          <span>匯出 JPG 航班分組</span>
+        </button>
+      </div>
+      <div class="export-info">
+        Word 檔案將使用模板格式，填入隊員資料<br>
+        CSV 檔案可在 Excel 中開啟編輯，包含所有隊員資料<br>
+        JPG 圖片將顯示航班分組資訊
+      </div>
+      
+      <div id="errorDetails" class="error-details" style="display: none;">
+        <strong>錯誤詳情：</strong>
+        <pre id="errorContent"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      onAuthStateChanged, 
+      signOut 
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGCaWivohAhxZDkKp7YGNp9deNetR3K4Y",
+      authDomain: "jersey-app-bcefa.firebaseapp.com",
+      databaseURL: "https://jersey-app-bcefa-default-rtdb.firebaseio.com",
+      projectId: "jersey-app-bcefa",
+      storageBucket: "jersey-app-bcefa.appspot.com",
+      messagingSenderId: "778327507472",
+      appId: "1:778327507472:web:057e3db1b767f0b137c095"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    // Make functions available globally
+    window.showAdminLogin = showAdminLogin;
+    window.closeAdminLogin = closeAdminLogin;
+    window.logout = logout;
+    window.toggleManualInput = toggleManualInput;
+    window.exportToWord = exportToWord;
+    window.exportToCSV = exportToCSV;
+    window.exportToJPG = exportToJPG;
+    window.toggleForm = toggleForm;
+
+    // Fixed template URL
+    const TEMPLATE_URL = 'https://earnestbasketball.netlify.app/application.docx';
+
+    // 所有隊員名單 - 移除皮、杰、銘
+    const allMembers = [
+      "趙教", "布", "adain", "Alvin", "Earnest", "皮", "Jason", "Martin", 
+      "Pine", "Rex", "Tak", "Tf", "tsan", "wingsun", "Yee", "大師兄", 
+      "仁", "光", "天", "奶", "宏", "巨峰", "文威", "毛", "洲", 
+      "表", "達"
+    ];
+
+    // 中文姓名對照表 - 只保留確認的對照
+    const chineseNameMapping = {
+      "趙教": "趙志華",
+      "布": "布永輝",
+      "毛": "張子基",
+      "Tf": "楊子豐"
+    };
+
+    // Store current data globally
+    let currentMemberData = {};
+
+    // Toggle form function
+    function toggleForm() {
+      const formHeader = document.querySelector('.form-header');
+      const formContent = document.getElementById('formContent');
+      
+      formHeader.classList.toggle('active');
+      formContent.classList.toggle('show');
+    }
+
+    // Auth state observer
+    onAuthStateChanged(auth, (user) => {
+      const adminLoginLink = document.getElementById('adminLoginLink');
+      const adminLoggedIn = document.getElementById('adminLoggedIn');
+      const adminEmailSpan = document.getElementById('adminEmail');
+      
+      if (user) {
+        // User is signed in
+        adminLoginLink.style.display = 'none';
+        adminLoggedIn.style.display = 'block';
+        adminEmailSpan.textContent = user.email;
+      } else {
+        // User is signed out
+        adminLoginLink.style.display = 'block';
+        adminLoggedIn.style.display = 'none';
+      }
+    });
+
+    // Export to Word function - Modified to handle the specific template format
+    async function exportToWord() {
+      const exportBtn = document.getElementById('exportBtn');
+      exportBtn.disabled = true;
+      exportBtn.innerHTML = '<span class="loading-spinner"></span>正在生成 Word 檔案...';
+      
+      try {
+        // Load template from fixed URL
+        console.log('載入模板從:', TEMPLATE_URL);
+        const response = await fetch(TEMPLATE_URL);
+        
+        if (!response.ok) {
+          throw new Error(`無法載入模板檔案: ${response.status} ${response.statusText}`);
+        }
+        
+        const templateContent = await response.arrayBuffer();
+        console.log('模板載入成功，大小:', templateContent.byteLength, 'bytes');
+        
+        // Get data from Firebase
+        const snapshot = await new Promise((resolve) => {
+          const flightsRef = ref(db, 'toyotama-flights');
+          onValue(flightsRef, (snapshot) => {
+            resolve(snapshot);
+          }, { onlyOnce: true });
+        });
+        
+        const data = snapshot.val();
+        if (!data) {
+          alert('沒有可匯出的資料');
+          return;
+        }
+        
+        // Prepare members data
+        // 楊子豐 (Tf) 和 張子基 (毛) 已在模板中固定於位置 1 和 2
+        // 從位置 3 開始填入其他成員
+        const excludedFromList = ["毛", "布", "趙教", "Tf"]; // 這些不列入填充名單
+        const members = [];
+        
+        Object.entries(data).forEach(([name, info]) => {
+          if (!excludedFromList.includes(name)) {
+            members.push({
+              name: name,
+              chineseName: info.chineseName || chineseNameMapping[name] || "",
+              height: info.height || "",
+              weight: info.weight || ""
+            });
+          }
+        });
+        
+        // Sort members alphabetically
+        members.sort((a, b) => a.name.localeCompare(b.name));
+        console.log('準備填入的成員數量:', members.length);
+        
+        // Prepare data for template
+        const templateData = {};
+
+        // Fill in data starting from name1 through name23 (updated from 22 to 23)
+        for (let i = 0; i < 23; i++) {
+          const member = members[i];
+          const num = i + 1;
+          
+          if (member) {
+            templateData[`name${num}`] = member.chineseName;
+            templateData[`height${num}`] = member.height.toString();
+            templateData[`weight${num}`] = member.weight.toString();
+          } else {
+            // 空白資料
+            templateData[`name${num}`] = "";
+            templateData[`height${num}`] = "";
+            templateData[`weight${num}`] = "";
+          }
+        }
+        
+        console.log('模板資料準備完成，範例:', {
+          name1: templateData.name1,
+          height1: templateData.height1,
+          weight1: templateData.weight1
+        });
+        
+        // Load the template
+        const zip = new PizZip(templateContent);
+        const doc = new window.docxtemplater(zip, {
+          paragraphLoop: true,
+          linebreaks: true,
+          delimiters: {
+            start: '{{',
+            end: '}}'
+          }
+        });
+        
+        // Set the template variables
+        doc.setData(templateData);
+        
+        try {
+          // Render the document
+          doc.render();
+          console.log('文件渲染成功');
+        } catch (error) {
+          console.error('渲染錯誤:', error);
+          
+          // 顯示詳細錯誤
+          const errorDiv = document.getElementById('errorDetails');
+          const errorContent = document.getElementById('errorContent');
+          errorDiv.style.display = 'block';
+          
+          if (error.properties && error.properties.errors) {
+            let errorText = '';
+            error.properties.errors.forEach(err => {
+              errorText += `錯誤: ${err.message}\n`;
+              errorText += `位置: ${err.properties.explanation || '未知'}\n`;
+              errorText += `範圍: ${err.properties.scope || '未知'}\n\n`;
+            });
+            errorContent.textContent = errorText;
+          } else {
+            errorContent.textContent = error.message || '未知錯誤';
+          }
+          
+          alert('模板渲染失敗，請查看錯誤詳情');
+          return;
+        }
+        
+        // Generate output
+        const out = doc.getZip().generate({
+          type: "blob",
+          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        });
+        
+        // Save the file
+        saveAs(out, "114年山水茶堂籃球邀請賽報名表-豐玉.docx");
+        console.log('檔案已成功生成並下載');
+        
+        // Hide error details if successful
+        document.getElementById('errorDetails').style.display = 'none';
+        
+      } catch (error) {
+        console.error('Export error:', error);
+        alert(`匯出失敗：${error.message}`);
+      } finally {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = '<span>📥</span><span>匯出 Word 報名表</span>';
+      }
+    }
+
+    // Export to CSV function
+    async function exportToCSV() {
+      const exportBtn = document.getElementById('exportCsvBtn');
+      exportBtn.disabled = true;
+      exportBtn.innerHTML = '<span class="loading-spinner"></span>正在生成 CSV 檔案...';
+      
+      try {
+        // Get data from Firebase
+        const snapshot = await new Promise((resolve) => {
+          const flightsRef = ref(db, 'toyotama-flights');
+          onValue(flightsRef, (snapshot) => {
+            resolve(snapshot);
+          }, { onlyOnce: true });
+        });
+        
+        const data = snapshot.val();
+        if (!data) {
+          alert('沒有可匯出的資料');
+          return;
+        }
+        
+        // Prepare CSV data with all information
+        let csvContent = '\uFEFF'; // UTF-8 BOM for Excel
+        csvContent += '編號,姓名,中文姓名,身高,體重,出發日期,航空公司,航班編號,起飛時間,抵達時間\n';
+        
+        // Create ordered list
+        const reportMembers = [];
+        
+        // First add the fixed members
+        reportMembers.push({
+          number: 1,
+          name: "Tf",
+          chineseName: "楊子豐",
+          height: data["Tf"]?.height || 180,
+          weight: data["Tf"]?.weight || 82,
+          data: data["Tf"] || {}
+        });
+        
+        reportMembers.push({
+          number: 2,
+          name: "毛",
+          chineseName: "張子基",
+          height: data["毛"]?.height || 185,
+          weight: data["毛"]?.weight || 93,
+          data: data["毛"] || {}
+        });
+        
+        // Then add all other members
+        let number = 3;
+        const excludedFromNumbering = ["毛", "Tf"]; // Already added above
+        
+        Object.entries(data).forEach(([name, info]) => {
+          if (!excludedFromNumbering.includes(name)) {
+            reportMembers.push({
+              number: number++,
+              name: name,
+              chineseName: info.chineseName || chineseNameMapping[name] || "",
+              height: info.height || "",
+              weight: info.weight || "",
+              data: info
+            });
+          }
+        });
+        
+        // Sort other members alphabetically (after position 2)
+        const fixedMembers = reportMembers.slice(0, 2);
+        const otherMembers = reportMembers.slice(2).sort((a, b) => a.name.localeCompare(b.name));
+        const finalMembers = [...fixedMembers, ...otherMembers];
+        
+        // Generate CSV rows
+        finalMembers.forEach((member) => {
+          const row = [
+            member.number,
+            member.name,
+            member.chineseName,
+            member.height,
+            member.weight,
+            member.data.date || '',
+            member.data.airline || '',
+            member.data.flightNo || '',
+            member.data.departure || '',
+            member.data.arrival || ''
+          ];
+          
+          // Escape values and join
+          csvContent += row.map(value => {
+            const strValue = String(value || '');
+            // Escape quotes and wrap in quotes if contains comma, quote, or newline
+            if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
+              return `"${strValue.replace(/"/g, '""')}"`;
+            }
+            return strValue;
+          }).join(',') + '\n';
+        });
+        
+        // Create blob and download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `豐玉籃球隊報名表_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '-')}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        alert('CSV 檔案已成功生成！您可以在 Excel 中開啟此檔案進行編輯。');
+        
+      } catch (error) {
+        console.error('Export error:', error);
+        alert('匯出失敗，請重試');
+      } finally {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = '<span>📊</span><span>匯出 CSV 檔案</span>';
+      }
+    }
+
+    // Export to JPG function
+    async function exportToJPG() {
+      const exportBtn = document.getElementById('exportJpgBtn');
+      exportBtn.disabled = true;
+      exportBtn.innerHTML = '<span class="loading-spinner"></span>正在生成 JPG 圖片...';
+      
+      try {
+        // Get data from Firebase
+        const snapshot = await new Promise((resolve) => {
+          const flightsRef = ref(db, 'toyotama-flights');
+          onValue(flightsRef, (snapshot) => {
+            resolve(snapshot);
+          }, { onlyOnce: true });
+        });
+        
+        const data = snapshot.val();
+        if (!data) {
+          alert('沒有可匯出的資料');
+          return;
+        }
+        
+        // Generate JPG content
+        const jpgContent = document.getElementById('jpgFlightContent');
+        jpgContent.innerHTML = '';
+        
+        // Group members by date and flight
+        const groupedData = groupMembersByFlight(data);
+        const sortedDates = Object.keys(groupedData).sort();
+        
+        sortedDates.forEach(date => {
+          const sortedFlights = Object.entries(groupedData[date]).sort((a, b) => {
+            return a[1].departure.localeCompare(b[1].departure);
+          });
+          
+          sortedFlights.forEach(([flightKey, flightInfo]) => {
+            const flightSection = document.createElement('div');
+            flightSection.className = 'jpg-flight-section';
+            
+            // Header
+            const header = document.createElement('div');
+            header.className = 'jpg-flight-header';
+            header.innerHTML = `
+              <div class="jpg-flight-info">
+                ${formatDateDMY(date)} | ${flightInfo.flightNo} | ${flightInfo.departure}
+              </div>
+              <div class="jpg-member-count">${flightInfo.members.length} 人</div>
+            `;
+            flightSection.appendChild(header);
+            
+            // Members grid
+            const membersGrid = document.createElement('div');
+            membersGrid.className = 'jpg-members-grid';
+            
+            flightInfo.members.sort((a, b) => a.name.localeCompare(b.name));
+            
+            flightInfo.members.forEach((member, index) => {
+              const memberItem = document.createElement('div');
+              memberItem.className = 'jpg-member-item';
+              memberItem.textContent = `${index + 1}. ${member.name}`;
+              membersGrid.appendChild(memberItem);
+            });
+            
+            flightSection.appendChild(membersGrid);
+            jpgContent.appendChild(flightSection);
+          });
+        });
+        
+        // Show container temporarily
+        const container = document.getElementById('jpgExportContainer');
+        container.style.display = 'block';
+        
+        // Generate image
+        const canvas = await html2canvas(container, {
+          scale: 2,
+          backgroundColor: '#ffffff'
+        });
+        
+        // Hide container
+        container.style.display = 'none';
+        
+        // Convert to blob and download
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `豐玉籃球隊_航班分組_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '-')}.jpg`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }, 'image/jpeg', 0.95);
+        
+      } catch (error) {
+        console.error('Export error:', error);
+        alert('匯出失敗，請重試');
+      } finally {
+        exportBtn.disabled = false;
+        exportBtn.innerHTML = '<span>🖼️</span><span>匯出 JPG 航班分組</span>';
+      }
+    }
+
+    // Admin login functions
+    function showAdminLogin() {
+      document.getElementById('adminModal').classList.add('show');
+      document.getElementById('adminEmailInput').focus();
+    }
+
+    function closeAdminLogin() {
+      document.getElementById('adminModal').classList.remove('show');
+      document.getElementById('adminLoginForm').reset();
+      document.getElementById('loginError').classList.remove('show');
+      // Clear input fields
+      document.getElementById('adminEmailInput').value = '';
+      document.getElementById('adminPasswordInput').value = '';
+    }
+
+    async function logout() {
+      try {
+        await signOut(auth);
+        alert('已成功登出');
+      } catch (error) {
+        console.error('登出錯誤:', error);
+        alert('登出失敗，請重試');
+      }
+    }
+
+    // Admin login form handler
+    document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('adminEmailInput').value;
+      const password = document.getElementById('adminPasswordInput').value;
+      const loginBtn = document.getElementById('loginSubmitBtn');
+      const loginBtnText = document.getElementById('loginBtnText');
+      const loginError = document.getElementById('loginError');
+      const errorMessage = document.getElementById('errorMessage');
+      
+      // Show loading state
+      loginBtn.disabled = true;
+      loginBtnText.innerHTML = '<span class="loading-spinner"></span>登入中...';
+      loginError.classList.remove('show');
+      
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        closeAdminLogin();
+      } catch (error) {
+        let errorText = '登入失敗';
+        
+        switch (error.code) {
+          case 'auth/invalid-email':
+            errorText = 'Email 格式錯誤';
+            break;
+          case 'auth/user-disabled':
+            errorText = '此帳號已被停用';
+            break;
+          case 'auth/user-not-found':
+            errorText = '找不到此使用者';
+            break;
+          case 'auth/wrong-password':
+            errorText = '密碼錯誤';
+            break;
+          case 'auth/invalid-credential':
+            errorText = 'Email 或密碼錯誤';
+            break;
+          case 'auth/too-many-requests':
+            errorText = '登入嘗試次數過多，請稍後再試';
+            break;
+          case 'auth/missing-email':
+            errorText = '請輸入 Email';
+            break;
+          default:
+            errorText = error.message;
+        }
+        
+        errorMessage.textContent = errorText;
+        loginError.classList.add('show');
+      } finally {
+        // Reset button state
+        loginBtn.disabled = false;
+        loginBtnText.textContent = '登入';
+      }
+    });
+
+    // Click outside to close modal
+    document.getElementById('adminModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeAdminLogin();
+      }
+    });
+
+    // 航班資料
+    const flightData = {
+      'HX234-0800': { airline: 'HK Express 香港快運', flightNo: 'HX234', departure: '08:00', arrival: '09:30' },
+      'CX420-0835': { airline: 'Cathay Pacific 國泰航空', flightNo: 'CX420', departure: '08:35', arrival: '10:15' },
+      'CI920-1010': { airline: 'China Airlines 中華航空', flightNo: 'CI920', departure: '10:10', arrival: '11:45' },
+      'AE390-1010': { airline: 'Mandarin Airlines 華信航空', flightNo: 'AE390', departure: '10:10', arrival: '11:45' },
+      'CX422-1035': { airline: 'Cathay Pacific 國泰航空', flightNo: 'CX422', departure: '10:35', arrival: '12:15' },
+      'BR828-1205': { airline: 'EVA Air 長榮航空', flightNo: 'BR828', departure: '12:05', arrival: '13:40' },
+      'HX236-1245': { airline: 'HK Express 香港快運', flightNo: 'HX236', departure: '12:45', arrival: '14:15' }
+    };
+
+    // 全域變數
+    let selectedDateValue = null;
+    let selectedFlightData = null;
+    let isManualInput = false;
+    let existingMemberData = {};
+
+    // Check if data is complete
+    function isDataComplete(memberData) {
+      return memberData && memberData.chineseName && memberData.height && memberData.weight;
+    }
+
+    // Update member dropdown with status
+    function updateMemberDropdown() {
+      const memberSelect = document.getElementById('memberName');
+      memberSelect.innerHTML = '<option value="">請選擇隊員</option>';
+      
+      // Create optgroups
+      const submittedGroup = document.createElement('optgroup');
+      submittedGroup.label = '✓ 已登記 (資料完整)';
+      
+      const incompleteGroup = document.createElement('optgroup');
+      incompleteGroup.label = '⚠ 已登記 (待補資料)';
+      
+      const notSubmittedGroup = document.createElement('optgroup');
+      notSubmittedGroup.label = '✗ 未登記';
+      
+      let completeCount = 0;
+      let incompleteCount = 0;
+      let notSubmittedCount = 0;
+      
+      allMembers.forEach(member => {
+        const option = document.createElement('option');
+        option.value = member;
+        option.textContent = member;
+        
+        if (existingMemberData[member]) {
+          if (isDataComplete(existingMemberData[member])) {
+            option.className = 'submitted';
+            submittedGroup.appendChild(option);
+            completeCount++;
+          } else {
+            option.className = 'incomplete';
+            incompleteGroup.appendChild(option);
+            incompleteCount++;
+          }
+        } else {
+          option.className = 'not-submitted';
+          notSubmittedGroup.appendChild(option);
+          notSubmittedCount++;
+        }
+      });
+      
+      // Add groups to select
+      if (submittedGroup.children.length > 0) {
+        memberSelect.appendChild(submittedGroup);
+      }
+      if (incompleteGroup.children.length > 0) {
+        memberSelect.appendChild(incompleteGroup);
+      }
+      if (notSubmittedGroup.children.length > 0) {
+        memberSelect.appendChild(notSubmittedGroup);
+      }
+      
+      // Update stats
+      document.getElementById('completeCount').textContent = completeCount;
+      document.getElementById('incompleteCount').textContent = incompleteCount;
+      document.getElementById('notSubmittedCount').textContent = notSubmittedCount;
+      document.getElementById('memberStats').style.display = 'flex';
+    }
+
+    // 日期選擇
+    const dateButtons = document.querySelectorAll('.date-btn');
+    dateButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        dateButtons.forEach(btn => btn.classList.remove('selected'));
+        this.classList.add('selected');
+        
+        const dateValue = this.getAttribute('data-date');
+        const otherDateInput = document.getElementById('otherDateInput');
+        
+        if (dateValue === 'other') {
+          otherDateInput.classList.add('show');
+          document.getElementById('customDate').focus();
+          selectedDateValue = null;
+        } else {
+          otherDateInput.classList.remove('show');
+          selectedDateValue = dateValue;
+          document.getElementById('selectedDate').value = dateValue;
+        }
+      });
+    });
+
+    // 自訂日期輸入
+    document.getElementById('customDate').addEventListener('change', function() {
+      if (this.value) {
+        selectedDateValue = this.value;
+        document.getElementById('selectedDate').value = this.value;
+      }
+    });
+
+    // 航班按鈕選擇
+    const flightButtons = document.querySelectorAll('.flight-btn');
+    flightButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        isManualInput = false;
+        document.getElementById('manualInput').classList.remove('show');
+        clearManualInputs();
+
+        flightButtons.forEach(btn => btn.classList.remove('selected'));
+        this.classList.add('selected');
+        
+        const flightId = this.getAttribute('data-flight');
+        selectedFlightData = flightData[flightId];
+        document.getElementById('selectedFlight').value = flightId;
+      });
+    });
+
+    // 手動輸入切換
+    function toggleManualInput() {
+      const manualInput = document.getElementById('manualInput');
+      manualInput.classList.toggle('show');
+      
+      if (manualInput.classList.contains('show')) {
+        isManualInput = true;
+        flightButtons.forEach(btn => btn.classList.remove('selected'));
+        selectedFlightData = null;
+        document.getElementById('selectedFlight').value = 'manual';
+      } else {
+        isManualInput = false;
+        clearManualInputs();
+      }
+    }
+
+    function clearManualInputs() {
+      document.getElementById('customAirline').value = '';
+      document.getElementById('customFlightNo').value = '';
+      document.getElementById('customDeparture').value = '';
+      document.getElementById('customArrival').value = '';
+    }
+
+    // 格式化日期顯示
+    function formatDateDMY(dateString) {
+      const date = new Date(dateString + 'T00:00:00');
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      
+      const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+      const weekday = weekdays[date.getDay()];
+      
+      return `${day}/${month}/${year} (${weekday})`;
+    }
+
+    // Helper function to find matching flight button
+    function findMatchingFlightButton(memberData) {
+      for (const [key, value] of Object.entries(flightData)) {
+        if (value.airline === memberData.airline && 
+            value.departure === memberData.departure &&
+            value.arrival === memberData.arrival) {
+          return key;
+        }
+      }
+      return null;
+    }
+
+    function resetForm() {
+      document.getElementById('chineseName').value = '';
+      document.getElementById('height').value = '';
+      document.getElementById('weight').value = '';
+      
+      dateButtons.forEach(btn => btn.classList.remove('selected'));
+      flightButtons.forEach(btn => btn.classList.remove('selected'));
+      document.getElementById('otherDateInput').classList.remove('show');
+      document.getElementById('manualInput').classList.remove('show');
+      document.getElementById('existingDataNotice').classList.remove('show');
+      clearManualInputs();
+      
+      selectedDateValue = null;
+      selectedFlightData = null;
+      isManualInput = false;
+    }
+
+    // 隊員選擇處理 - 自動填入已儲存的資料
+    document.getElementById('memberName').addEventListener('change', function() {
+      const memberName = this.value;
+      if (!memberName) {
+        resetForm();
+        return;
+      }
+
+      // 如果選擇的是有確認中文姓名的隊員，自動填入
+      if (chineseNameMapping[memberName]) {
+        document.getElementById('chineseName').value = chineseNameMapping[memberName];
+      }
+
+      // 檢查是否有已存在的資料
+      if (existingMemberData[memberName]) {
+        const memberData = existingMemberData[memberName];
+        
+        // 顯示提示訊息
+        document.getElementById('existingDataNotice').classList.add('show');
+        
+        // 填入個人資料（如果有）
+        if (memberData.chineseName) {
+          document.getElementById('chineseName').value = memberData.chineseName;
+        }
+        if (memberData.height) {
+          document.getElementById('height').value = memberData.height;
+        }
+        if (memberData.weight) {
+          document.getElementById('weight').value = memberData.weight;
+        }
+        
+        // 自動選擇日期
+        if (memberData.date) {
+          // 檢查是否為預設日期
+          const isDefaultDate = memberData.date === '2025-06-19' || memberData.date === '2025-06-20';
+          
+          dateButtons.forEach(btn => {
+            btn.classList.remove('selected');
+            if (isDefaultDate && btn.getAttribute('data-date') === memberData.date) {
+              btn.classList.add('selected');
+            }
+          });
+          
+          if (!isDefaultDate) {
+            // 選擇"其他日期"並填入日期
+            dateButtons.forEach(btn => {
+              if (btn.getAttribute('data-date') === 'other') {
+                btn.classList.add('selected');
+              }
+            });
+            document.getElementById('otherDateInput').classList.add('show');
+            document.getElementById('customDate').value = memberData.date;
+          }
+          
+          selectedDateValue = memberData.date;
+          document.getElementById('selectedDate').value = memberData.date;
+        }
+        
+        // 自動選擇航班
+        const matchingFlight = findMatchingFlightButton(memberData);
+        if (matchingFlight) {
+          // 找到匹配的預設航班
+          flightButtons.forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.getAttribute('data-flight') === matchingFlight) {
+              btn.classList.add('selected');
+              selectedFlightData = flightData[matchingFlight];
+              document.getElementById('selectedFlight').value = matchingFlight;
+            }
+          });
+        } else {
+          // 使用手動輸入
+          document.getElementById('manualInput').classList.add('show');
+          document.getElementById('customAirline').value = memberData.airline || '';
+          document.getElementById('customFlightNo').value = memberData.flightNo || '';
+          document.getElementById('customDeparture').value = memberData.departure || '';
+          document.getElementById('customArrival').value = memberData.arrival || '';
+          isManualInput = true;
+          document.getElementById('selectedFlight').value = 'manual';
+        }
+      } else {
+        // 沒有現有資料，重置表單
+        resetForm();
+        
+        // 但保留已自動填入的中文姓名
+        if (chineseNameMapping[memberName]) {
+          document.getElementById('chineseName').value = chineseNameMapping[memberName];
+        }
+      }
+    });
+
+    // 表單提交
+    document.getElementById('memberForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const memberName = document.getElementById('memberName').value;
+      const chineseName = document.getElementById('chineseName').value;
+      const height = document.getElementById('height').value;
+      const weight = document.getElementById('weight').value;
+      
+      if (!memberName || !chineseName || !height || !weight) {
+        alert('請填寫完整的個人資料！');
+        return;
+      }
+
+      if (!selectedDateValue && !document.getElementById('customDate').value) {
+        alert('請選擇出發日期！');
+        return;
+      }
+
+      const flightDate = selectedDateValue || document.getElementById('customDate').value;
+      let flightInfo;
+
+      if (isManualInput) {
+        const airline = document.getElementById('customAirline').value;
+        const flightNo = document.getElementById('customFlightNo').value;
+        const departure = document.getElementById('customDeparture').value;
+        const arrival = document.getElementById('customArrival').value;
+
+        if (!airline || !flightNo || !departure || !arrival) {
+          alert('請填寫完整的航班資訊！');
+          return;
+        }
+
+        flightInfo = {
+          airline: airline,
+          flightNo: flightNo,
+          departure: departure,
+          arrival: arrival,
+          date: flightDate
+        };
+      } else {
+        if (!selectedFlightData) {
+          alert('請選擇航班！');
+          return;
+        }
+        flightInfo = {
+          ...selectedFlightData,
+          date: flightDate
+        };
+      }
+
+      // 儲存到 Firebase - 使用 toyotama-flights 路徑
+      const memberRef = ref(db, `toyotama-flights/${memberName}`);
+      set(memberRef, {
+        chineseName: chineseName,
+        height: parseInt(height),
+        weight: parseInt(weight),
+        ...flightInfo,
+        timestamp: Date.now()
+      }).then(() => {
+        alert(`✅ ${memberName} 的資料已登記成功！`);
+        
+        // 重設表單
+        document.getElementById('memberForm').reset();
+        resetForm();
+      }).catch((error) => {
+        alert('❌ 登記失敗，請重試！');
+        console.error(error);
+      });
+    });
+
+    // Group members by date and flight
+    function groupMembersByFlight(data) {
+      const grouped = {};
+      
+      Object.entries(data).forEach(([memberName, memberData]) => {
+        const date = memberData.date;
+        const flightKey = `${memberData.flightNo}-${memberData.departure}-${memberData.arrival}`;
+        
+        if (!grouped[date]) {
+          grouped[date] = {};
+        }
+        
+        if (!grouped[date][flightKey]) {
+          grouped[date][flightKey] = {
+            airline: memberData.airline,
+            flightNo: memberData.flightNo,
+            departure: memberData.departure,
+            arrival: memberData.arrival,
+            members: []
+          };
+        }
+        
+        grouped[date][flightKey].members.push({
+          name: memberName,
+          ...memberData
+        });
+      });
+      
+      return grouped;
+    }
+
+    // 監聽資料變更
+    const flightsRef = ref(db, 'toyotama-flights');
+    onValue(flightsRef, (snapshot) => {
+      const data = snapshot.val();
+      const flightGroupsContainer = document.getElementById('flightGroupsContainer');
+      const emptyState = document.getElementById('emptyState');
+      const memberCount = document.getElementById('memberCount');
+
+      flightGroupsContainer.innerHTML = '';
+      existingMemberData = data || {};
+      currentMemberData = data || {};
+
+      // Update member dropdown
+      updateMemberDropdown();
+
+      if (!data) {
+        flightGroupsContainer.style.display = 'none';
+        emptyState.style.display = 'block';
+        memberCount.textContent = '已登記: 0 人';
+        return;
+      }
+
+      flightGroupsContainer.style.display = 'block';
+      emptyState.style.display = 'none';
+
+      const totalMembers = Object.keys(data).length;
+      memberCount.textContent = `已登記: ${totalMembers} 人`;
+
+      // Group members by date and flight
+      const groupedData = groupMembersByFlight(data);
+      
+      // Sort dates
+      const sortedDates = Object.keys(groupedData).sort();
+      
+      sortedDates.forEach(date => {
+        // Create date section
+        const dateSection = document.createElement('div');
+        dateSection.className = 'date-section';
+        
+        // Count total members for this date
+        let dateTotalCount = 0;
+        Object.values(groupedData[date]).forEach(flight => {
+          dateTotalCount += flight.members.length;
+        });
+        
+        // Date header
+        const dateSectionHeader = document.createElement('div');
+        dateSectionHeader.className = 'date-section-header';
+        dateSectionHeader.innerHTML = `
+          <div class="date-section-title">📅 ${formatDateDMY(date)}</div>
+          <div class="date-total-count">共 ${dateTotalCount} 人</div>
+        `;
+        dateSection.appendChild(dateSectionHeader);
+        
+        // Sort flights by departure time
+        const sortedFlights = Object.entries(groupedData[date]).sort((a, b) => {
+          return a[1].departure.localeCompare(b[1].departure);
+        });
+        
+        // Create flight groups
+        sortedFlights.forEach(([flightKey, flightInfo]) => {
+          const flightGroup = document.createElement('div');
+          flightGroup.className = 'flight-group';
+          
+          // Flight header
+          const flightHeader = document.createElement('div');
+          flightHeader.className = 'flight-header';
+          flightHeader.innerHTML = `
+            <div class="flight-details">
+              <div class="flight-airline-info">
+                <span class="flight-airline-name">${flightInfo.airline}</span>
+                <span class="flight-no">${flightInfo.flightNo}</span>
+              </div>
+              <div class="flight-time-info">${flightInfo.departure} - ${flightInfo.arrival}</div>
+            </div>
+            <div class="flight-passenger-count">${flightInfo.members.length} 人</div>
+          `;
+          flightGroup.appendChild(flightHeader);
+          
+          // Members table
+          const membersTable = document.createElement('table');
+          membersTable.className = 'members-table';
+          
+          const thead = document.createElement('thead');
+          thead.innerHTML = `
+            <tr>
+              <th style="width: 50px;">狀態</th>
+              <th>隊員姓名</th>
+              <th>中文姓名</th>
+              <th>身高</th>
+              <th>體重</th>
+            </tr>
+          `;
+          membersTable.appendChild(thead);
+          
+          const tbody = document.createElement('tbody');
+          
+          // Sort members by name
+          flightInfo.members.sort((a, b) => a.name.localeCompare(b.name));
+          
+          flightInfo.members.forEach(member => {
+            const isComplete = isDataComplete(member);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>
+                ${isComplete ? 
+                  '<span class="status-icon status-complete">✓</span>' : 
+                  '<span class="status-icon status-incomplete">!</span>'}
+              </td>
+              <td class="member-name">${member.name}</td>
+              <td>${member.chineseName || '<span class="pending-input">待輸入</span>'}</td>
+              <td>${member.height ? member.height + ' cm' : '<span class="pending-input">待輸入</span>'}</td>
+              <td>${member.weight ? member.weight + ' kg' : '<span class="pending-input">待輸入</span>'}</td>
+            `;
+            tbody.appendChild(row);
+          });
+          
+          membersTable.appendChild(tbody);
+          flightGroup.appendChild(membersTable);
+          
+          dateSection.appendChild(flightGroup);
+        });
+        
+        flightGroupsContainer.appendChild(dateSection);
+      });
+    });
+
+    // ========== TOURNAMENT SCORE CODE ==========
+    
+    // Group definitions
+    const groups = {
+      A: ["屏東高中", "同德高中", "海皇高中", "attitude"],
+      B: ["屏東金牌", "屏青", "香港豐玉", "廣聯上正"]
+    };
+
+    // Store match scores
+    let matchScores = {};
+
+    // Load scores from Firebase on page load
+    const scoresRef = ref(db, 'toyotama-tournament-scores');
+    onValue(scoresRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        matchScores = data;
+        // Update score inputs
+        Object.entries(data).forEach(([matchId, scores]) => {
+          const matchElement = document.querySelector(`[data-match-id="${matchId}"]`);
+          if (matchElement) {
+            const team1Input = matchElement.querySelector('.team1-score');
+            const team2Input = matchElement.querySelector('.team2-score');
+            if (team1Input && team2Input) {
+              team1Input.value = scores.team1Score;
+              team2Input.value = scores.team2Score;
+            }
+          }
+        });
+        // Recalculate standings
+        calculateStandings();
+      }
+    });
+
+    // Add event listeners for score inputs
+    setTimeout(() => {
+      const scoreInputs = document.querySelectorAll('.score-input');
+      scoreInputs.forEach(input => {
+        input.addEventListener('change', function() {
+          const matchItem = this.closest('.match-item');
+          const matchId = matchItem.dataset.matchId;
+          const team1Score = matchItem.querySelector('.team1-score').value;
+          const team2Score = matchItem.querySelector('.team2-score').value;
+          
+          if (team1Score !== '' && team2Score !== '') {
+            // Save to Firebase
+            const scoreData = {
+              matchId: matchId,
+              team1: matchItem.dataset.team1,
+              team2: matchItem.dataset.team2,
+              team1Score: parseInt(team1Score),
+              team2Score: parseInt(team2Score),
+              group: matchItem.dataset.group,
+              timestamp: Date.now()
+            };
+            
+            // Check if user is admin
+            const user = auth.currentUser;
+            if (user) {
+              set(ref(db, `toyotama-tournament-scores/${matchId}`), scoreData)
+                .then(() => {
+                  matchScores[matchId] = scoreData;
+                  calculateStandings();
+                })
+                .catch(error => {
+                  console.error('Error saving score:', error);
+                  alert('儲存比分時發生錯誤');
+                });
+            } else {
+              alert('請先登入管理員帳號才能輸入比分');
+              this.value = '';
+            }
+          }
+        });
+      });
+    }, 1000);
+
+    // Calculate standings
+    function calculateStandings() {
+      const standings = {
+        A: {},
+        B: {}
+      };
+      
+      // Initialize standings
+      Object.entries(groups).forEach(([group, teams]) => {
+        teams.forEach(team => {
+          standings[group][team] = {
+            played: 0,
+            won: 0,
+            lost: 0,
+            pointsFor: 0,
+            pointsAgainst: 0,
+            pointDiff: 0,
+            headToHead: {}
+          };
+        });
+      });
+      
+      // Process match results
+      Object.values(matchScores).forEach(match => {
+        if (match.group && standings[match.group]) {
+          const team1 = match.team1;
+          const team2 = match.team2;
+          const team1Score = match.team1Score;
+          const team2Score = match.team2Score;
+          
+          // Update stats
+          standings[match.group][team1].played++;
+          standings[match.group][team2].played++;
+          
+          standings[match.group][team1].pointsFor += team1Score;
+          standings[match.group][team1].pointsAgainst += team2Score;
+          standings[match.group][team2].pointsFor += team2Score;
+          standings[match.group][team2].pointsAgainst += team1Score;
+          
+          if (team1Score > team2Score) {
+            standings[match.group][team1].won++;
+            standings[match.group][team2].lost++;
+            standings[match.group][team1].headToHead[team2] = 1;
+            standings[match.group][team2].headToHead[team1] = -1;
+          } else {
+            standings[match.group][team2].won++;
+            standings[match.group][team1].lost++;
+            standings[match.group][team2].headToHead[team1] = 1;
+            standings[match.group][team1].headToHead[team2] = -1;
+          }
+          
+          standings[match.group][team1].pointDiff = standings[match.group][team1].pointsFor - standings[match.group][team1].pointsAgainst;
+          standings[match.group][team2].pointDiff = standings[match.group][team2].pointsFor - standings[match.group][team2].pointsAgainst;
+        }
+      });
+      
+      // Sort standings
+      const sortedStandings = {};
+      Object.entries(standings).forEach(([group, teams]) => {
+        sortedStandings[group] = Object.entries(teams)
+          .map(([teamName, stats]) => ({ teamName, ...stats }))
+          .sort((a, b) => {
+            // Sort by wins
+            if (a.won !== b.won) return b.won - a.won;
+            // If tied, check head-to-head
+            if (a.headToHead[b.teamName]) return -a.headToHead[b.teamName];
+            // If still tied, use point differential
+            return b.pointDiff - a.pointDiff;
+          });
+      });
+      
+      // Update standings display
+      updateStandingsDisplay(sortedStandings);
+      
+      // Update playoff matches
+      updatePlayoffMatches(sortedStandings);
+    }
+
+    // Update standings display
+    function updateStandingsDisplay(standings) {
+      ['A', 'B'].forEach(group => {
+        const tbody = document.getElementById(`group${group}Standings`);
+        if (standings[group].some(team => team.played > 0)) {
+          tbody.innerHTML = standings[group].map((team, index) => `
+            <tr class="${index === 0 ? 'rank-1' : ''}">
+              <td>${index + 1}</td>
+              <td>${team.teamName}</td>
+              <td>${team.won}</td>
+              <td>${team.lost}</td>
+              <td>${team.pointDiff > 0 ? '+' : ''}${team.pointDiff}</td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="5" class="no-data">尚未有比賽結果</td></tr>';
+        }
+      });
+    }
+
+    // Update playoff matches
+    function updatePlayoffMatches(standings) {
+      if (standings.A.length === 4 && standings.B.length === 4 && 
+          standings.A.every(team => team.played >= 3) && 
+          standings.B.every(team => team.played >= 3)) {
+        
+        // Update playoff matches
+        document.getElementById('playoff-1').textContent = `${standings.A[3].teamName} VS ${standings.B[2].teamName}`;
+        document.getElementById('playoff-2').textContent = `${standings.A[2].teamName} VS ${standings.B[3].teamName}`;
+        document.getElementById('playoff-3').textContent = `${standings.A[1].teamName} VS ${standings.B[0].teamName}`;
+        document.getElementById('playoff-4').textContent = `${standings.A[0].teamName} VS ${standings.B[1].teamName}`;
+        
+        // Update final matches
+        document.getElementById('final-78').textContent = `第7-8名決賽`;
+        document.getElementById('final-56').textContent = `第5-6名決賽`;
+        document.getElementById('final-34').textContent = `第3-4名決賽`;
+        document.getElementById('final-12').textContent = `冠軍賽`;
+      }
+    }
+  </script>
+</body>
+</html>
