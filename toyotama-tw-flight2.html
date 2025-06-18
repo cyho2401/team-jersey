@@ -3284,4 +3284,148 @@
             if (a.won !== b.won) return b.won - a.won;
             // If tied, check head-to-head
             if (a.headToHead[b.teamName]) return -a.headToHead[b.teamName];
-            // If
+            // If// If still tied, use point differential
+            return b.pointDiff - a.pointDiff;
+          });
+      });
+      
+      // Store current standings globally
+      currentStandings = sortedStandings;
+      
+      // Show/hide standings based on whether we have scores
+      if (hasScores) {
+        document.getElementById('groupComposition').style.display = 'none';
+        document.getElementById('standingsContainer').classList.add('show');
+      } else {
+        document.getElementById('groupComposition').style.display = 'grid';
+        document.getElementById('standingsContainer').classList.remove('show');
+      }
+      
+      // Update standings display
+      updateStandingsDisplay(sortedStandings);
+      
+      // Update playoff matches
+      updatePlayoffMatches(sortedStandings);
+    }
+
+    // Update standings display
+    function updateStandingsDisplay(standings) {
+      ['A', 'B'].forEach(group => {
+        const tbody = document.getElementById(`group${group}Standings`);
+        if (standings[group].some(team => team.played > 0)) {
+          tbody.innerHTML = standings[group].map((team, index) => `
+            <tr class="${index === 0 ? 'rank-1' : ''}">
+              <td>${index + 1}</td>
+              <td>${team.teamName}</td>
+              <td>${team.won}</td>
+              <td>${team.lost}</td>
+              <td>${team.pointDiff > 0 ? '+' : ''}${team.pointDiff}</td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="5" class="no-data">尚未有比賽結果</td></tr>';
+        }
+      });
+    }
+
+    // Update playoff matches
+    function updatePlayoffMatches(standings) {
+      // Check if all group matches are complete (each team should have played 3 matches)
+      const groupAComplete = standings.A.length === 4 && standings.A.every(team => team.played >= 3);
+      const groupBComplete = standings.B.length === 4 && standings.B.every(team => team.played >= 3);
+      
+      if (groupAComplete && groupBComplete) {
+        // Update playoff matches with actual team names
+        document.getElementById('playoff-1').textContent = `${standings.A[3].teamName} VS ${standings.B[2].teamName}`;
+        document.getElementById('playoff-2').textContent = `${standings.A[2].teamName} VS ${standings.B[3].teamName}`;
+        document.getElementById('playoff-3').textContent = `${standings.A[1].teamName} VS ${standings.B[0].teamName}`;
+        document.getElementById('playoff-4').textContent = `${standings.A[0].teamName} VS ${standings.B[1].teamName}`;
+        
+        // Update data attributes for playoff matches
+        const playoff1 = document.querySelector('[data-match-id="13"]');
+        const playoff2 = document.querySelector('[data-match-id="14"]');
+        const playoff3 = document.querySelector('[data-match-id="15"]');
+        const playoff4 = document.querySelector('[data-match-id="16"]');
+        
+        if (playoff1) {
+          playoff1.dataset.team1 = standings.A[3].teamName;
+          playoff1.dataset.team2 = standings.B[2].teamName;
+        }
+        if (playoff2) {
+          playoff2.dataset.team1 = standings.A[2].teamName;
+          playoff2.dataset.team2 = standings.B[3].teamName;
+        }
+        if (playoff3) {
+          playoff3.dataset.team1 = standings.A[1].teamName;
+          playoff3.dataset.team2 = standings.B[0].teamName;
+        }
+        if (playoff4) {
+          playoff4.dataset.team1 = standings.A[0].teamName;
+          playoff4.dataset.team2 = standings.B[1].teamName;
+        }
+        
+        // Check if playoff matches are complete to determine final matches
+        const playoffResults = {
+          match13: matchScores['13'],
+          match14: matchScores['14'],
+          match15: matchScores['15'],
+          match16: matchScores['16']
+        };
+        
+        // If all playoff matches are complete, update final matches
+        if (playoffResults.match13 && playoffResults.match14 && 
+            playoffResults.match15 && playoffResults.match16) {
+          
+          // Determine winners and losers
+          const loser13 = playoffResults.match13.team1Score > playoffResults.match13.team2Score ? 
+                          playoffResults.match13.team2 : playoffResults.match13.team1;
+          const loser14 = playoffResults.match14.team1Score > playoffResults.match14.team2Score ? 
+                          playoffResults.match14.team2 : playoffResults.match14.team1;
+          const winner13 = playoffResults.match13.team1Score > playoffResults.match13.team2Score ? 
+                           playoffResults.match13.team1 : playoffResults.match13.team2;
+          const winner14 = playoffResults.match14.team1Score > playoffResults.match14.team2Score ? 
+                           playoffResults.match14.team1 : playoffResults.match14.team2;
+          
+          const loser15 = playoffResults.match15.team1Score > playoffResults.match15.team2Score ? 
+                          playoffResults.match15.team2 : playoffResults.match15.team1;
+          const loser16 = playoffResults.match16.team1Score > playoffResults.match16.team2Score ? 
+                          playoffResults.match16.team2 : playoffResults.match16.team1;
+          const winner15 = playoffResults.match15.team1Score > playoffResults.match15.team2Score ? 
+                           playoffResults.match15.team1 : playoffResults.match15.team2;
+          const winner16 = playoffResults.match16.team1Score > playoffResults.match16.team2Score ? 
+                           playoffResults.match16.team1 : playoffResults.match16.team2;
+          
+          // Update final matches
+          document.getElementById('final-78').textContent = `${loser13} VS ${loser14}`;
+          document.getElementById('final-56').textContent = `${winner13} VS ${winner14}`;
+          document.getElementById('final-34').textContent = `${loser15} VS ${loser16}`;
+          document.getElementById('final-12').textContent = `${winner15} VS ${winner16}`;
+          
+          // Update data attributes for final matches
+          const final78 = document.querySelector('[data-match-id="17"]');
+          const final56 = document.querySelector('[data-match-id="18"]');
+          const final34 = document.querySelector('[data-match-id="19"]');
+          const final12 = document.querySelector('[data-match-id="20"]');
+          
+          if (final78) {
+            final78.dataset.team1 = loser13;
+            final78.dataset.team2 = loser14;
+          }
+          if (final56) {
+            final56.dataset.team1 = winner13;
+            final56.dataset.team2 = winner14;
+          }
+          if (final34) {
+            final34.dataset.team1 = loser15;
+            final34.dataset.team2 = loser16;
+          }
+          if (final12) {
+            final12.dataset.team1 = winner15;
+            final12.dataset.team2 = winner16;
+          }
+        }
+      }
+    }
+  </script>
+</body>
+</html>
