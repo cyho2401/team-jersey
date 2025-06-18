@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>球衣登記系統 - 選擇球隊</title>
+  <title>球衣登記系統 - 登入</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  
   <style>
     * {
       margin: 0;
@@ -25,6 +30,83 @@
       text-align: center;
       max-width: 1000px;
       width: 100%;
+      display: none;
+    }
+    
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    
+    .login-container h2 {
+      color: #2c3e50;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+    
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .form-group {
+      text-align: left;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #6c757d;
+      font-size: 14px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #0084ff;
+    }
+    
+    .login-btn {
+      background: #0084ff;
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-top: 10px;
+    }
+    
+    .login-btn:hover {
+      background: #0066cc;
+    }
+    
+    .login-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .error-message {
+      color: #dc3545;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
     }
     
     .header {
@@ -59,6 +141,7 @@
       color: inherit;
       position: relative;
       overflow: hidden;
+      cursor: pointer;
     }
     
     .team-card::before {
@@ -150,11 +233,60 @@
       border-radius: 8px;
       font-size: 14px;
       transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
     }
     
     .admin-btn:hover {
       background: #5a6268;
       transform: translateY(-1px);
+    }
+    
+    .other-links {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .other-title {
+      color: #6c757d;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    
+    .other-btn {
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .other-btn:hover {
+      background: #218838;
+      transform: translateY(-1px);
+    }
+    
+    .logout-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    
+    .logout-btn:hover {
+      background: #c82333;
     }
     
     @media (max-width: 768px) {
@@ -181,11 +313,38 @@
       .team-name {
         font-size: 24px;
       }
+      
+      .logout-btn {
+        top: 10px;
+        right: 10px;
+        padding: 8px 16px;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <!-- Login Container -->
+  <div id="loginContainer" class="login-container">
+    <h2>登入球衣登記系統</h2>
+    <form id="loginForm" class="login-form">
+      <div class="form-group">
+        <label for="email">電子郵件</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">密碼</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <button type="submit" class="login-btn" id="loginBtn">登入</button>
+      <div id="errorMessage" class="error-message"></div>
+    </form>
+  </div>
+
+  <!-- Main Container (Hidden until login) -->
+  <div id="mainContainer" class="container">
+    <button class="logout-btn" onclick="logout()">登出</button>
+    
     <div class="header">
       <h1>球衣登記系統</h1>
       <p class="subtitle">請選擇您的球隊進行球衣登記</p>
@@ -193,45 +352,141 @@
     
     <div class="teams-grid">
       <!-- Toyotama Team -->
-      <a href="toyotama.html" class="team-card team-toyotama">
+      <div onclick="navigateTo('toyotama.html')" class="team-card team-toyotama">
         <span class="team-icon">🏀</span>
         <div class="team-name">
           豐玉
           <span class="team-name-en">Toyotama</span>
         </div>
         <div class="team-desc">點擊進入登記</div>
-      </a>
+      </div>
       
       <!-- Fungbird Team -->
-      <a href="fungbird.html" class="team-card team-fungbird">
+      <div onclick="navigateTo('fungbird.html')" class="team-card team-fungbird">
         <span class="team-icon">🦜</span>
         <div class="team-name">
           豐鳥
           <span class="team-name-en">Fungbird</span>
         </div>
         <div class="team-desc">點擊進入登記</div>
-      </a>
+      </div>
       
       <!-- Gratitude Team -->
-      <a href="gratitude.html" class="team-card team-gratitude">
+      <div onclick="navigateTo('gratitude.html')" class="team-card team-gratitude">
         <span class="team-icon">🙏</span>
         <div class="team-name">
           Gratitude
           <span class="team-name-en">藍隊（星期六）</span>
         </div>
         <div class="team-desc">點擊進入登記</div>
-      </a>
+      </div>
     </div>
     
     <!-- Admin Links -->
     <div class="admin-links">
       <p class="admin-title">管理員入口</p>
       <div class="admin-buttons">
-        <a href="toyotama-admin.html" class="admin-btn">豐玉管理</a>
-        <a href="fungbird-admin.html" class="admin-btn">豐鳥管理</a>
-        <a href="gratitude-admin.html" class="admin-btn">Gratitude管理</a>
+        <button onclick="navigateTo('toyotama-admin.html')" class="admin-btn">豐玉管理</button>
+        <button onclick="navigateTo('fungbird-admin.html')" class="admin-btn">豐鳥管理</button>
+        <button onclick="navigateTo('gratitude-admin.html')" class="admin-btn">Gratitude管理</button>
+      </div>
+    </div>
+    
+    <!-- Other Links -->
+    <div class="other-links">
+      <p class="other-title">其他功能</p>
+      <div class="admin-buttons">
+        <button onclick="navigateTo('fungbird-leave.html')" class="other-btn">豐鳥請假表</button>
+        <button onclick="navigateTo('toyotama-tw-flight.html')" class="other-btn">豐玉台灣航班</button>
+        <button onclick="navigateTo('toyotama-tw-flight-admin.html')" class="admin-btn">豐玉台灣航班管理</button>
       </div>
     </div>
   </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSzg7XpttLUGO-114Yt6Exchbm-JrQEkk",
+      authDomain: "fungbirdchat2024.firebaseapp.com",
+      projectId: "fungbirdchat2024",
+      storageBucket: "fungbirdchat2024.appspot.com",
+      messagingSenderId: "114506396114",
+      appId: "1:114506396114:web:b8c76c7503a9b6b84025d7"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Check authentication state
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // User is signed in
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('mainContainer').style.display = 'block';
+      } else {
+        // User is signed out
+        document.getElementById('loginContainer').style.display = 'block';
+        document.getElementById('mainContainer').style.display = 'none';
+      }
+    });
+
+    // Login form handler
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const loginBtn = document.getElementById('loginBtn');
+      const errorMessage = document.getElementById('errorMessage');
+      
+      loginBtn.disabled = true;
+      loginBtn.textContent = '登入中...';
+      errorMessage.style.display = 'none';
+      
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        // Successful login - onAuthStateChanged will handle UI update
+      } catch (error) {
+        // Handle errors
+        let errorText = '登入失敗：';
+        switch (error.code) {
+          case 'auth/invalid-email':
+            errorText += '無效的電子郵件格式';
+            break;
+          case 'auth/user-disabled':
+            errorText += '此帳號已被停用';
+            break;
+          case 'auth/user-not-found':
+            errorText += '找不到此使用者';
+            break;
+          case 'auth/wrong-password':
+            errorText += '密碼錯誤';
+            break;
+          default:
+            errorText += error.message;
+        }
+        errorMessage.textContent = errorText;
+        errorMessage.style.display = 'block';
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = '登入';
+      }
+    });
+
+    // Logout function
+    function logout() {
+      auth.signOut().then(() => {
+        // Sign-out successful
+      }).catch((error) => {
+        console.error('登出錯誤:', error);
+      });
+    }
+
+    // Navigation function
+    function navigateTo(page) {
+      window.location.href = page;
+    }
+  </script>
 </body>
 </html>
