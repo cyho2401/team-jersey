@@ -1510,25 +1510,25 @@
         members.sort((a, b) => a.name.localeCompare(b.name));
         console.log('準備填入的成員數量:', members.length);
         
-        // Prepare data for template
-        const templateData = {};
-        
-        // Fill in data starting from name1 through name22
-        for (let i = 0; i < 22; i++) {
-          const member = members[i];
-          const num = i + 1;
-          
-          if (member) {
-            templateData[`name${num}`] = member.chineseName;
-            templateData[`height${num}`] = member.height.toString();
-            templateData[`weight${num}`] = member.weight.toString();
-          } else {
-            // 空白資料
-            templateData[`name${num}`] = "";
-            templateData[`height${num}`] = "";
-            templateData[`weight${num}`] = "";
-          }
-        }
+       // Prepare data for template
+const templateData = {};
+
+// Fill in data starting from name1 through name23 (updated from 22 to 23)
+for (let i = 0; i < 23; i++) {
+  const member = members[i];
+  const num = i + 1;
+  
+  if (member) {
+    templateData[`name${num}`] = member.chineseName;
+    templateData[`height${num}`] = member.height.toString();
+    templateData[`weight${num}`] = member.weight.toString();
+  } else {
+    // 空白資料
+    templateData[`name${num}`] = "";
+    templateData[`height${num}`] = "";
+    templateData[`weight${num}`] = "";
+  }
+}
         
         console.log('模板資料準備完成，範例:', {
           name1: templateData.name1,
