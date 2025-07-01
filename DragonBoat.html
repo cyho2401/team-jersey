@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon Boat Race Schedule (Hong Kong)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f0f4f8;
+            color: #2d3748;
+            padding: 20px 10px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #1a365d;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .table-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            overflow: hidden;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #2b6cb0 0%, #1a365d 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        tbody tr:hover {
+            background-color: #f7fafc;
+        }
+        
+        .date-cell {
+            font-weight: 600;
+            color: #2b6cb0;
+        }
+        
+        .time-cell {
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .event-cell {
+            font-weight: 500;
+            color: #2d3748;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .category-standard {
+            background-color: #bee3f8;
+            color: #2c5282;
+        }
+        
+        .category-small {
+            background-color: #d6f5d6;
+            color: #276749;
+        }
+        
+        .stage-cell {
+            color: #718096;
+        }
+        
+        .lane-cell {
+            font-weight: 600;
+            color: #e53e3e;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            
+            body {
+                padding: 10px 5px;
+            }
+            
+            .table-wrapper {
+                border-radius: 8px;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 10px 6px;
+            }
+            
+            /* Hide less important columns on mobile */
+            .hide-mobile {
+                display: none;
+            }
+            
+            .category-badge {
+                font-size: 11px;
+                padding: 2px 6px;
+            }
+        }
+        
+        /* Specific column widths */
+        .col-date { width: 12%; min-width: 90px; }
+        .col-time { width: 8%; min-width: 60px; }
+        .col-distance { width: 8%; min-width: 60px; }
+        .col-event { width: 20%; min-width: 120px; }
+        .col-category { width: 12%; min-width: 90px; }
+        .col-gender { width: 8%; min-width: 60px; }
+        .col-stage { width: 12%; min-width: 80px; }
+        .col-lane { width: 10%; min-width: 70px; }
+        .col-notes { width: 10%; }
+        
+        /* Sticky header on scroll */
+        @media (min-width: 769px) {
+            thead th {
+                position: sticky;
+                top: 0;
+                background: linear-gradient(135deg, #2b6cb0 0%, #1a365d 100%);
+            }
+        }
+        
+        /* Loading animation */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        
+        /* Day separator */
+        .day-separator {
+            background-color: #f7fafc;
+            font-weight: 600;
+            color: #2b6cb0;
+            text-align: center;
+            padding: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐉 Dragon Boat Race Schedule  (Hong Kong🇭🇰)</h1>
+        <div class="table-wrapper">
+            <table id="raceTable">
+                <thead>
+                    <tr>
+                        <th class="col-date">Date</th>
+                        <th class="col-time">Time</th>
+                        <th class="col-distance hide-mobile">Distance</th>
+                        <th class="col-event">Event</th>
+                        <th class="col-category">Boat Type</th>
+                        <th class="col-gender hide-mobile">Gender</th>
+                        <th class="col-stage">Stage</th>
+                        <th class="col-lane">Lane/Pos</th>
+                        <th class="col-notes hide-mobile">Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr class="loading">
+                        <td colspan="9">Loading races...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Race data
+        const raceData = [
+            {date: "2025-07-14", day: "Monday", time: "12:30", distance: "2000m", event: "Premier Mixed", category: "Standard boat", gender: "Mixed", stage: "Final", lane: "Position 10", notes: ""},
+            {date: "2025-07-14", day: "Monday", time: "13:30", distance: "2000m", event: "24u Mixed / 18u Mixed / 16u Mixed (as part of combined race)", category: "Standard boat", gender: "Mixed", stage: "Final", lane: "Position 2", notes: ""},
+            {date: "2025-07-14", day: "Monday", time: "14:00", distance: "2000m", event: "24u Mixed / Senior C Mixed (as part of combined race)", category: "Small boat", gender: "Mixed", stage: "Final", lane: "Position 18", notes: ""},
+            {date: "2025-07-14", day: "Monday", time: "15:30", distance: "2000m", event: "Senior A Mixed", category: "Standard boat", gender: "Mixed", stage: "Final", lane: "Position 8", notes: ""},
+            {date: "2025-07-15", day: "Tuesday", time: "09:00", distance: "2000m", event: "Premier Women", category: "Small boat", gender: "Women", stage: "Final", lane: "Position 11", notes: ""},
+            {date: "2025-07-15", day: "Tuesday", time: "10:00", distance: "2000m", event: "Premier Open", category: "Small boat", gender: "Open", stage: "Final", lane: "Position 14", notes: ""},
+            {date: "2025-07-15", day: "Tuesday", time: "11:00", distance: "2000m", event: "24u Women / Senior C Women (as part of combined race)", category: "Small boat", gender: "Women", stage: "Final", lane: "Position 4", notes: ""},
+            {date: "2025-07-15", day: "Tuesday", time: "12:00", distance: "2000m", event: "24u Open / Senior C Open (as part of combined race)", category: "Small boat", gender: "Open", stage: "Final", lane: "Position 6", notes: ""},
+            {date: "2025-07-15", day: "Tuesday", time: "12:30", distance: "2000m", event: "Senior C Open / 18u Open (as part of combined race)", category: "Standard boat", gender: "Open", stage: "Final", lane: "Position 7", notes: ""},
+            {date: "2025-07-15", day: "Tuesday", time: "16:30", distance: "2000m", event: "Senior B Open / Senior A Open (as part of combined race)", category: "Standard boat", gender: "Open", stage: "Final", lane: "Position 10", notes: ""},
+            {date: "2025-07-15", day: "Tuesday", time: "17:00", distance: "2000m", event: "Senior A Women", category: "Small boat", gender: "Women", stage: "Final", lane: "Position 11", notes: ""},
+            {date: "2025-07-16", day: "Wednesday", time: "09:00", distance: "1000m", event: "Premier Mixed", category: "Standard boat", gender: "Mixed", stage: "Heat 1", lane: "Lane 2", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-16", day: "Wednesday", time: "09:30", distance: "1000m", event: "Senior B Mixed", category: "Standard boat", gender: "Mixed", stage: "Heat 2", lane: "Lane 2", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-16", day: "Wednesday", time: "10:20", distance: "1000m", event: "24u Mixed", category: "Standard boat", gender: "Mixed", stage: "Round 1", lane: "Lane 6", notes: "Sum of 2 rounds"},
+            {date: "2025-07-16", day: "Wednesday", time: "11:50", distance: "1000m", event: "24u Mixed", category: "Standard boat", gender: "Mixed", stage: "Round 2", lane: "Lane 1", notes: "Sum of 2 rounds"},
+            {date: "2025-07-16", day: "Wednesday", time: "12:30", distance: "1000m", event: "Senior C Open (as part of Senior C Open final)", category: "Standard boat", gender: "Open", stage: "Final", lane: "Position 7", notes: ""},
+            {date: "2025-07-16", day: "Wednesday", time: "13:40", distance: "1000m", event: "Senior C Open", category: "Standard boat", gender: "Open", stage: "Heat 1", lane: "Lane 3", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-16", day: "Wednesday", time: "14:10", distance: "1000m", event: "Senior A Open", category: "Standard boat", gender: "Open", stage: "Heat 2", lane: "Lane 3", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-17", day: "Thursday", time: "09:20", distance: "200m", event: "Premier Mixed", category: "Standard boat", gender: "Mixed", stage: "Heat 2", lane: "Lane 5", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-17", day: "Thursday", time: "10:15", distance: "200m", event: "Senior B Mixed", category: "Standard boat", gender: "Mixed", stage: "Heat 2", lane: "Lane 2", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-17", day: "Thursday", time: "12:40", distance: "200m", event: "Senior C Open", category: "Small boat", gender: "Open", stage: "Round 1", lane: "Lane 2", notes: "Sum of 3 rounds"},
+            {date: "2025-07-17", day: "Thursday", time: "13:55", distance: "200m", event: "Senior C Open", category: "Small boat", gender: "Open", stage: "Round 2", lane: "Lane 4", notes: "Sum of 3 rounds"},
+            {date: "2025-07-17", day: "Thursday", time: "14:10", distance: "200m", event: "Senior A Open", category: "Small boat", gender: "Open", stage: "Heat 2", lane: "Lane 3", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-17", day: "Thursday", time: "15:05", distance: "200m", event: "Senior C Open", category: "Small boat", gender: "Open", stage: "Round 3", lane: "Lane 7", notes: "Sum of 3 rounds"},
+            {date: "2025-07-18", day: "Friday", time: "09:00", distance: "200m", event: "Senior A Mixed", category: "Small boat", gender: "Mixed", stage: "Heat 1", lane: "Lane 2", notes: "First 2 in each Heat => Semifinals"},
+            {date: "2025-07-18", day: "Friday", time: "11:40", distance: "200m", event: "Premier Women", category: "Small boat", gender: "Women", stage: "Heat 2", lane: "Lane 4", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-18", day: "Friday", time: "12:00", distance: "200m", event: "Premier Open", category: "Small boat", gender: "Open", stage: "Heat 3", lane: "Lane 5", notes: "First 2 in each Heat => Semifinals"},
+            {date: "2025-07-19", day: "Saturday", time: "12:45", distance: "500m", event: "Senior B Women", category: "Small boat", gender: "Women", stage: "Heat 2", lane: "Lane 4", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-19", day: "Saturday", time: "14:00", distance: "500m", event: "Senior A Women", category: "Small boat", gender: "Women", stage: "Heat 1", lane: "Lane 2", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-19", day: "Saturday", time: "14:12", distance: "500m", event: "Senior A Open", category: "Standard boat", gender: "Open", stage: "Round 1", lane: "Lane 4", notes: "Sum of 3 rounds"},
+            {date: "2025-07-19", day: "Saturday", time: "15:30", distance: "500m", event: "Senior A Open", category: "Standard boat", gender: "Open", stage: "Round 2", lane: "Lane 6", notes: "Sum of 3 rounds"},
+            {date: "2025-07-19", day: "Saturday", time: "16:42", distance: "500m", event: "Senior A Open", category: "Standard boat", gender: "Open", stage: "Round 3", lane: "Lane 1", notes: "Sum of 3 rounds"},
+            {date: "2025-07-20", day: "Sunday", time: "09:21", distance: "500m", event: "Senior A Mixed", category: "Standard boat", gender: "Mixed", stage: "Heat 1", lane: "Lane 3", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-20", day: "Sunday", time: "09:42", distance: "500m", event: "24u Mixed", category: "Standard boat", gender: "Mixed", stage: "Round 1", lane: "Lane 5", notes: "Sum of 3 rounds"},
+            {date: "2025-07-20", day: "Sunday", time: "09:56", distance: "500m", event: "Senior C Mixed", category: "Small boat", gender: "Mixed", stage: "Heat 2", lane: "Lane 4", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-20", day: "Sunday", time: "10:52", distance: "500m", event: "24u Mixed", category: "Standard boat", gender: "Mixed", stage: "Round 2", lane: "Lane 2", notes: "Sum of 3 rounds"},
+            {date: "2025-07-20", day: "Sunday", time: "11:55", distance: "500m", event: "24u Mixed", category: "Standard boat", gender: "Mixed", stage: "Round 3", lane: "Lane 7", notes: "Sum of 3 rounds"},
+            {date: "2025-07-20", day: "Sunday", time: "13:36", distance: "500m", event: "24u Women", category: "Small boat", gender: "Women", stage: "Round 1", lane: "Lane 4", notes: "Sum of 3 rounds"},
+            {date: "2025-07-20", day: "Sunday", time: "13:48", distance: "500m", event: "24u Open", category: "Small boat", gender: "Open", stage: "Round 1", lane: "Lane 3", notes: "Sum of 3 rounds"},
+            {date: "2025-07-20", day: "Sunday", time: "14:22", distance: "500m", event: "Senior B Open", category: "Small boat", gender: "Open", stage: "Heat 1", lane: "Lane 2", notes: "First 2 in each Heat => Grand Final"},
+            {date: "2025-07-20", day: "Sunday", time: "14:54", distance: "500m", event: "24u Women", category: "Small boat", gender: "Women", stage: "Round 2", lane: "Lane 2", notes: "Sum of 3 rounds"},
+            {date: "2025-07-20", day: "Sunday", time: "15:06", distance: "500m", event: "24u Open", category: "Small boat", gender: "Open", stage: "Round 2", lane: "Lane 5", notes: "Sum of 3 rounds"},
+            {date: "2025-07-20", day: "Sunday", time: "16:12", distance: "500m", event: "24u Women", category: "Small boat", gender: "Women", stage: "Round 3", lane: "Lane 5", notes: "Sum of 3 rounds"},
+            {date: "2025-07-20", day: "Sunday", time: "16:24", distance: "500m", event: "24u Open", category: "Small boat", gender: "Open", stage: "Round 3", lane: "Lane 7", notes: "Sum of 3 rounds"}
+        ];
+
+        // Sort data by date and time
+        raceData.sort((a, b) => {
+            const dateCompare = a.date.localeCompare(b.date);
+            if (dateCompare !== 0) return dateCompare;
+            return a.time.localeCompare(b.time);
+        });
+
+        // Format date for display
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const options = { month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        // Render table
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            let currentDate = '';
+            
+            raceData.forEach(race => {
+                // Add day separator if new date
+                if (race.date !== currentDate) {
+                    currentDate = race.date;
+                    const separatorRow = document.createElement('tr');
+                    separatorRow.innerHTML = `<td colspan="9" class="day-separator">${race.day}, ${formatDate(race.date)}</td>`;
+                    tbody.appendChild(separatorRow);
+                }
+                
+                const row = document.createElement('tr');
+                const categoryClass = race.category === 'Standard boat' ? 'category-standard' : 'category-small';
+                
+                row.innerHTML = `
+                    <td class="date-cell">${formatDate(race.date)}</td>
+                    <td class="time-cell">${race.time}</td>
+                    <td class="hide-mobile">${race.distance}</td>
+                    <td class="event-cell">${race.event}</td>
+                    <td><span class="category-badge ${categoryClass}">${race.category.replace(' boat', '')}</span></td>
+                    <td class="hide-mobile">${race.gender}</td>
+                    <td class="stage-cell">${race.stage}</td>
+                    <td class="lane-cell">${race.lane}</td>
+                    <td class="hide-mobile">${race.notes}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize table
+        renderTable();
+    </script>
+</body>
+</html>
